@@ -1,0 +1,3 @@
+#
+#Fri Jan 11 10:47:04 GMT+08:00 2019
+com.maven.controller.user.UserController=org.springframework.stereotype.Component
