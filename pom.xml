@@ -18,7 +18,7 @@
 
 	<properties>
 		<spring.version>5.1.2.RELEASE</spring.version>
-		<spring.data.jpa>2.1.2.RELEASE</spring.data.jpa>
+		<spring.data.jpa.version>2.1.2.RELEASE</spring.data.jpa.version>
 		<spring.data.redis>2.1.4.RELEASE</spring.data.redis>
 		<mysql.version>5.1.47</mysql.version>
 		<slf4j.version>1.7.25</slf4j.version>
@@ -176,7 +176,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>${spring.data.jpa}</version>
+				<version>${spring.data.jpa.version}</version>
 			</dependency>
 			<!-- Spring-data-jpa End -->
 
