@@ -13,10 +13,10 @@ CREATE TABLE `f_user` (
   `trueName` varchar(50) DEFAULT NULL COMMENT '真实姓名',
   `sex` char(1) NOT NULL COMMENT '性别(1:男,2:女,3:保密)',
   `photo` varchar(255) DEFAULT NULL COMMENT '头像',
+  `isReal` char(1) NOT NULL COMMENT '是否实名认证(0:否,1:是,2:待审核)',
   `createDate` datetime NOT NULL COMMENT '创建日期',
   `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
   `deleteStatus` bit(1) NOT NULL COMMENT '是否删除(0:否,1:是)',
-  `isReal` char(1) NOT NULL COMMENT '是否实名认证(0:否,1:是,2:待审核)',
   PRIMARY KEY (`keyId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户基本信息表';
 

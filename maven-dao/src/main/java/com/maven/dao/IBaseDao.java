@@ -11,8 +11,6 @@ import com.maven.common.page.Pager;
  * 
  * @author chenjian
  * @createDate 2018-12-28
- * @param <T>
- * @param <PK>
  */
 public interface IBaseDao {
 
