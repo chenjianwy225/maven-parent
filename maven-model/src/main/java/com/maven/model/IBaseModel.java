@@ -29,7 +29,7 @@ public class IBaseModel implements Serializable {
 	 * 创建日期
 	 */
 	@Column(name = "createDate", nullable = false)
-	private Date createDate;
+	private Date createDate = new Date();
 
 	/**
 	 * 更新日期
@@ -41,7 +41,7 @@ public class IBaseModel implements Serializable {
 	 * 是否删除(0:否,1:是)
 	 */
 	@Column(name = "deleteStatus", columnDefinition = "bit default 0", length = 1, nullable = false)
-	private Boolean deleteStatus;
+	private Boolean deleteStatus = false;
 
 	public String getKeyId() {
 		return keyId;

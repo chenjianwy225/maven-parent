@@ -136,7 +136,11 @@ public class BaseDao extends HibernateDaoSupport implements IBaseDao {
 					public Pager doInHibernate(Session session)
 							throws HibernateException {
 						Query query = session.createQuery(hql, clazz);
-						query.setProperties(params);
+						
+						for (int i = 0; i < params.length; i++) {
+							query.setParameter(i, params[i]);
+						}
+						
 						int count = query.list().size();
 
 						Pager pager = new Pager();

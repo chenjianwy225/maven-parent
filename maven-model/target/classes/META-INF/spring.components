@@ -1,0 +1,5 @@
+#
+#Mon Jul 22 15:18:49 GMT+08:00 2019
+com.maven.model.IBaseModel=javax.persistence.MappedSuperclass
+com.maven.model.user.User=javax.persistence.Entity,javax.persistence.Table
+com.maven.model.user.UserInfo=javax.persistence.Entity,javax.persistence.Table

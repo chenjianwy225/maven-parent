@@ -33,6 +33,19 @@ public class ResponseUtils {
 	 * 
 	 * @param msg
 	 *            信息内容
+	 * @param isLogin
+	 *            是否登录
+	 * @return
+	 */
+	public static Object writeSuccess(String msg, boolean isLogin) {
+		return writeSuccess(msg, 0, null, isLogin, fileUrl);
+	}
+
+	/**
+	 * 获取成功信息
+	 * 
+	 * @param msg
+	 *            信息内容
 	 * @param code
 	 *            信息编码
 	 * @param isLogin

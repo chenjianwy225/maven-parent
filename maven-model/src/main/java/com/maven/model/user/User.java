@@ -58,7 +58,7 @@ public class User extends IBaseModel {
 	 * 性别(1:男,2:女,3:保密)
 	 */
 	@Column(name = "sex", columnDefinition = "char(1) default 3", length = 1, nullable = false)
-	private String sex;
+	private String sex = "3";
 
 	/**
 	 * 头像
@@ -70,7 +70,7 @@ public class User extends IBaseModel {
 	 * 是否实名认证(0:否,1:是,2:待审核)
 	 */
 	@Column(name = "isReal", columnDefinition = "char(1) default 0", length = 1, nullable = false)
-	private String isReal;
+	private String isReal = "0";
 
 	@OneToOne(targetEntity = UserInfo.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "keyId", referencedColumnName = "userId")

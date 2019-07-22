@@ -76,8 +76,8 @@ public class UserInfo implements Serializable {
 	/**
 	 * 年龄
 	 */
-	@Column(name = "age")
-	private int age;
+	@Column(name = "age", columnDefinition = "int default 0")
+	private int age = 0;
 
 	/**
 	 * 出生日期
