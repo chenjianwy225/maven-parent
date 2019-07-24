@@ -1,0 +1,5 @@
+#
+#Wed Jul 24 14:42:28 GMT+08:00 2019
+com.maven.controller.article.ArticleController=org.springframework.stereotype.Component
+com.maven.controller.article.ArticleTypeController=org.springframework.stereotype.Component
+com.maven.controller.user.UserController=org.springframework.stereotype.Component

@@ -3,11 +3,9 @@ package com.maven.model.user;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -114,9 +112,6 @@ public class UserInfo implements Serializable {
 	 */
 	@Column(name = "address")
 	private String address;
-
-	@OneToOne(mappedBy = "userInfo", cascade = CascadeType.ALL)
-	private User user;
 
 	public String getUserId() {
 		return userId;
@@ -236,13 +231,5 @@ public class UserInfo implements Serializable {
 
 	public void setAddress(String address) {
 		this.address = address;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 }

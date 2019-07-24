@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.maven.model.IBaseModel;
@@ -61,11 +61,20 @@ public class Article extends IBaseModel {
 	@Column(name = "videoPath")
 	private String videoPath;
 
-	@ManyToMany(targetEntity = User.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@Column(name = "hits", columnDefinition = "int default 0")
+	private int hits = 0;
+
+	/**
+	 * 用户对象
+	 */
+	@OneToOne(targetEntity = User.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JoinColumn(name = "userId", referencedColumnName = "keyId")
 	private User user;
 
-	@ManyToMany(targetEntity = ArticleType.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	/**
+	 * 文章分类对象
+	 */
+	@OneToOne(targetEntity = ArticleType.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JoinColumn(name = "typeId", referencedColumnName = "keyId")
 	private ArticleType articleType;
 
@@ -115,6 +124,14 @@ public class Article extends IBaseModel {
 
 	public void setVideoPath(String videoPath) {
 		this.videoPath = videoPath;
+	}
+
+	public int getHits() {
+		return hits;
+	}
+
+	public void setHits(int hits) {
+		this.hits = hits;
 	}
 
 	public User getUser() {

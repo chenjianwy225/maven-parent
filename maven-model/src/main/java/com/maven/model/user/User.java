@@ -72,7 +72,10 @@ public class User extends IBaseModel {
 	@Column(name = "isReal", columnDefinition = "char(1) default 0", length = 1, nullable = false)
 	private String isReal = "0";
 
-	@OneToOne(targetEntity = UserInfo.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	/**
+	 * 用户详细对象
+	 */
+	@OneToOne(targetEntity = UserInfo.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JoinColumn(name = "keyId", referencedColumnName = "userId")
 	private UserInfo userInfo;
 
@@ -139,7 +142,7 @@ public class User extends IBaseModel {
 	public void setIsReal(String isReal) {
 		this.isReal = isReal;
 	}
-	
+
 	public UserInfo getUserInfo() {
 		return userInfo;
 	}
