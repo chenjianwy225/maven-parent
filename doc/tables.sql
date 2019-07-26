@@ -35,7 +35,7 @@ CREATE TABLE `f_user_info` (
   `weiXin` varchar(50) DEFAULT NULL COMMENT '微信号码',
   `weiBo` varchar(50) DEFAULT NULL COMMENT '微博号码',
   `occupation` varchar(50) DEFAULT NULL COMMENT '职业',
-  `age` int(11) DEFAULT NULL COMMENT '年龄',
+  `age` int(11) NOT NULL DEFAULT '0' COMMENT '年龄',
   `birthday` date DEFAULT NULL COMMENT '出生日期',
   `constellation` varchar(50) DEFAULT NULL COMMENT '星座',
   `degree` varchar(20) DEFAULT NULL COMMENT '学位',
@@ -113,3 +113,94 @@ CREATE TABLE `f_article_comment` (
   CONSTRAINT `fk_comment_article` FOREIGN KEY (`articleId`) REFERENCES `f_article` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_comment_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章评论表';
+
+/*
+ * 表名：f_article_point(文章点赞表)
+ * 创建人：chenjian
+ * 创建时间：2019-07-24
+ */
+DROP TABLE IF EXISTS `f_article_point`;
+CREATE TABLE `f_article_point` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `userId` varchar(32) NOT NULL COMMENT '用户编号',
+  `articleId` varchar(32) NOT NULL COMMENT '文章编号',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
+  `deleteStatus` bit(1) DEFAULT b'0' COMMENT '是否删除(0:否,1:是)',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_point_user` (`userId`),
+  KEY `fk_point_article` (`articleId`),
+  CONSTRAINT `fk_point_article` FOREIGN KEY (`articleId`) REFERENCES `f_article` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_point_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章点赞表';
+
+/*
+ * 表名：f_friend(好友表)
+ * 创建人：chenjian
+ * 创建时间：2019-07-26
+ */
+DROP TABLE IF EXISTS `f_friend`;
+CREATE TABLE `f_friend` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `userId` varchar(32) NOT NULL COMMENT '用户编号',
+  `friendId` varchar(32) NOT NULL COMMENT '好友编号',
+  `createDate` datetime NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_friend_user` (`userId`),
+  KEY `fk_friend_friend` (`friendId`),
+  CONSTRAINT `fk_friend_friend` FOREIGN KEY (`friendId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_friend_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友表';
+
+/*
+ * 表名：f_friend_group(好友分组表)
+ * 创建人：chenjian
+ * 创建时间：2019-07-26
+ */
+DROP TABLE IF EXISTS `f_friend_group`;
+CREATE TABLE `f_friend_group` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `friendId` varchar(32) NOT NULL COMMENT '好友编号',
+  `groupId` varchar(32) NOT NULL COMMENT '分组编号',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_friend_group_group` (`groupId`),
+  KEY `fk_friend_group_friend` (`friendId`),
+  CONSTRAINT `fk_friend_group_friend` FOREIGN KEY (`friendId`) REFERENCES `f_friend` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_friend_group_group` FOREIGN KEY (`groupId`) REFERENCES `f_group` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友分组表';
+
+/*
+ * 表名：f_group(分组表)
+ * 创建人：chenjian
+ * 创建时间：2019-07-26
+ */
+DROP TABLE IF EXISTS `f_group`;
+CREATE TABLE `f_group` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `userId` varchar(32) NOT NULL COMMENT '用户编号',
+  `name` varchar(100) NOT NULL COMMENT '分组名称',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_group_user` (`userId`),
+  CONSTRAINT `fk_group_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分组表';
+
+/*
+ * 表名：f_friend_invite(好友邀请表)
+ * 创建人：chenjian
+ * 创建时间：2019-07-26
+ */
+DROP TABLE IF EXISTS `f_friend_invite`;
+CREATE TABLE `f_friend_invite` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `sendId` varchar(32) NOT NULL COMMENT '邀请人编号',
+  `acceptId` varchar(32) NOT NULL COMMENT '被邀请人编号',
+  `content` varchar(100) DEFAULT NULL COMMENT '邀请内容',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_invite_sender` (`sendId`),
+  KEY `fk_invite_accepter` (`acceptId`),
+  CONSTRAINT `fk_invite_accepter` FOREIGN KEY (`acceptId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_invite_sender` FOREIGN KEY (`sendId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友邀请表';

@@ -4,6 +4,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -49,8 +50,8 @@ public class ArticleComment extends IBaseModel {
 	/**
 	 * 文章对象
 	 */
-	@OneToOne(targetEntity = Article.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	@JoinColumn(name = "articleId", referencedColumnName = "keyId")
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "articleId")
 	private Article article;
 
 	public String getParentId() {

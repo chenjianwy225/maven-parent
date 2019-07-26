@@ -1,10 +1,14 @@
 package com.maven.model.article;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -78,6 +82,12 @@ public class Article extends IBaseModel {
 	@JoinColumn(name = "typeId", referencedColumnName = "keyId")
 	private ArticleType articleType;
 
+	/**
+	 * 文章评论集合
+	 */
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "article", fetch = FetchType.EAGER)
+	private List<ArticleComment> commentList = new ArrayList<ArticleComment>();
+
 	public String getTitle() {
 		return title;
 	}
@@ -148,5 +158,13 @@ public class Article extends IBaseModel {
 
 	public void setArticleType(ArticleType articleType) {
 		this.articleType = articleType;
+	}
+
+	public List<ArticleComment> getCommentList() {
+		return commentList;
+	}
+
+	public void setCommentList(List<ArticleComment> commentList) {
+		this.commentList = commentList;
 	}
 }

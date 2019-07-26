@@ -58,6 +58,13 @@ public class UserController extends BaseController {
 		}
 	}
 
+	/**
+	 * 搜索用户信息
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@RequestMapping(value = "all", method = RequestMethod.GET)
 	@ResponseBody
 	public Object all(HttpServletRequest request, HttpServletResponse response) {
@@ -93,6 +100,13 @@ public class UserController extends BaseController {
 		}
 	}
 
+	/**
+	 * 保存用户信息
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
 	public Object save(HttpServletRequest request, HttpServletResponse response) {
@@ -234,6 +248,13 @@ public class UserController extends BaseController {
 		}
 	}
 
+	/**
+	 * 删除用户信息
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@RequestMapping(value = "delete", method = RequestMethod.POST)
 	@ResponseBody
 	public Object delete(HttpServletRequest request,
@@ -280,13 +301,15 @@ public class UserController extends BaseController {
 
 		sql.append("SELECT u.keyId, u.mobile, u.nickName, u.trueName, u.sex, u.photo, u.isReal");
 		sql.append(", ui.idType, ui.idNo, ui.idiograph, ui.occupation, ui.age, ui.birthday, ui.constellation, ui.degree, ui.school, ui.company, ui.address");
-		sql.append(" FROM f_user u");
-		sql.append(" INNER JOIN f_user_info ui ON ui.userId = u.keyId");
+		sql.append(" FROM " + User.tableName + " u");
+		sql.append(" INNER JOIN " + UserInfo.tableName
+				+ " ui ON ui.userId = u.keyId");
 
 		StringBuffer where = new StringBuffer();
 		if (StringUtils.isNotEmpty(keyword)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE (u.userName LIKE ? OR u.mobile LIKE ? OR u.nickName LIKE ? OR u.trueName LIKE ?)"
-					: " AND (u.userName LIKE ? OR u.mobile LIKE ? OR u.nickName LIKE ? OR u.trueName LIKE ?)");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("(u.userName LIKE ? OR u.mobile LIKE ? OR u.nickName LIKE ? OR u.trueName LIKE ?)");
 			params.add("%" + keyword + "%");
 			params.add("%" + keyword + "%");
 			params.add("%" + keyword + "%");
@@ -294,74 +317,86 @@ public class UserController extends BaseController {
 		}
 
 		if (StringUtils.isNotEmpty(sex)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE u.sex = ?"
-					: " AND u.sex = ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("u.sex = ?");
 			params.add(sex);
 		}
 
 		if (StringUtils.isNotEmpty(idNo)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.idNo LIKE ?"
-					: " AND ui.idNo LIKE ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.idNo LIKE ?");
 			params.add("%" + idNo + "%");
 		}
 
 		if (StringUtils.isNotEmpty(occupation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.occupation = ?"
-					: " AND ui.occupation = ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.occupation = ?");
 			params.add(occupation);
 		}
 
 		if (StringUtils.isNotEmpty(minAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.age >= ?"
-					: " AND ui.age >= ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.age >= ?");
 			params.add(Integer.parseInt(minAge));
 		}
 
 		if (StringUtils.isNotEmpty(maxAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.age <= ?"
-					: " AND ui.age <= ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.age <= ?");
 			params.add(Integer.parseInt(maxAge));
 		}
 
 		if (StringUtils.isNotEmpty(beginDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.birthday >= ?"
-					: " AND ui.birthday >= ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.birthday >= ?");
 			params.add(DateUtils.strToDate(beginDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(endDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.birthday <= ?"
-					: " AND ui.birthday <= ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.birthday <= ?");
 			params.add(DateUtils.strToDate(endDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(constellation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.constellation = ?"
-					: " AND ui.constellation = ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.constellation = ?");
 			params.add(constellation);
 		}
 
 		if (StringUtils.isNotEmpty(degree)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.degree = ?"
-					: " AND ui.degree = ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.degree = ?");
 			params.add(degree);
 		}
 
 		if (StringUtils.isNotEmpty(school)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.school LIKE ?"
-					: " AND ui.school LIKE ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.school LIKE ?");
 			params.add("%" + school + "%");
 		}
 
 		if (StringUtils.isNotEmpty(company)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.company LIKE ?"
-					: " AND ui.company LIKE ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.company LIKE ?");
 			params.add("%" + company + "%");
 		}
 
 		if (StringUtils.isNotEmpty(address)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE ui.school address ?"
-					: " AND ui.address LIKE ?");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("ui.address LIKE ?");
 			params.add("%" + address + "%");
 		}
 		sql.append(where);
@@ -407,8 +442,9 @@ public class UserController extends BaseController {
 
 		StringBuffer where = new StringBuffer();
 		if (StringUtils.isNotEmpty(keyword)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE (userName LIKE ?0 OR mobile LIKE ?1 OR nickName LIKE ?2 OR trueName LIKE ?3)"
-					: " AND (userName LIKE ?0 OR mobile LIKE ?1 OR nickName LIKE ?2 OR trueName LIKE ?3)");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("(userName LIKE ?0 OR mobile LIKE ?1 OR nickName LIKE ?2 OR trueName LIKE ?3)");
 			params.add("%" + keyword + "%");
 			params.add("%" + keyword + "%");
 			params.add("%" + keyword + "%");
@@ -416,86 +452,97 @@ public class UserController extends BaseController {
 		}
 
 		if (StringUtils.isNotEmpty(sex)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE sex = ?0"
-					: " AND sex = ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("sex = ?" + Integer.valueOf(params.size()).toString());
 			params.add(sex);
 		}
 
 		if (StringUtils.isNotEmpty(idNo)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.idNo LIKE ?0"
-					: " AND userInfo.idNo LIKE ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.idNo LIKE ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add("%" + idNo + "%");
 		}
 
 		if (StringUtils.isNotEmpty(occupation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.occupation = ?0"
-					: " AND userInfo.occupation = ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.occupation = ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(occupation);
 		}
 
 		if (StringUtils.isNotEmpty(minAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.age >= ?0"
-					: " AND userInfo.age >= ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.age >= ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(Integer.parseInt(minAge));
 		}
 
 		if (StringUtils.isNotEmpty(maxAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.age <= ?0"
-					: " AND userInfo.age <= ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.age <= ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(Integer.parseInt(maxAge));
 		}
 
 		if (StringUtils.isNotEmpty(beginDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.birthday >= ?0"
-					: " AND userInfo.birthday >= ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.birthday >= ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(DateUtils.strToDate(beginDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(endDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.birthday <= ?0"
-					: " AND userInfo.birthday <= ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.birthday <= ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(DateUtils.strToDate(endDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(constellation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.constellation = ?0"
-					: " AND userInfo.constellation = ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.constellation = ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(constellation);
 		}
 
 		if (StringUtils.isNotEmpty(degree)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.degree = ?0"
-					: " AND userInfo.degree = ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.degree = ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add(degree);
 		}
 
 		if (StringUtils.isNotEmpty(school)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.school LIKE ?0"
-					: " AND userInfo.school LIKE ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.school LIKE ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add("%" + school + "%");
 		}
 
 		if (StringUtils.isNotEmpty(company)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.company LIKE ?0"
-					: " AND userInfo.company LIKE ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.company LIKE ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add("%" + company + "%");
 		}
 
 		if (StringUtils.isNotEmpty(address)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.address LIKE ?0"
-					: " AND userInfo.address LIKE ?"
-							+ Integer.valueOf(params.size()).toString());
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.address LIKE ?"
+					+ Integer.valueOf(params.size()).toString());
 			params.add("%" + address + "%");
 		}
 		sql.append(where);
@@ -540,81 +587,94 @@ public class UserController extends BaseController {
 
 		StringBuffer where = new StringBuffer();
 		if (StringUtils.isNotEmpty(keyword)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE (userName LIKE :keyword OR mobile LIKE :keyword OR nickName LIKE :keyword OR trueName LIKE :keyword)"
-					: " AND (userName LIKE :keyword OR mobile LIKE :keyword OR nickName LIKE :keyword OR trueName LIKE :keyword)");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("(userName LIKE :keyword OR mobile LIKE :keyword OR nickName LIKE :keyword OR trueName LIKE :keyword)");
 			params.put("keyword", "%" + keyword + "%");
 		}
 
 		if (StringUtils.isNotEmpty(sex)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE sex = :sex"
-					: " AND sex = :sex");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("sex = :sex");
 			params.put("sex", sex);
 		}
 
 		if (StringUtils.isNotEmpty(idNo)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.idNo LIKE :idNo"
-					: " AND userInfo.idNo LIKE :idNo");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.idNo LIKE :idNo");
 			params.put("idNo", "%" + idNo + "%");
 		}
 
 		if (StringUtils.isNotEmpty(occupation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.occupation = :occupation"
-					: " AND userInfo.occupation = :occupation");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.occupation = :occupation");
 			params.put("occupation", occupation);
 		}
 
 		if (StringUtils.isNotEmpty(minAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.age >= :minAge"
-					: " AND userInfo.age >= :minAge");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.age >= :minAge");
 			params.put("minAge", Integer.parseInt(minAge));
 		}
 
 		if (StringUtils.isNotEmpty(maxAge)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.age <= :maxAge"
-					: " AND userInfo.age <= :maxAge");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.age <= :maxAge");
 			params.put("maxAge", Integer.parseInt(maxAge));
 		}
 
 		if (StringUtils.isNotEmpty(beginDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.birthday >= :beginDate"
-					: " AND userInfo.birthday >= :beginDate");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.birthday >= :beginDate");
 			params.put("beginDate",
 					DateUtils.strToDate(beginDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(endDate)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.birthday <= :endDate"
-					: " AND userInfo.birthday <= :endDate");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.birthday <= :endDate");
 			params.put("endDate", DateUtils.strToDate(endDate, "yyyy-MM-dd"));
 		}
 
 		if (StringUtils.isNotEmpty(constellation)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.constellation = :constellation"
-					: " AND userInfo.constellation = :constellation");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.constellation = :constellation");
 			params.put("constellation", constellation);
 		}
 
 		if (StringUtils.isNotEmpty(degree)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.degree = :degree"
-					: " AND userInfo.degree = :degree");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.degree = :degree");
 			params.put("degree", degree);
 		}
 
 		if (StringUtils.isNotEmpty(school)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.school LIKE :school"
-					: " AND userInfo.school LIKE :school");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.school LIKE :school");
 			params.put("school", "%" + school + "%");
 		}
 
 		if (StringUtils.isNotEmpty(company)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.company LIKE :company"
-					: " AND userInfo.company LIKE :company");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.company LIKE :company");
 			params.put("company", "%" + company + "%");
 		}
 
 		if (StringUtils.isNotEmpty(address)) {
-			where.append(where.toString().equalsIgnoreCase("") ? " WHERE userInfo.address LIKE :address"
-					: " AND userInfo.address LIKE :address");
+			where.append(where.toString().equalsIgnoreCase("") ? " WHERE "
+					: " AND ");
+			where.append("userInfo.address LIKE :address");
 			params.put("address", "%" + address + "%");
 		}
 		sql.append(where);
