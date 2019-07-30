@@ -167,76 +167,76 @@ public class UserController extends BaseController {
 				message = "修改成功";
 			}
 
-			if (StringUtils.isNotEmpty(userName)) {
-				user.setUserName(userName);
-			}
-
-			if (StringUtils.isNotEmpty(userPassword)) {
-				user.setUserPassword(MD5Utils.encoderToMD5(userPassword));
-			}
-
-			if (StringUtils.isNotEmpty(mobile)) {
-				user.setMobile(mobile);
-			}
-
-			if (StringUtils.isNotEmpty(nickName)) {
-				user.setNickName(nickName);
-			}
-
-			if (StringUtils.isNotEmpty(trueName)) {
-				user.setTrueName(trueName);
-			}
-
-			if (StringUtils.isNotEmpty(sex)) {
-				user.setSex(sex);
-			}
-
-			if (StringUtils.isNotEmpty(idType)) {
-				userInfo.setIdType(idType);
-			}
-
-			if (StringUtils.isNotEmpty(idNo)) {
-				userInfo.setIdNo(idNo);
-			}
-
-			if (StringUtils.isNotEmpty(idiograph)) {
-				userInfo.setIdiograph(idiograph);
-			}
-
-			if (StringUtils.isNotEmpty(occupation)) {
-				userInfo.setOccupation(occupation);
-			}
-
-			if (StringUtils.isNotEmpty(age)) {
-				userInfo.setAge(Integer.parseInt(age));
-			}
-
-			if (StringUtils.isNotEmpty(birthday)) {
-				userInfo.setBirthday(DateUtils
-						.strToDate(birthday, "yyyy-MM-dd"));
-			}
-
-			if (StringUtils.isNotEmpty(constellation)) {
-				userInfo.setConstellation(constellation);
-			}
-
-			if (StringUtils.isNotEmpty(degree)) {
-				userInfo.setDegree(degree);
-			}
-
-			if (StringUtils.isNotEmpty(school)) {
-				userInfo.setSchool(school);
-			}
-
-			if (StringUtils.isNotEmpty(company)) {
-				userInfo.setCompany(company);
-			}
-
-			if (StringUtils.isNotEmpty(address)) {
-				userInfo.setAddress(address);
-			}
-
 			if (StringUtils.isNotEmpty(user)) {
+				if (StringUtils.isNotEmpty(userName)) {
+					user.setUserName(userName);
+				}
+
+				if (StringUtils.isNotEmpty(userPassword)) {
+					user.setUserPassword(MD5Utils.encoderToMD5(userPassword));
+				}
+
+				if (StringUtils.isNotEmpty(mobile)) {
+					user.setMobile(mobile);
+				}
+
+				if (StringUtils.isNotEmpty(nickName)) {
+					user.setNickName(nickName);
+				}
+
+				if (StringUtils.isNotEmpty(trueName)) {
+					user.setTrueName(trueName);
+				}
+
+				if (StringUtils.isNotEmpty(sex)) {
+					user.setSex(sex);
+				}
+
+				if (StringUtils.isNotEmpty(idType)) {
+					userInfo.setIdType(idType);
+				}
+
+				if (StringUtils.isNotEmpty(idNo)) {
+					userInfo.setIdNo(idNo);
+				}
+
+				if (StringUtils.isNotEmpty(idiograph)) {
+					userInfo.setIdiograph(idiograph);
+				}
+
+				if (StringUtils.isNotEmpty(occupation)) {
+					userInfo.setOccupation(occupation);
+				}
+
+				if (StringUtils.isNotEmpty(age)) {
+					userInfo.setAge(Integer.parseInt(age));
+				}
+
+				if (StringUtils.isNotEmpty(birthday)) {
+					userInfo.setBirthday(DateUtils.strToDate(birthday,
+							"yyyy-MM-dd"));
+				}
+
+				if (StringUtils.isNotEmpty(constellation)) {
+					userInfo.setConstellation(constellation);
+				}
+
+				if (StringUtils.isNotEmpty(degree)) {
+					userInfo.setDegree(degree);
+				}
+
+				if (StringUtils.isNotEmpty(school)) {
+					userInfo.setSchool(school);
+				}
+
+				if (StringUtils.isNotEmpty(company)) {
+					userInfo.setCompany(company);
+				}
+
+				if (StringUtils.isNotEmpty(address)) {
+					userInfo.setAddress(address);
+				}
+
 				user.setUserInfo(userInfo);
 				baseService.saveOrUpdate(user);
 			}
