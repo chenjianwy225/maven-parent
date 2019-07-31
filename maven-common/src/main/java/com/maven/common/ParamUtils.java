@@ -47,7 +47,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -86,7 +86,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -125,7 +125,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -164,7 +164,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -203,7 +203,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -242,7 +242,7 @@ public class ParamUtils {
 				return defaultValue;
 			}
 		} else {
-			return null;
+			return defaultValue;
 		}
 	}
 
@@ -274,6 +274,7 @@ public class ParamUtils {
 	public static String[] getValuesDefault(HttpServletRequest request,
 			String key, String[] defaultValue) {
 		String[] value = request.getParameterValues(key);
+
 		if (StringUtils.isNotEmpty(value)) {
 			for (String string : value) {
 				string = CharsetUtils.charsetConverter(string);
@@ -281,6 +282,6 @@ public class ParamUtils {
 		} else {
 			value = defaultValue;
 		}
-		return value;
+		return defaultValue;
 	}
 }
