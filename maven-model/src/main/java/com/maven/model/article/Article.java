@@ -65,6 +65,9 @@ public class Article extends IBaseModel {
 	@Column(name = "videoPath")
 	private String videoPath;
 
+	/**
+	 * 浏览量
+	 */
 	@Column(name = "hits", columnDefinition = "int default 0")
 	private int hits = 0;
 

@@ -110,7 +110,9 @@ CREATE TABLE `f_article_comment` (
   PRIMARY KEY (`keyId`),
   KEY `fk_comment_article` (`articleId`) USING BTREE,
   KEY `fk_comment_user` (`userId`),
+  KEY `fk_comment_parent` (`parentId`),
   CONSTRAINT `fk_comment_article` FOREIGN KEY (`articleId`) REFERENCES `f_article` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comment_parent` FOREIGN KEY (`parentId`) REFERENCES `f_article_comment` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_comment_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章评论表';
 
@@ -204,3 +206,69 @@ CREATE TABLE `f_friend_invite` (
   CONSTRAINT `fk_invite_accepter` FOREIGN KEY (`acceptId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_invite_sender` FOREIGN KEY (`sendId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友邀请表';
+
+/*
+ * 表名：f_game(游戏表)
+ * 创建人：chenjian
+ * 创建时间：2019-08-14
+ */
+DROP TABLE IF EXISTS `f_game`;
+CREATE TABLE `f_game` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `typeId` varchar(32) NOT NULL COMMENT '分类编号',
+  `name` varchar(100) NOT NULL COMMENT '名称',
+  `summary` varchar(255) NOT NULL COMMENT '摘要',
+  `content` text NOT NULL COMMENT '内容',
+  `picPath` text NOT NULL COMMENT '图片路径(以逗号'',''分隔)',
+  `videoPath` text COMMENT '视频路径(以逗号'',''分隔)',
+  `urlPath` text NOT NULL COMMENT '下载路径',
+  `hits` int(11) NOT NULL DEFAULT '0' COMMENT '浏览量',
+  `downloads` int(11) NOT NULL DEFAULT '0' COMMENT '下载量',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
+  `deleteStatus` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除(0:否,1:是)',
+  PRIMARY KEY (`keyId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏表';
+
+/*
+ * 表名：f_game_type(游戏分类表)
+ * 创建人：chenjian
+ * 创建时间：2019-08-14
+ */
+DROP TABLE IF EXISTS `f_game_type`;
+CREATE TABLE `f_game_type` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `name` varchar(100) NOT NULL COMMENT '分类名称',
+  `parentId` varchar(32) DEFAULT NULL COMMENT '父级编号',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
+  `deleteStatus` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除(0:否,1:是)',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_game_type` (`parentId`),
+  CONSTRAINT `fk_game_type` FOREIGN KEY (`parentId`) REFERENCES `f_game_type` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏分类表';
+
+/*
+ * 表名：f_game_comment(游戏评论表)
+ * 创建人：chenjian
+ * 创建时间：2019-08-14
+ */
+DROP TABLE IF EXISTS `f_game_comment`;
+CREATE TABLE `f_game_comment` (
+  `keyId` varchar(32) NOT NULL COMMENT '编号(主键)',
+  `userId` varchar(32) NOT NULL COMMENT '用户编号',
+  `gameId` varchar(32) NOT NULL COMMENT '文章编号',
+  `parentId` varchar(32) DEFAULT NULL COMMENT '父级编号',
+  `content` text NOT NULL COMMENT '内容',
+  `picPath` text COMMENT '图片路径(以逗号'',''分隔)',
+  `createDate` datetime NOT NULL COMMENT '创建日期',
+  `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
+  `deleteStatus` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除(0:否,1:是)',
+  PRIMARY KEY (`keyId`),
+  KEY `fk_game_comment` (`gameId`),
+  KEY `fk_game_user` (`userId`),
+  KEY `fk_game_parent` (`parentId`),
+  CONSTRAINT `fk_game_comment` FOREIGN KEY (`gameId`) REFERENCES `f_game` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_game_parent` FOREIGN KEY (`parentId`) REFERENCES `f_game_comment` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_game_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏评论表';

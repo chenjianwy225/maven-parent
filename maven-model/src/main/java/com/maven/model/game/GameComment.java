@@ -1,4 +1,4 @@
-package com.maven.model.article;
+package com.maven.model.game;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -12,18 +12,18 @@ import com.maven.model.IBaseModel;
 import com.maven.model.user.User;
 
 /**
- * 文章评论实体类
+ * 游戏评论实体类
  * 
  * @author chenjian
- * @createDate 2019-07-24
+ * @createDate 2019-08-14
  */
 @Entity
-@Table(name = "f_article_comment")
-public class ArticleComment extends IBaseModel {
+@Table(name = "f_game_comment")
+public class GameComment extends IBaseModel {
 
-	private static final long serialVersionUID = 919153569604787730L;
+	private static final long serialVersionUID = -8853902843907351993L;
 
-	public static final String tableName = "f_article_comment";
+	public static final String tableName = "f_game_comment";
 
 	/**
 	 * 内容
@@ -43,18 +43,18 @@ public class ArticleComment extends IBaseModel {
 	private User user;
 
 	/**
-	 * 文章对象
+	 * 游戏对象
 	 */
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "articleId")
-	private Article article;
+	@JoinColumn(name = "gameId")
+	private Game game;
 
 	/**
 	 * 父级对象
 	 */
-	@OneToOne(targetEntity = ArticleComment.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@OneToOne(targetEntity = GameComment.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JoinColumn(name = "parentId", referencedColumnName = "keyId")
-	private ArticleComment articleComment;
+	private GameComment gameComment;
 
 	public String getContent() {
 		return content;
@@ -80,19 +80,19 @@ public class ArticleComment extends IBaseModel {
 		this.user = user;
 	}
 
-	public Article getArticle() {
-		return article;
+	public Game getGame() {
+		return game;
 	}
 
-	public void setArticle(Article article) {
-		this.article = article;
+	public void setGame(Game game) {
+		this.game = game;
 	}
 
-	public ArticleComment getArticleComment() {
-		return articleComment;
+	public GameComment getGameComment() {
+		return gameComment;
 	}
 
-	public void setArticleComment(ArticleComment articleComment) {
-		this.articleComment = articleComment;
+	public void setGameComment(GameComment gameComment) {
+		this.gameComment = gameComment;
 	}
 }

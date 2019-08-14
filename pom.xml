@@ -27,7 +27,8 @@
 		<hibernate.version>5.3.7.Final</hibernate.version>
 		<datasource.version>0.9.5.2</datasource.version>
 		<ehcache.version>2.10.6</ehcache.version>
-		<common.codec.version>1.11</common.codec.version>
+		<commons.codec.version>1.11</commons.codec.version>
+		<commons.net.version>3.6</commons.net.version>
 		<fastjson.version>1.2.54</fastjson.version>
 		<poi.version>4.0.1</poi.version>
 		<fileupload.version>1.4</fileupload.version>
@@ -266,13 +267,19 @@
 			</dependency>
 			<!-- DataSource End -->
 
-			<!-- Common-codec Start -->
+			<!-- Commons Start -->
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>${common.codec.version}</version>
+				<version>${commons.codec.version}</version>
 			</dependency>
-			<!-- Common-codec End -->
+
+			<dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>${commons.net.version}</version>
+			</dependency>
+			<!-- Commons End -->
 
 			<!-- Fastjson Start -->
 			<dependency>

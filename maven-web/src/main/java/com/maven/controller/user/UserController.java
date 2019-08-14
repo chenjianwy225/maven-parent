@@ -1,5 +1,6 @@
 package com.maven.controller.user;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.maven.common.DateUtils;
+import com.maven.common.FtpUtils;
 import com.maven.common.MD5Utils;
 import com.maven.common.ParamUtils;
 import com.maven.common.ResponseUtils;
@@ -49,6 +51,12 @@ public class UserController extends BaseController {
 			HttpServletResponse response) {
 		try {
 			String userId = ParamUtils.getStringDefault(request, "userId", "");
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			File file = new File("E:\\images\\1.jpg");
+			map.put(file.getName() + file.getName(), file);
+			
+			FtpUtils ftpUtils = new FtpUtils();
 
 			User user = baseService.findById(User.class, userId);
 			return ResponseUtils.writeSuccess(user, true);

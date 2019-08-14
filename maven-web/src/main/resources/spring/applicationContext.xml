@@ -27,4 +27,5 @@
 	<!-- 导入配置 -->
 	<import resource="classpath:spring/spring-hibernate.xml" />
 	<import resource="classpath:spring/spring-redis.xml" />
+	<import resource="classpath:spring/spring-ehcache.xml" />
 </beans>
