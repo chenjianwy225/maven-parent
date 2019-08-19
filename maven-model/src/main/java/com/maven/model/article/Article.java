@@ -25,7 +25,7 @@ import com.maven.model.user.User;
 @Table(name = "f_article")
 public class Article extends IBaseModel {
 
-	private static final long serialVersionUID = 1940028849328964119L;
+	private static final long serialVersionUID = 8603525056825423683L;
 
 	public static final String tableName = "f_article";
 
@@ -44,7 +44,7 @@ public class Article extends IBaseModel {
 	/**
 	 * 内容
 	 */
-	@Column(name = "content")
+	@Column(name = "content", nullable = false)
 	private String content;
 
 	/**
@@ -70,6 +70,12 @@ public class Article extends IBaseModel {
 	 */
 	@Column(name = "hits", columnDefinition = "int default 0")
 	private int hits = 0;
+
+	/**
+	 * 审核状态(0:申请,1:通过,2:驳回)
+	 */
+	@Column(name = "status", columnDefinition = "varchar(1) default 0")
+	private String status;
 
 	/**
 	 * 用户对象
@@ -145,6 +151,14 @@ public class Article extends IBaseModel {
 
 	public void setHits(int hits) {
 		this.hits = hits;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public User getUser() {

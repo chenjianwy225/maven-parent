@@ -63,6 +63,7 @@ CREATE TABLE `f_article` (
   `audioPath` text COMMENT '音频路径(以逗号'',''分隔)',
   `videoPath` text COMMENT '视频路径(以逗号'',''分隔)',
   `hits` int(11) NOT NULL DEFAULT '0' COMMENT '浏览量',
+  `status` char(1) NOT NULL DEFAULT '0' COMMENT '审核状态(0:申请,1:通过,2:驳回)',
   `createDate` datetime NOT NULL COMMENT '创建日期',
   `modifyDate` datetime DEFAULT NULL COMMENT '更新日期',
   `deleteStatus` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除(0:否,1:是)',
