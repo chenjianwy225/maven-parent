@@ -189,7 +189,7 @@
 				<version>${spring.data.redis}</version>
 			</dependency>
 			<!-- Spring-data-redis End -->
-
+			
 			<!-- MySql Start -->
 			<dependency>
 				<groupId>mysql</groupId>

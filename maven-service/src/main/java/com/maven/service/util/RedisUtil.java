@@ -213,7 +213,7 @@ public class RedisUtil {
 	 *            对应多个键值
 	 * @return true 成功 false 失败
 	 */
-	public boolean hmset(String key, Map<String, Object> map) {
+	public boolean hmset(String key, Map<Object, Object> map) {
 		try {
 			redisTemplate.opsForHash().putAll(key, map);
 			return true;
@@ -234,7 +234,7 @@ public class RedisUtil {
 	 *            时间(秒)
 	 * @return true成功 false失败
 	 */
-	public boolean hmset(String key, Map<String, Object> map, long time) {
+	public boolean hmset(String key, Map<Object, Object> map, long time) {
 		try {
 			redisTemplate.opsForHash().putAll(key, map);
 			if (time > 0) {

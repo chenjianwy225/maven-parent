@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.maven.authentication.annotation.ValidationAuthority;
 import com.maven.common.DateUtils;
 import com.maven.common.MD5Utils;
 import com.maven.common.ParamUtils;
