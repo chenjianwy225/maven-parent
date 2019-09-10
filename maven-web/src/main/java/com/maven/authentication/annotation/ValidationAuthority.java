@@ -15,5 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidationAuthority {
 
-	String[] value();
+	boolean validationToken() default false;
+
+	String[] value() default {};
 }

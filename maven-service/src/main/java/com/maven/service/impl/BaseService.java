@@ -30,13 +30,13 @@ public class BaseService implements IBaseService {
 
 	@Override
 	public <T> T findByCondition(Class<T> clazz, String hql,
-			Map<String, Object> param) {
-		return baseDao.findByCondition(clazz, hql, param);
+			Map<String, Object> params) {
+		return baseDao.findByCondition(clazz, hql, params);
 	}
 
 	@Override
-	public <T> T findByCondition(Class<T> clazz, String hql, Object[] param) {
-		return baseDao.findByCondition(clazz, hql, param);
+	public <T> T findByCondition(Class<T> clazz, String hql, Object[] params) {
+		return baseDao.findByCondition(clazz, hql, params);
 	}
 
 	@Override

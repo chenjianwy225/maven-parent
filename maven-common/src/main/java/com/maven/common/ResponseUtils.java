@@ -18,6 +18,28 @@ public class ResponseUtils {
 	/**
 	 * 获取成功信息
 	 * 
+	 * @param msg
+	 *            信息内容
+	 * @return
+	 */
+	public static Object writeSuccess(String msg) {
+		return writeSuccess(msg, 0, null, true, fileUrl);
+	}
+
+	/**
+	 * 获取成功信息
+	 * 
+	 * @param data
+	 *            数据信息
+	 * @return
+	 */
+	public static Object writeSuccess(Object data) {
+		return writeSuccess("请求成功", 0, data, true, fileUrl);
+	}
+
+	/**
+	 * 获取成功信息
+	 * 
 	 * @param data
 	 *            数据信息
 	 * @param isLogin

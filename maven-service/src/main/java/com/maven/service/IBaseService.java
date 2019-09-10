@@ -34,7 +34,7 @@ public interface IBaseService {
 	 *            条件参数
 	 * @return
 	 */
-	<T> T findByCondition(Class<T> clazz, String hql, Map<String, Object> param);
+	<T> T findByCondition(Class<T> clazz, String hql, Map<String, Object> params);
 
 	/**
 	 * 根据条件获取信息
@@ -47,7 +47,7 @@ public interface IBaseService {
 	 *            条件参数
 	 * @return
 	 */
-	<T> T findByCondition(Class<T> clazz, String hql, Object[] param);
+	<T> T findByCondition(Class<T> clazz, String hql, Object[] params);
 
 	/**
 	 * 获取所有信息
