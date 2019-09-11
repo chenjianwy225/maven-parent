@@ -1,17 +1,18 @@
 package com.test;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
 
 public class Ts {
 
 	public static void main(String[] args) throws Exception {
-		String str = "1";
-		String str1 = "";
-		String[] strs = new String[]{};
-		System.out.println(strs.length);
-
-		List<String> list = Arrays.asList(strs);
-		System.out.println(list.contains(str));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("name", "messi");
+		map.put("age", 20);
+		
+		System.out.println(map);
+		System.out.println(JSON.toJSONString(map));
 	}
 }

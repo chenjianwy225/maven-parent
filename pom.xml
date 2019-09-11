@@ -35,6 +35,8 @@
 		<servlet.version>4.0.1</servlet.version>
 		<redis.version>2.9.3</redis.version>
 		<jackson.version>2.9.9</jackson.version>
+		<httpclient.version>3.1</httpclient.version>
+		<httpcomponents.version>4.5.10</httpcomponents.version>
 	</properties>
 
 	<dependencyManagement>
@@ -189,7 +191,7 @@
 				<version>${spring.data.redis}</version>
 			</dependency>
 			<!-- Spring-data-redis End -->
-			
+
 			<!-- MySql Start -->
 			<dependency>
 				<groupId>mysql</groupId>
@@ -347,6 +349,28 @@
 				<version>${jackson.version}</version>
 			</dependency>
 			<!-- Jackson End -->
+
+			<!-- HttpClient Start -->
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>${httpclient.version}</version>
+			</dependency>
+			<!-- HttpClient End -->
+
+			<!-- HttpComponents Start -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpcomponents.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpmime</artifactId>
+				<version>${httpcomponents.version}</version>
+			</dependency>
+			<!-- HttpComponents End -->
 		</dependencies>
 	</dependencyManagement>
 </project>

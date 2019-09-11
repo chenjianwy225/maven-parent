@@ -70,7 +70,7 @@ public class AllInterceptor implements HandlerInterceptor {
 				// 判断用户访问是否带Token参数
 				if (StringUtils.isNotEmpty(token)) {
 					// 判断Token是否有效
-					if (StringUtils.isNotEmpty(redisUtil.hasKey(token))) {
+					if (redisUtil.hasKey(token)) {
 						boolean isAuthority = false;
 						Map<Object, Object> map = redisUtil.hmget(token);
 						List<String> userAuthoritys = StringUtils

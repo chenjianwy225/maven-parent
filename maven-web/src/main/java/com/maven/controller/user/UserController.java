@@ -44,6 +44,7 @@ public class UserController extends BaseController {
 	 * @param response
 	 * @return
 	 */
+	@ValidationAuthority(validationToken = true)
 	@RequestMapping(value = "single", method = RequestMethod.GET)
 	@ResponseBody
 	public Object single(HttpServletRequest request,

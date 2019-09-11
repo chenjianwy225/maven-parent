@@ -46,27 +46,29 @@ public class BaseDao extends HibernateDaoSupport implements IBaseDao {
 
 	@Override
 	public <T> T findByCondition(Class<T> clazz, String hql,
-			Map<String, Object> param) {
+			Map<String, Object> params) {
 		return this.getHibernateTemplate().execute(new HibernateCallback<T>() {
 
 			@Override
 			public T doInHibernate(Session session) throws HibernateException {
 				Query query = session.createQuery(hql, clazz);
-				query.setProperties(param);
-				return null;
+				query.setProperties(params);
+				query.setMaxResults(1);
+				return (T) query.uniqueResult();
 			}
 		});
 	}
 
 	@Override
-	public <T> T findByCondition(Class<T> clazz, String hql, Object[] param) {
+	public <T> T findByCondition(Class<T> clazz, String hql, Object[] params) {
 		return this.getHibernateTemplate().execute(new HibernateCallback<T>() {
 
 			@Override
 			public T doInHibernate(Session session) throws HibernateException {
 				Query query = session.createQuery(hql, clazz);
-				query.setProperties(param);
-				return null;
+				query.setProperties(params);
+				query.setMaxResults(1);
+				return (T) query.uniqueResult();
 			}
 		});
 	}
@@ -136,11 +138,11 @@ public class BaseDao extends HibernateDaoSupport implements IBaseDao {
 					public Pager doInHibernate(Session session)
 							throws HibernateException {
 						Query query = session.createQuery(hql, clazz);
-						
+
 						for (int i = 0; i < params.length; i++) {
 							query.setParameter(i, params[i]);
 						}
-						
+
 						int count = query.list().size();
 
 						Pager pager = new Pager();
