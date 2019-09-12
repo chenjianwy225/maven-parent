@@ -563,7 +563,7 @@ public class HttpComponentsUtils {
 			HttpEntity httpEntity = multipartEntityBuilder.build();
 			httpPost.setEntity(httpEntity);
 
-			// 由客户端执行(发送)Get请求
+			// 由客户端执行(发送)Post请求
 			response = httpClient.execute(httpPost);
 
 			int statusCode = response.getStatusLine().getStatusCode();

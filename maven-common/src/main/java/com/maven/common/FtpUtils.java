@@ -49,7 +49,6 @@ public class FtpUtils {
 
 	private FTPClient ftpClient = null;
 
-	@SuppressWarnings("static-access")
 	public FtpUtils() {
 		LoadPropertiesUtils loadPropertiesUtils = LoadPropertiesUtils
 				.getInstance("ftp.properties");

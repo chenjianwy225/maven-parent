@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.maven.authentication.annotation.ValidationAuthority;
+import com.maven.common.LoadPropertiesUtils;
 import com.maven.common.ParamUtils;
 import com.maven.common.ResponseUtils;
 import com.maven.common.StringUtils;
@@ -38,8 +39,15 @@ public class AllInterceptor implements HandlerInterceptor {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	// Redis过期时间(秒)
-	private final static long expireTime = 2 * 60 * 60;
+	// Token在Redis的数据库索引
+	private static final int tokenDbIndex = Integer.valueOf(
+			LoadPropertiesUtils.getInstance().getKey("tokenDbIndex"))
+			.intValue();
+
+	// Token在Redis的过期时间(分钟)
+	private static final long tokenExpireTime = Long.valueOf(
+			LoadPropertiesUtils.getInstance().getKey("tokenExpireTime"))
+			.longValue();
 
 	@Override
 	public boolean preHandle(HttpServletRequest request,
@@ -92,9 +100,10 @@ public class AllInterceptor implements HandlerInterceptor {
 
 						// 判断用户是否有访问权限
 						if (isAuthority) {
+							redisUtil.changeDataBase(tokenDbIndex);
 							redisUtil.del(token);
 							token = UUIDUtils.getUUID();
-							redisUtil.hmset(token, map, expireTime);
+							redisUtil.hmset(token, map, tokenExpireTime);
 							response.setHeader("token", token);
 						} else {
 							String message = "您沒有权限";

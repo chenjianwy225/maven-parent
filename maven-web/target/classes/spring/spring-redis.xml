@@ -18,9 +18,12 @@
 	<!-- 连接池配置，类似数据库连接池 -->
 	<bean id="jedisConnectionFactory"
 		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="usePool" value="${redis.usePool}"></property>
 		<property name="hostName" value="${redis.host}"></property>
 		<property name="port" value="${redis.port}"></property>
 		<property name="password" value="${redis.password}"></property>
+		<property name="timeout" value="${redis.timeout}" />
+        <property name="database" value="${redis.dbIndex}"></property>
 		<property name="poolConfig" ref="poolConfig"></property>
 	</bean>
 

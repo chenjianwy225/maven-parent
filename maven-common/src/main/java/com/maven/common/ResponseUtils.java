@@ -11,7 +11,6 @@ import com.maven.common.model.JsonResult;
 public class ResponseUtils {
 
 	// 图片访问路径
-	@SuppressWarnings("static-access")
 	private static final String fileUrl = LoadPropertiesUtils.getInstance()
 			.getKey("fileUrl");
 
@@ -35,6 +34,19 @@ public class ResponseUtils {
 	 */
 	public static Object writeSuccess(Object data) {
 		return writeSuccess("请求成功", 0, data, true, fileUrl);
+	}
+
+	/**
+	 * 获取成功信息
+	 * 
+	 * @param msg
+	 *            信息内容
+	 * @param data
+	 *            数据信息
+	 * @return
+	 */
+	public static Object writeSuccess(String msg, Object data) {
+		return writeSuccess(msg, 0, data, true, fileUrl);
 	}
 
 	/**

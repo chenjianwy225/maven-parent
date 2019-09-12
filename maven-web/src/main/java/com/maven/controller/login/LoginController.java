@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.maven.authentication.annotation.ValidationAuthority;
+import com.maven.common.LoadPropertiesUtils;
 import com.maven.common.MD5Utils;
 import com.maven.common.ParamUtils;
 import com.maven.common.ResponseUtils;
@@ -31,8 +32,15 @@ import com.maven.model.user.User;
 @RequestMapping(value = "/login")
 public class LoginController extends BaseController {
 
-	// Redis过期时间(秒)
-	private final static long expireTime = 2 * 60 * 60;
+	// Token在Redis的数据库索引
+	private static final int tokenDbIndex = Integer.valueOf(
+			LoadPropertiesUtils.getInstance().getKey("tokenDbIndex"))
+			.intValue();
+
+	// Token在Redis的过期时间(分钟)
+	private static final long tokenExpireTime = Long.valueOf(
+			LoadPropertiesUtils.getInstance().getKey("tokenExpireTime"))
+			.longValue();
 
 	/**
 	 * 用户登录
@@ -73,7 +81,8 @@ public class LoginController extends BaseController {
 						map.put("authority", "");
 
 						String token = UUIDUtils.getUUID();
-						redisUtil.hmset(token, map, expireTime);
+						redisUtil.changeDataBase(tokenDbIndex);
+						redisUtil.hmset(token, map, tokenExpireTime);
 						response.setHeader("token", token);
 
 						isLogin = true;
@@ -122,6 +131,7 @@ public class LoginController extends BaseController {
 			}
 
 			if (StringUtils.isNotEmpty(token)) {
+				redisUtil.changeDataBase(tokenDbIndex);
 				redisUtil.del(token);
 
 				return ResponseUtils.writeSuccess("退出登录成功");

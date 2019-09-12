@@ -60,7 +60,7 @@ public class LoadPropertiesUtils {
 	 *            Key名称
 	 * @return
 	 */
-	public static String getKey(String key) {
+	public String getKey(String key) {
 		String value = null;
 		try {
 			value = properties.getProperty(key);

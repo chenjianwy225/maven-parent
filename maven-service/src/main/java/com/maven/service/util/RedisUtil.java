@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -27,18 +28,31 @@ public class RedisUtil {
 	}
 
 	/**
+	 * 切换数据库
+	 * 
+	 * @param dbIndex
+	 *            数据库索引
+	 */
+	@SuppressWarnings("deprecation")
+	public void changeDataBase(int dbIndex) {
+		JedisConnectionFactory factory = (JedisConnectionFactory) this.redisTemplate
+				.getConnectionFactory();
+		factory.setDatabase(dbIndex);
+	}
+
+	/**
 	 * 指定缓存失效时间
 	 * 
 	 * @param key
 	 *            键
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return
 	 */
 	public boolean expire(String key, long time) {
 		try {
 			if (time > 0) {
-				redisTemplate.expire(key, time, TimeUnit.SECONDS);
+				redisTemplate.expire(key, time, TimeUnit.MINUTES);
 			}
 			return true;
 		} catch (Exception e) {
@@ -52,10 +66,10 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 *            键 不能为null
-	 * @return 时间(秒) 返回0代表为永久有效
+	 * @return 时间(分钟) 返回0代表为永久有效
 	 */
 	public long getExpire(String key) {
-		return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+		return redisTemplate.getExpire(key, TimeUnit.MINUTES);
 	}
 
 	/**
@@ -130,14 +144,14 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒) time要大于0 如果time小于等于0 将设置无限期
+	 *            时间(分钟) time要大于0 如果time小于等于0 将设置无限期
 	 * @return true成功 false 失败
 	 */
 	public boolean set(String key, Object value, long time) {
 		try {
 			if (time > 0) {
 				redisTemplate.opsForValue().set(key, value, time,
-						TimeUnit.SECONDS);
+						TimeUnit.MINUTES);
 			} else {
 				set(key, value);
 			}
@@ -231,7 +245,7 @@ public class RedisUtil {
 	 * @param map
 	 *            对应多个键值
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return true成功 false失败
 	 */
 	public boolean hmset(String key, Map<Object, Object> map, long time) {
@@ -278,7 +292,7 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒) 注意:如果已存在的hash表有时间,这里将会替换原有的时间
+	 *            时间(分钟) 注意:如果已存在的hash表有时间,这里将会替换原有的时间
 	 * @return true 成功 false失败
 	 */
 	public boolean hset(String key, String item, Object value, long time) {
@@ -407,7 +421,7 @@ public class RedisUtil {
 	 * @param key
 	 *            键
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @param values
 	 *            值 可以是多个
 	 * @return 成功个数
@@ -521,7 +535,7 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return
 	 */
 	public boolean lSet(String key, Object value) {
@@ -542,7 +556,7 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return
 	 */
 	public boolean lSet(String key, Object value, long time) {
@@ -565,7 +579,7 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return
 	 */
 	public boolean lSet(String key, List<Object> value) {
@@ -586,7 +600,7 @@ public class RedisUtil {
 	 * @param value
 	 *            值
 	 * @param time
-	 *            时间(秒)
+	 *            时间(分钟)
 	 * @return
 	 */
 	public boolean lSet(String key, List<Object> value, long time) {
