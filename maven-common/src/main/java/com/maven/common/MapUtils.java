@@ -21,7 +21,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static String getString(Map<String, Object> map, String key) {
-		return getStringDefault(map, key, null);
+		return getString(map, key, null);
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static String getStringDefault(Map<String, Object> map, String key,
+	public static String getString(Map<String, Object> map, String key,
 			String defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
@@ -60,7 +60,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Integer getInteger(Map<String, Object> map, String key) {
-		return getIntegerDefault(map, key, null);
+		return getInteger(map, key, null);
 	}
 
 	/**
@@ -74,8 +74,8 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Integer getIntegerDefault(Map<String, Object> map,
-			String key, Integer defaultValue) {
+	public static Integer getInteger(Map<String, Object> map, String key,
+			Integer defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
 
@@ -99,7 +99,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Long getLong(Map<String, Object> map, String key) {
-		return getLongDefault(map, key, null);
+		return getLong(map, key, null);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Long getLongDefault(Map<String, Object> map, String key,
+	public static Long getLong(Map<String, Object> map, String key,
 			Long defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
@@ -138,7 +138,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Float getFloat(Map<String, Object> map, String key) {
-		return getFloatDefault(map, key, null);
+		return getFloat(map, key, null);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Float getFloatDefault(Map<String, Object> map, String key,
+	public static Float getFloat(Map<String, Object> map, String key,
 			Float defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
@@ -177,7 +177,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Double getDouble(Map<String, Object> map, String key) {
-		return getDoubleDefault(map, key, null);
+		return getDouble(map, key, null);
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Double getDoubleDefault(Map<String, Object> map, String key,
+	public static Double getDouble(Map<String, Object> map, String key,
 			Double defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
@@ -216,7 +216,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Boolean getBoolean(Map<String, Object> map, String key) {
-		return getBooleanDefault(map, key, null);
+		return getBoolean(map, key, null);
 	}
 
 	/**
@@ -230,8 +230,8 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Boolean getBooleanDefault(Map<String, Object> map,
-			String key, Boolean defaultValue) {
+	public static Boolean getBoolean(Map<String, Object> map, String key,
+			Boolean defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);
 
@@ -255,7 +255,7 @@ public class MapUtils {
 	 * @return
 	 */
 	public static Date getDate(Map<String, Object> map, String key) {
-		return getDateDefault(map, key, null);
+		return getDate(map, key, null);
 	}
 
 	/**
@@ -269,7 +269,7 @@ public class MapUtils {
 	 *            默认值
 	 * @return
 	 */
-	public static Date getDateDefault(Map<String, Object> map, String key,
+	public static Date getDate(Map<String, Object> map, String key,
 			Date defaultValue) {
 		if (StringUtils.isNotEmpty(map)) {
 			Object object = map.get(key);

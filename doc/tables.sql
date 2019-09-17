@@ -273,3 +273,19 @@ CREATE TABLE `f_game_comment` (
   CONSTRAINT `fk_game_parent` FOREIGN KEY (`parentId`) REFERENCES `f_game_comment` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_game_user` FOREIGN KEY (`userId`) REFERENCES `f_user` (`keyId`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏评论表';
+
+/*
+ * 表名：f_code(验证码表)
+ * 创建人：chenjian
+ * 创建时间：2019-09-12
+ */
+DROP TABLE IF EXISTS `f_code`;
+CREATE TABLE `f_code` (
+  `mobile` varchar(11) NOT NULL COMMENT '手机号码(主键)',
+  `codeNum` varchar(10) NOT NULL COMMENT '验证码',
+  `number` int(11) NOT NULL DEFAULT '0' COMMENT '发送次数',
+  `expireTime` int(11) NOT NULL DEFAULT '5' COMMENT '过期时间(分钟)',
+  `startDate` datetime NOT NULL COMMENT '开始日期',
+  `endDate` datetime NOT NULL COMMENT '结束日期',
+  PRIMARY KEY (`mobile`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='验证码表';

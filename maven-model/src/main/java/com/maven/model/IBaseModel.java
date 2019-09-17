@@ -22,7 +22,7 @@ public class IBaseModel implements Serializable {
 	 * 编号(主键)
 	 */
 	@Id
-	@Column(unique = true, nullable = false)
+	@Column(name = "keyId", unique = true, nullable = false)
 	private String keyId;
 
 	/**

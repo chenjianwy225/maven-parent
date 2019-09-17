@@ -20,6 +20,7 @@ import com.maven.common.ResponseUtils;
 import com.maven.common.StringUtils;
 import com.maven.common.UUIDUtils;
 import com.maven.controller.BaseController;
+import com.maven.model.sms.Code;
 import com.maven.model.user.User;
 
 /**
@@ -36,6 +37,10 @@ public class LoginController extends BaseController {
 	private static final int tokenDbIndex = Integer.valueOf(
 			LoadPropertiesUtils.getInstance().getKey("tokenDbIndex"))
 			.intValue();
+
+	// 验证码在Redis的数据库索引
+	private static final int codeDbIndex = Integer.valueOf(
+			LoadPropertiesUtils.getInstance().getKey("codeDbIndex")).intValue();
 
 	// Token在Redis的过期时间(分钟)
 	private static final long tokenExpireTime = Long.valueOf(
@@ -60,11 +65,13 @@ public class LoginController extends BaseController {
 					"");
 			String userPassword = ParamUtils.getStringDefault(request,
 					"userPassword", "");
-			String code = ParamUtils.getStringDefault(request, "code", "");
+			String userCode = ParamUtils.getStringDefault(request, "userCode",
+					"");
+			String codeId = ParamUtils.getStringDefault(request, "keyId", "");
 
 			if (StringUtils.isNotEmpty(userName)
 					&& StringUtils.isNotEmpty(userPassword)
-					&& StringUtils.isNotEmpty(code)) {
+					&& StringUtils.isNotEmpty(userCode)) {
 				String hql = "FROM User WHERE userName = :userName";
 				Map<String, Object> params = new HashMap<String, Object>();
 				params.put("userName", userName);
@@ -77,16 +84,56 @@ public class LoginController extends BaseController {
 					// 判断密码是否正确
 					if (user.getUserPassword().equalsIgnoreCase(
 							MD5Utils.encoderToMD5(userPassword))) {
-						Map<Object, Object> map = BeanUtils.describe(user);
-						map.put("authority", "");
+						// 判断是RedisCode或SMSCode
+						if (StringUtils.isNotEmpty(codeId)) {
+							redisUtil.changeDataBase(codeDbIndex);
 
-						String token = UUIDUtils.getUUID();
-						redisUtil.changeDataBase(tokenDbIndex);
-						redisUtil.hmset(token, map, tokenExpireTime);
-						response.setHeader("token", token);
+							// 判断验证码是否有效
+							if (redisUtil.hasKey(codeId)) {
+								// 判断验证是否正确
+								if (userCode.equalsIgnoreCase(redisUtil.get(
+										codeId).toString())) {
+									isLogin = true;
+								} else {
+									message = "验证码错误";
+								}
+							} else {
+								message = "验证码过期";
+							}
+						} else {
+							params.clear();
+							hql = "FROM Code WHERE mobile = :mobile AND NOW() BETWEEN startDate AND endDate";
+							params.put("mobile", user.getMobile());
 
-						isLogin = true;
-						message = "登录成功";
+							Code code = baseService.findByCondition(Code.class,
+									hql, params);
+
+							// 判断验证码是否有效
+							if (StringUtils.isNotEmpty(code)) {
+								// 判断验证是否正确
+								if (userCode
+										.equalsIgnoreCase(code.getCodeNum())) {
+									isLogin = true;
+								} else {
+									message = "验证码错误";
+								}
+							} else {
+								message = "验证码过期";
+							}
+						}
+
+						// 判断是否登录
+						if (isLogin) {
+							Map<Object, Object> map = BeanUtils.describe(user);
+							map.put("authority", "");
+
+							String token = UUIDUtils.getUUID();
+							redisUtil.changeDataBase(tokenDbIndex);
+							redisUtil.hmset(token, map, tokenExpireTime);
+							response.setHeader("token", token);
+
+							message = "登录成功";
+						}
 					} else {
 						message = "密码错误";
 					}

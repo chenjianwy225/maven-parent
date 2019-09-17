@@ -37,6 +37,8 @@
 		<jackson.version>2.9.9</jackson.version>
 		<httpclient.version>3.1</httpclient.version>
 		<httpcomponents.version>4.5.10</httpcomponents.version>
+		<xmlbeans.version>3.1.0</xmlbeans.version>
+		<freemarker.version>2.3.29</freemarker.version>
 	</properties>
 
 	<dependencyManagement>
@@ -294,6 +296,24 @@
 			<!-- Poi Start -->
 			<dependency>
 				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${poi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${poi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml-schemas</artifactId>
+				<version>${poi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-excelant</artifactId>
 				<version>${poi.version}</version>
 			</dependency>
@@ -371,6 +391,22 @@
 				<version>${httpcomponents.version}</version>
 			</dependency>
 			<!-- HttpComponents End -->
+
+			<!-- Xmlbeans Start -->
+			<dependency>
+				<groupId>org.apache.xmlbeans</groupId>
+				<artifactId>xmlbeans</artifactId>
+				<version>${xmlbeans.version}</version>
+			</dependency>
+			<!-- Xmlbeans End -->
+
+			<!-- Freemarker Start -->
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>${freemarker.version}</version>
+			</dependency>
+			<!-- Freemarker End -->
 		</dependencies>
 	</dependencyManagement>
 </project>

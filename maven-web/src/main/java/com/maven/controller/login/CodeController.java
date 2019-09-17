@@ -3,6 +3,8 @@ package com.maven.controller.login;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,20 +18,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.maven.common.LoadPropertiesUtils;
+import com.maven.common.ParamUtils;
 import com.maven.common.RandomUtils;
 import com.maven.common.ResponseUtils;
+import com.maven.common.StringUtils;
 import com.maven.common.UUIDUtils;
 import com.maven.controller.BaseController;
+import com.maven.model.sms.Code;
 
 /**
- * 短信Controller
+ * 验证码Controller
  * 
  * @author chenjian
  * @createDate 2019-09-11
  */
 @Controller
-@RequestMapping(value = "/sms")
-public class SMSController extends BaseController {
+@RequestMapping(value = "/code")
+public class CodeController extends BaseController {
 
 	// 验证码长度
 	private static final int codeLengths = Integer.valueOf(
@@ -45,16 +50,15 @@ public class SMSController extends BaseController {
 			.longValue();
 
 	/**
-	 * 获取保存Redis的验证码
+	 * 生成Redis验证码
 	 * 
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	@RequestMapping(value = "/redisCode", method = RequestMethod.GET)
+	@RequestMapping(value = "/redis", method = RequestMethod.GET)
 	@ResponseBody
-	public Object redisCode(HttpServletRequest request,
-			HttpServletResponse response) {
+	public Object redis(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String codeId = UUIDUtils.getUUID();
 			Object[] obj = RandomUtils.getCode(codeLengths,
@@ -76,7 +80,69 @@ public class SMSController extends BaseController {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("codeId", codeId);
 			map.put("base64Img", base64Img);
-			return ResponseUtils.writeSuccess(map);
+			return ResponseUtils.writeSuccess("发送成功", map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseUtils.writeFail();
+		}
+	}
+
+	/**
+	 * 生成并发送短信验证码
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/sms", method = RequestMethod.GET)
+	@ResponseBody
+	public Object sms(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String message = "";
+			boolean isAdd = false;
+			String mobile = ParamUtils.getStringDefault(request, "mobile", "");
+
+			// 判断是否填写手机号码
+			if (StringUtils.isNotEmpty(mobile)) {
+				Code code = baseService.findById(Code.class, mobile);
+
+				// 判断数据是否存在
+				if (StringUtils.isEmpty(code)) {
+					code = new Code();
+					code.setMobile(mobile);
+
+					isAdd = true;
+				}
+
+				// 验证码
+				String codeNum = RandomUtils.getRandomCode(codeLengths,
+						RandomUtils.NUMBER_CODE);
+
+				Calendar calendar = Calendar.getInstance();
+				int expireTime = Long.valueOf(codeExpireTime).intValue();
+				Date startDate = calendar.getTime();
+				calendar.add(Calendar.MINUTE, expireTime);
+				Date endDate = calendar.getTime();
+
+				code.setCodeNum(codeNum);
+				code.setNumber(code.getNumber() + 1);
+				code.setExpireTime(expireTime);
+				code.setStartDate(startDate);
+				code.setEndDate(endDate);
+
+				// 判断是否新增数据
+				if (isAdd) {
+					baseService.save(code);
+				} else {
+					baseService.update(code);
+				}
+
+				message = "发送成功";
+			} else {
+				message = "未填写手机号码";
+			}
+
+			return ResponseUtils.writeSuccess(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseUtils.writeFail();

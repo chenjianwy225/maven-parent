@@ -106,7 +106,8 @@ public class RandomUtils {
 			// 遍历索引集合
 			List<String> codeList = new ArrayList<String>();
 			for (int codeIndex : codeIndexs) {
-				if (!indexList.contains(codeIndex)) {
+				if (!indexList.contains(codeIndex) && codeIndex >= 0
+						&& codeIndex < CODES.length) {
 					codeList.addAll(Arrays.asList(CODES[codeIndex]));
 					indexList.add(codeIndex);
 				}
@@ -146,5 +147,9 @@ public class RandomUtils {
 		int g = fc + random.nextInt(bc - fc);
 		int b = fc + random.nextInt(bc - fc);
 		return new Color(r, g, b);
+	}
+
+	public static void main(String[] args) {
+		System.out.println(CODES.length);
 	}
 }

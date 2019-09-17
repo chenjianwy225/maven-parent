@@ -1,5 +1,8 @@
 package com.maven.common;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * 字符串验证类
  * 
@@ -37,5 +40,24 @@ public class StringUtils {
 	 */
 	public static boolean isNotEmpty(Object object) {
 		return !isEmpty(object);
+	}
+
+	/**
+	 * 判断Object是否JSON格式
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public static boolean isJson(Object object) {
+		try {
+			JSONObject.parseObject(object.toString());
+		} catch (JSONException ex) {
+			try {
+				JSONObject.parseArray(object.toString());
+			} catch (JSONException ex1) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
