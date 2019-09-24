@@ -1,6 +1,11 @@
 package com.maven.common.xls;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,9 +19,11 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
@@ -29,7 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.maven.common.StringUtils;
 
 /**
- * XLS生成类
+ * 读写XLS类
  * 
  * @author chenjian
  * @createDate 2019-09-17
@@ -37,7 +44,28 @@ import com.maven.common.StringUtils;
 public class XLSUtils {
 
 	/**
-	 * 生成文件
+	 * 读文件
+	 * 
+	 * @param filePath
+	 *            文件路径
+	 * @return
+	 */
+	public static List<List<Object>> read(String filePath) {
+		List<List<Object>> list = null;
+		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+				.toLowerCase();
+
+		if (fileType.equalsIgnoreCase("xls")) {
+			list = readXLS(filePath);
+		} else if (fileType.equalsIgnoreCase("xlsx")) {
+			list = readXLSX(filePath);
+		}
+
+		return list;
+	}
+
+	/**
+	 * 写文件
 	 * 
 	 * @param filePath
 	 *            文件路径
@@ -53,7 +81,7 @@ public class XLSUtils {
 	 *            验证数据是否需要标注集合
 	 * @return
 	 */
-	public static boolean createFile(String filePath, String sheetName,
+	public static boolean write(String filePath, String sheetName,
 			String titleName, List<String> titles,
 			List<Map<String, Object>> datas, Map<String, Number> checks) {
 		boolean success = true;
@@ -61,9 +89,9 @@ public class XLSUtils {
 				.toLowerCase();
 
 		if (fileType.equalsIgnoreCase("xls")) {
-			createXLS(filePath, sheetName, titleName, titles, datas, checks);
+			writeXLS(filePath, sheetName, titleName, titles, datas, checks);
 		} else if (fileType.equalsIgnoreCase("xlsx")) {
-			createXLSX(filePath, sheetName, titleName, titles, datas, checks);
+			writeXLSX(filePath, sheetName, titleName, titles, datas, checks);
 		} else {
 			success = false;
 		}
@@ -72,7 +100,137 @@ public class XLSUtils {
 	}
 
 	/**
-	 * 生成XLS文件
+	 * 读XLS文件
+	 * 
+	 * @param filePath
+	 *            文件路径
+	 * @return
+	 */
+	private static List<List<Object>> readXLS(String filePath) {
+		List<List<Object>> list = null;
+		InputStream inputStream = null;
+		HSSFWorkbook workbook = null;
+
+		try {
+			inputStream = new FileInputStream(new File(filePath));
+			workbook = new HSSFWorkbook(inputStream);
+
+			// Excel的页签数量
+			int sheetNum = workbook.getNumberOfSheets();
+			if (sheetNum > 0) {
+				list = new ArrayList<List<Object>>();
+
+				for (int i = 0; i < sheetNum; i++) {
+					List<Object> ls = new ArrayList<Object>();
+					HSSFSheet sheet = workbook.getSheetAt(i);
+
+					Iterator<Row> rowIterator = sheet.rowIterator();
+					while (rowIterator.hasNext()) {
+						Row row = rowIterator.next();
+
+						Iterator<Cell> cellIterator = row.cellIterator();
+						while (cellIterator.hasNext()) {
+							Cell cell = cellIterator.next();
+
+							if (cell.getCellType() == CellType.NUMERIC) {
+								ls.add(cell.getNumericCellValue());
+							} else if (cell.getCellType() == CellType.BOOLEAN) {
+								ls.add(cell.getBooleanCellValue());
+							} else {
+								ls.add(cell.getStringCellValue());
+							}
+						}
+					}
+
+					list.add(ls);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(inputStream)) {
+					inputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(workbook)) {
+					workbook.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * 读XLSX文件
+	 * 
+	 * @param filePath
+	 *            文件路径
+	 * @return
+	 */
+	private static List<List<Object>> readXLSX(String filePath) {
+		List<List<Object>> list = null;
+		InputStream inputStream = null;
+		XSSFWorkbook workbook = null;
+
+		try {
+			inputStream = new FileInputStream(new File(filePath));
+			workbook = new XSSFWorkbook(inputStream);
+
+			// Excel的页签数量
+			int sheetNum = workbook.getNumberOfSheets();
+			if (sheetNum > 0) {
+				list = new ArrayList<List<Object>>();
+
+				for (int i = 0; i < sheetNum; i++) {
+					List<Object> ls = new ArrayList<Object>();
+					XSSFSheet sheet = workbook.getSheetAt(i);
+
+					Iterator<Row> rowIterator = sheet.rowIterator();
+					while (rowIterator.hasNext()) {
+						Row row = rowIterator.next();
+
+						Iterator<Cell> cellIterator = row.cellIterator();
+						while (cellIterator.hasNext()) {
+							Cell cell = cellIterator.next();
+
+							if (cell.getCellType() == CellType.NUMERIC) {
+								ls.add(cell.getNumericCellValue());
+							} else if (cell.getCellType() == CellType.BOOLEAN) {
+								ls.add(cell.getBooleanCellValue());
+							} else {
+								ls.add(cell.getStringCellValue());
+							}
+						}
+					}
+
+					list.add(ls);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(inputStream)) {
+					inputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(workbook)) {
+					workbook.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * 写XLS文件
 	 * 
 	 * @param filePath
 	 *            文件路径
@@ -87,7 +245,7 @@ public class XLSUtils {
 	 * @param checks
 	 *            验证数据是否需要标注集合
 	 */
-	private static void createXLS(String filePath, String sheetName,
+	private static void writeXLS(String filePath, String sheetName,
 			String titleName, List<String> titles,
 			List<Map<String, Object>> datas, Map<String, Number> checks) {
 		FileOutputStream outputStream = null;
@@ -281,7 +439,7 @@ public class XLSUtils {
 	}
 
 	/**
-	 * 生成XLSX文件
+	 * 写XLSX文件
 	 * 
 	 * @param filePath
 	 *            文件路径
@@ -296,7 +454,7 @@ public class XLSUtils {
 	 * @param checks
 	 *            验证数据是否需要标注集合
 	 */
-	private static void createXLSX(String filePath, String sheetName,
+	private static void writeXLSX(String filePath, String sheetName,
 			String titleName, List<String> titles,
 			List<Map<String, Object>> datas, Map<String, Number> checks) {
 		FileOutputStream outputStream = null;
@@ -482,6 +640,10 @@ public class XLSUtils {
 			try {
 				if (StringUtils.isNotEmpty(outputStream)) {
 					outputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(workbook)) {
+					workbook.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
