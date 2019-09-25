@@ -22,6 +22,7 @@
 		<spring.data.redis>2.1.4.RELEASE</spring.data.redis>
 		<mysql.version>5.1.47</mysql.version>
 		<slf4j.version>1.7.25</slf4j.version>
+		<dom4j.version>2.1.1</dom4j.version>
 		<json.version>2.4</json.version>
 		<junit.version>4.12</junit.version>
 		<hibernate.version>5.3.7.Final</hibernate.version>
@@ -216,6 +217,14 @@
 				<scope>test</scope>
 			</dependency>
 			<!-- Log4j End -->
+
+			<!-- Dom4j Start -->
+			<dependency>
+				<groupId>org.dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>${dom4j.version}</version>
+			</dependency>
+			<!-- Dom4j End -->
 
 			<!-- Json Start -->
 			<dependency>

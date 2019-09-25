@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.maven.common.StringUtils;
 
 import freemarker.template.Configuration;
@@ -21,6 +24,8 @@ import freemarker.template.Template;
  * @createDate 2019-09-17
  */
 public class TemplateUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(TemplateUtils.class);
 
 	/**
 	 * 通过模板生成文件(File)
@@ -54,6 +59,7 @@ public class TemplateUtils {
 			writer.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Create XLS file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(writer)) {
@@ -96,6 +102,7 @@ public class TemplateUtils {
 			byt = outputStream.toByteArray();
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Create XLS file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(writer)) {

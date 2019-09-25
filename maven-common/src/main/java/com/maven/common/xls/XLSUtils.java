@@ -32,6 +32,8 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.maven.common.StringUtils;
 
@@ -42,6 +44,14 @@ import com.maven.common.StringUtils;
  * @createDate 2019-09-17
  */
 public class XLSUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(XLSUtils.class);
+
+	// XLS文件后缀名
+	private static final String XLS_NAME = "xls";
+
+	// XLSX文件后缀名
+	private static final String XLSX_NAME = "xlsx";
 
 	/**
 	 * 读文件
@@ -55,10 +65,12 @@ public class XLSUtils {
 		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 				.toLowerCase();
 
-		if (fileType.equalsIgnoreCase("xls")) {
+		if (fileType.equalsIgnoreCase(XLS_NAME)) {
 			list = readXLS(filePath);
-		} else if (fileType.equalsIgnoreCase("xlsx")) {
+		} else if (fileType.equalsIgnoreCase(XLSX_NAME)) {
 			list = readXLSX(filePath);
+		} else {
+			logger.error("File format error");
 		}
 
 		return list;
@@ -147,6 +159,7 @@ public class XLSUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Read XLS file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(inputStream)) {
@@ -212,6 +225,7 @@ public class XLSUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Read XLSX file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(inputStream)) {
@@ -427,6 +441,7 @@ public class XLSUtils {
 			workbook.write(outputStream);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Write XLS file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(outputStream)) {
@@ -636,6 +651,7 @@ public class XLSUtils {
 			workbook.write(outputStream);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Write XLSX file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(outputStream)) {

@@ -12,6 +12,41 @@ import java.util.Map;
 public class MapUtils {
 
 	/**
+	 * 获取Map的Object类型
+	 * 
+	 * @param map
+	 *            集合对象
+	 * @param key
+	 *            Key名称
+	 * @return
+	 */
+	public static Object get(Map<String, Object> map, String key) {
+		return get(map, key, null);
+	}
+
+	/**
+	 * 获取Map的Object类型
+	 * 
+	 * @param map
+	 *            集合对象
+	 * @param key
+	 *            Key名称
+	 * @param defaultValue
+	 *            默认值
+	 * @return
+	 */
+	public static Object get(Map<String, Object> map, String key,
+			Object defaultValue) {
+		if (StringUtils.isNotEmpty(map)) {
+			Object object = map.get(key);
+
+			return object;
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * 获取Map的String类型
 	 * 
 	 * @param map

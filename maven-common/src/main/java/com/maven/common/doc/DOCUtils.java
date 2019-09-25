@@ -3,8 +3,10 @@ package com.maven.common.doc;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +25,15 @@ import org.apache.poi.hwpf.usermodel.TableRow;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFPictureData;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell.XWPFVertAlign;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.maven.common.MapUtils;
 import com.maven.common.StringUtils;
 
 /**
@@ -36,6 +43,23 @@ import com.maven.common.StringUtils;
  * @createDate 2019-09-23
  */
 public class DOCUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(DOCUtils.class);
+
+	// DOC文件后缀名
+	private static final String DOC_NAME = "doc";
+
+	// DOCX文件后缀名
+	private static final String DOCX_NAME = "docx";
+
+	// 段落类型
+	public static final String PARAGRAPH = "1";
+
+	// 表格类型
+	public static final String TABLE = "2";
+
+	// 图片类型
+	public static final String PICTURE = "3";
 
 	/**
 	 * 读文件
@@ -49,9 +73,9 @@ public class DOCUtils {
 		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 				.toLowerCase();
 
-		if (fileType.equalsIgnoreCase("doc")) {
+		if (fileType.equalsIgnoreCase(DOC_NAME)) {
 			map = readDOC(filePath);
-		} else if (fileType.equalsIgnoreCase("docx")) {
+		} else if (fileType.equalsIgnoreCase(DOCX_NAME)) {
 			map = readDOCX(filePath);
 		}
 
@@ -131,6 +155,7 @@ public class DOCUtils {
 			map.put("pictures", pictureList);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Read DOC file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(inputStream)) {
@@ -206,6 +231,7 @@ public class DOCUtils {
 			map.put("pictures", pictureList);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Read DOCX file error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(inputStream)) {
@@ -223,9 +249,103 @@ public class DOCUtils {
 		return map;
 	}
 
-	public static void main(String[] args) {
-		String filePath = "F:\\3.docx";
-		Map<String, Object> map = read(filePath);
-		System.out.println(map.size());
+	/**
+	 * 写文件
+	 * 
+	 * @param filePath
+	 *            文件路径
+	 * @param list
+	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
+	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 */
+	@SuppressWarnings("unchecked")
+	public static void write(String filePath, List<Map<String, Object>> list) {
+		OutputStream outputStream = null;
+		XWPFDocument document = null;
+
+		try {
+			String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+			File file = new File(dir);
+			if (!file.exists()) {
+				file.mkdir();
+			}
+
+			outputStream = new FileOutputStream(new File(filePath));
+
+			document = new XWPFDocument();
+
+			for (Map<String, Object> map : list) {
+				String type = MapUtils.getString(map, "type");
+				Object value = MapUtils.get(map, "value");
+
+				switch (type) {
+				case PARAGRAPH:
+					XWPFParagraph paragraph = document.createParagraph();
+					XWPFRun run = paragraph.createRun();
+
+					run.setBold(true);
+					run.setFontSize(18);
+					run.setText(value.toString());
+					break;
+				case TABLE:
+					List<List<Object>> tableList = (List<List<Object>>) value;
+
+					if (tableList.size() > 0) {
+						int rows = tableList.size();
+						int cols = tableList.get(0).size();
+						XWPFTable table = document.createTable(rows, cols);
+
+						for (int i = 0; i < rows; i++) {
+							List<Object> rowList = tableList.get(i);
+							XWPFTableRow row = table.getRow(i);
+
+							for (int j = 0; j < cols; j++) {
+								row.getCell(j).setVerticalAlignment(
+										XWPFVertAlign.CENTER);
+								row.getCell(j).setWidth("1000");
+								row.getCell(j).setText(
+										rowList.get(j).toString());
+							}
+						}
+
+						XWPFParagraph tableParagraph = document
+								.createParagraph();
+						XWPFRun tableRun = tableParagraph.createRun();
+						tableRun.addBreak();
+					}
+					break;
+				case PICTURE:
+					byte[] bs = (byte[]) value;
+					int width = MapUtils.getInteger(map, "width", 400);
+					int height = MapUtils.getInteger(map, "height", 300);
+
+					XWPFParagraph p = document.createParagraph();
+					String blipId = document.addPictureData(bs,
+							XWPFDocument.PICTURE_TYPE_PNG);
+					CustomXWPFDocument.createPicture(blipId, document
+							.getAllPictures().size() - 1, width, height, p);
+					break;
+				}
+			}
+
+			document.write(outputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Write DOC/DOCX file error");
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(outputStream)) {
+					outputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(document)) {
+					document.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
