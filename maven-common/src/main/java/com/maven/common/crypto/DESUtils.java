@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.crypto;
 
 import java.security.Key;
 import java.security.SecureRandom;

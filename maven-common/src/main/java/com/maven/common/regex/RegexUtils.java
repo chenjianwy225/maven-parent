@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.regex;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

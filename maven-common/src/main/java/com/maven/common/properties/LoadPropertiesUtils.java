@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.properties;
 
 import java.io.IOException;
 import java.io.InputStream;

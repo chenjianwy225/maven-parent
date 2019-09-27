@@ -1,6 +1,7 @@
-package com.maven.common;
+package com.maven.common.request;
 
 import com.maven.common.model.JsonResult;
+import com.maven.common.properties.LoadPropertiesUtils;
 
 /**
  * 返回信息类

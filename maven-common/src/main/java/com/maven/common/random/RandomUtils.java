@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.random;
 
 import java.awt.Color;
 import java.awt.Font;

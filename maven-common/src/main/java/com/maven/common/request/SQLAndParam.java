@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.request;
 
 import java.util.List;
 import java.util.Map;

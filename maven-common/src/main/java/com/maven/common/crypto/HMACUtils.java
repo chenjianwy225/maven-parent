@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.crypto;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;

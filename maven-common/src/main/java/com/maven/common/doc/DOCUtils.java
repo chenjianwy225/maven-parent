@@ -33,8 +33,8 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.maven.common.MapUtils;
 import com.maven.common.StringUtils;
+import com.maven.common.request.MapUtils;
 
 /**
  * 读写DOC类
@@ -73,10 +73,17 @@ public class DOCUtils {
 		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 				.toLowerCase();
 
-		if (fileType.equalsIgnoreCase(DOC_NAME)) {
+		// 判断文件后缀名
+		switch (fileType) {
+		case DOC_NAME:
 			map = readDOC(filePath);
-		} else if (fileType.equalsIgnoreCase(DOCX_NAME)) {
+			break;
+		case DOCX_NAME:
 			map = readDOCX(filePath);
+			break;
+		default:
+			logger.info("File format error");
+			break;
 		}
 
 		return map;
@@ -265,14 +272,115 @@ public class DOCUtils {
 		XWPFDocument document = null;
 
 		try {
-			String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
 
-			File file = new File(dir);
-			if (!file.exists()) {
-				file.mkdir();
+			// 判断文件后缀名
+			if (fileType.equalsIgnoreCase(DOC_NAME)
+					|| fileType.equalsIgnoreCase(DOCX_NAME)) {
+				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+				File file = new File(dir);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+
+				outputStream = new FileOutputStream(new File(filePath));
+
+				document = new XWPFDocument();
+
+				for (Map<String, Object> map : list) {
+					String type = MapUtils.getString(map, "type");
+					Object value = MapUtils.get(map, "value");
+
+					switch (type) {
+					case PARAGRAPH:
+						XWPFParagraph paragraph = document.createParagraph();
+						XWPFRun run = paragraph.createRun();
+
+						run.setBold(true);
+						run.setFontSize(18);
+						run.setText(value.toString());
+						break;
+					case TABLE:
+						List<List<Object>> tableList = (List<List<Object>>) value;
+
+						if (tableList.size() > 0) {
+							int rows = tableList.size();
+							int cols = tableList.get(0).size();
+							XWPFTable table = document.createTable(rows, cols);
+
+							for (int i = 0; i < rows; i++) {
+								List<Object> rowList = tableList.get(i);
+								XWPFTableRow row = table.getRow(i);
+
+								for (int j = 0; j < cols; j++) {
+									row.getCell(j).setVerticalAlignment(
+											XWPFVertAlign.CENTER);
+									row.getCell(j).setWidth("1000");
+									row.getCell(j).setText(
+											rowList.get(j).toString());
+								}
+							}
+
+							XWPFParagraph tableParagraph = document
+									.createParagraph();
+							XWPFRun tableRun = tableParagraph.createRun();
+							tableRun.addBreak();
+						}
+						break;
+					case PICTURE:
+						byte[] bs = (byte[]) value;
+						int width = MapUtils.getInteger(map, "width", 400);
+						int height = MapUtils.getInteger(map, "height", 300);
+
+						XWPFParagraph p = document.createParagraph();
+						String blipId = document.addPictureData(bs,
+								XWPFDocument.PICTURE_TYPE_PNG);
+						CustomXWPFDocument.createPicture(blipId, document
+								.getAllPictures().size() - 1, width, height, p);
+						break;
+					}
+				}
+
+				document.write(outputStream);
+			} else {
+				logger.info("File format error");
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Write DOC/DOCX file error");
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(outputStream)) {
+					outputStream.close();
+				}
 
-			outputStream = new FileOutputStream(new File(filePath));
+				if (StringUtils.isNotEmpty(document)) {
+					document.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 写文件(Byte)
+	 * 
+	 * @param list
+	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
+	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 */
+	@SuppressWarnings("unchecked")
+	public static byte[] write(List<Map<String, Object>> list) {
+		ByteArrayOutputStream outputStream = null;
+		XWPFDocument document = null;
+		byte[] byt = null;
+
+		try {
+			outputStream = new ByteArrayOutputStream();
 
 			document = new XWPFDocument();
 
@@ -331,6 +439,7 @@ public class DOCUtils {
 			}
 
 			document.write(outputStream);
+			byt = outputStream.toByteArray();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Write DOC/DOCX file error");
@@ -347,5 +456,7 @@ public class DOCUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return byt;
 	}
 }

@@ -1,6 +1,9 @@
-package com.maven.common;
+package com.maven.common.request;
 
 import javax.servlet.http.HttpServletRequest;
+
+import com.maven.common.StringUtils;
+import com.maven.common.charset.CharsetUtils;
 
 /**
  * Request请求参数类

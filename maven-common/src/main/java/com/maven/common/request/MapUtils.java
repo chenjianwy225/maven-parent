@@ -1,7 +1,9 @@
-package com.maven.common;
+package com.maven.common.request;
 
 import java.util.Date;
 import java.util.Map;
+
+import com.maven.common.StringUtils;
 
 /**
  * Map取值类

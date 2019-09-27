@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.inputstream;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import com.maven.common.StringUtils;
 
 /**
  * 文件、文件流和Byte转换类

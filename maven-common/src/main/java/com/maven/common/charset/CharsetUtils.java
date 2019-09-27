@@ -1,6 +1,8 @@
-package com.maven.common;
+package com.maven.common.charset;
 
 import java.io.UnsupportedEncodingException;
+
+import com.maven.common.StringUtils;
 
 /**
  * 字符集类

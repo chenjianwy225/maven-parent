@@ -18,11 +18,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.maven.authentication.annotation.ValidationAuthority;
-import com.maven.common.LoadPropertiesUtils;
-import com.maven.common.ParamUtils;
-import com.maven.common.ResponseUtils;
 import com.maven.common.StringUtils;
 import com.maven.common.UUIDUtils;
+import com.maven.common.properties.LoadPropertiesUtils;
+import com.maven.common.request.ParamUtils;
+import com.maven.common.request.ResponseUtils;
 import com.maven.service.util.RedisUtil;
 
 /**

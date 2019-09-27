@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.maven.common.InputStreamUtils;
-import com.maven.common.LoadPropertiesUtils;
-import com.maven.common.ResponseUtils;
 import com.maven.common.StringUtils;
 import com.maven.common.UUIDUtils;
+import com.maven.common.inputstream.InputStreamUtils;
+import com.maven.common.properties.LoadPropertiesUtils;
+import com.maven.common.request.ResponseUtils;
 import com.maven.controller.BaseController;
 
 /**

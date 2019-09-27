@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.maven.authentication.annotation.ValidationAuthority;
-import com.maven.common.LoadPropertiesUtils;
-import com.maven.common.MD5Utils;
-import com.maven.common.ParamUtils;
-import com.maven.common.ResponseUtils;
 import com.maven.common.StringUtils;
 import com.maven.common.UUIDUtils;
+import com.maven.common.crypto.MD5Utils;
+import com.maven.common.properties.LoadPropertiesUtils;
+import com.maven.common.request.ParamUtils;
+import com.maven.common.request.ResponseUtils;
 import com.maven.controller.BaseController;
 import com.maven.model.sms.Code;
 import com.maven.model.user.User;

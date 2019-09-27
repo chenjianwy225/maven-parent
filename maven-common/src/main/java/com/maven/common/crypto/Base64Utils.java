@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.crypto;
 
 import org.apache.commons.codec.binary.Base64;
 

@@ -27,6 +27,9 @@ public class TemplateUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(TemplateUtils.class);
 
+	// XLS文件后缀名
+	private static final String XLS_NAME = "xls";
+
 	/**
 	 * 通过模板生成文件(File)
 	 * 
@@ -45,18 +48,41 @@ public class TemplateUtils {
 		Writer writer = null;
 
 		try {
-			Configuration configuration = new Configuration();
-			configuration.setDefaultEncoding("UTF-8");
-			configuration
-					.setDirectoryForTemplateLoading(new File(templatePath));
-			configuration.setObjectWrapper(new DefaultObjectWrapper());
+			File file = new File(templatePath);
 
-			Template template = configuration
-					.getTemplate(templateName, "UTF-8");
-			writer = new OutputStreamWriter(new FileOutputStream(excelPath),
-					"UTF-8");
-			template.process(datas, writer);
-			writer.flush();
+			// 判断模板文件是否存在
+			if (file.exists()) {
+				String fileType = excelPath.substring(
+						excelPath.lastIndexOf(".") + 1).toLowerCase();
+
+				// 判断文件后缀名
+				if (fileType.equalsIgnoreCase(XLS_NAME)) {
+					String dir = excelPath.substring(0,
+							excelPath.lastIndexOf("\\"));
+
+					file = new File(dir);
+					if (!file.exists()) {
+						file.mkdirs();
+					}
+
+					Configuration configuration = new Configuration();
+					configuration.setDefaultEncoding("UTF-8");
+					configuration.setDirectoryForTemplateLoading(new File(
+							templatePath));
+					configuration.setObjectWrapper(new DefaultObjectWrapper());
+
+					Template template = configuration.getTemplate(templateName,
+							"UTF-8");
+					writer = new OutputStreamWriter(new FileOutputStream(
+							excelPath), "UTF-8");
+					template.process(datas, writer);
+					writer.flush();
+				} else {
+					logger.info("File format error");
+				}
+			} else {
+				logger.info("Template file not exist");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Create XLS file error");
@@ -88,18 +114,25 @@ public class TemplateUtils {
 		byte[] byt = null;
 
 		try {
-			Configuration configuration = new Configuration();
-			configuration.setDefaultEncoding("UTF-8");
-			configuration
-					.setDirectoryForTemplateLoading(new File(templatePath));
-			configuration.setObjectWrapper(new DefaultObjectWrapper());
+			File file = new File(templatePath);
 
-			Template template = configuration
-					.getTemplate(templateName, "UTF-8");
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			writer = new OutputStreamWriter(outputStream, "UTF-8");
-			template.process(datas, writer);
-			byt = outputStream.toByteArray();
+			// 判断模板文件是否存在
+			if (file.exists()) {
+				Configuration configuration = new Configuration();
+				configuration.setDefaultEncoding("UTF-8");
+				configuration.setDirectoryForTemplateLoading(new File(
+						templatePath));
+				configuration.setObjectWrapper(new DefaultObjectWrapper());
+
+				Template template = configuration.getTemplate(templateName,
+						"UTF-8");
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				writer = new OutputStreamWriter(outputStream, "UTF-8");
+				template.process(datas, writer);
+				byt = outputStream.toByteArray();
+			} else {
+				logger.info("Template file not exist");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Create XLS file error");

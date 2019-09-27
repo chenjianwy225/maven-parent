@@ -40,7 +40,7 @@ public class XMLUtils {
 	private static final String XML_ENCODER = "UTF-8";
 
 	/**
-	 * 读XML文件
+	 * 读文件
 	 * 
 	 * @param filePath
 	 *            文件路径
@@ -53,6 +53,7 @@ public class XMLUtils {
 			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 					.toLowerCase();
 
+			// 判断文件后缀名
 			if (fileType.equalsIgnoreCase(XML_NAME)) {
 				SAXReader reader = new SAXReader();
 				Document document = reader.read(new File(filePath));
@@ -71,7 +72,7 @@ public class XMLUtils {
 	}
 
 	/**
-	 * 写XML文件
+	 * 写文件
 	 * 
 	 * @param filePath
 	 *            文件路径
@@ -86,7 +87,15 @@ public class XMLUtils {
 			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 					.toLowerCase();
 
+			// 判断文件后缀名
 			if (fileType.equalsIgnoreCase(XML_NAME)) {
+				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+				File file = new File(dir);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+
 				Document document = DocumentHelper.createDocument();
 				structureXML(document, jsonObject);
 
@@ -121,7 +130,7 @@ public class XMLUtils {
 	}
 
 	/**
-	 * 写XML文件
+	 * 写文件(Byte)
 	 * 
 	 * @param jsonObject
 	 *            JSON数据对象
@@ -167,7 +176,7 @@ public class XMLUtils {
 	}
 
 	/**
-	 * 遍历XML元素
+	 * 遍历元素(针对XML读文件)
 	 * 
 	 * @param element
 	 *            元素对象
@@ -223,7 +232,7 @@ public class XMLUtils {
 	}
 
 	/**
-	 * 构建XML对象
+	 * 构建对象(针对XML写文件)
 	 * 
 	 * @param object
 	 *            XML对象

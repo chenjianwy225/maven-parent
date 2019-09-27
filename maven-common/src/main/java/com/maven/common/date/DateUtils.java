@@ -1,7 +1,9 @@
-package com.maven.common;
+package com.maven.common.date;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.maven.common.StringUtils;
 
 /**
  * 日期转换类

@@ -1,4 +1,4 @@
-package com.maven.common;
+package com.maven.common.ftp;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -18,6 +18,9 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.maven.common.StringUtils;
+import com.maven.common.properties.LoadPropertiesUtils;
 
 /**
  * FTP操作类
