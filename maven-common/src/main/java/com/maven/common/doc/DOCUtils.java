@@ -53,13 +53,13 @@ public class DOCUtils {
 	private static final String DOCX_NAME = "docx";
 
 	// 段落类型
-	public static final String PARAGRAPH = "1";
+	public static final int PARAGRAPH = 1;
 
 	// 表格类型
-	public static final String TABLE = "2";
+	public static final int TABLE = 2;
 
 	// 图片类型
-	public static final String PICTURE = "3";
+	public static final int PICTURE = 3;
 
 	/**
 	 * 读文件
@@ -290,7 +290,7 @@ public class DOCUtils {
 				document = new XWPFDocument();
 
 				for (Map<String, Object> map : list) {
-					String type = MapUtils.getString(map, "type");
+					int type = MapUtils.getInteger(map, "type").intValue();
 					Object value = MapUtils.get(map, "value");
 
 					switch (type) {
@@ -385,7 +385,7 @@ public class DOCUtils {
 			document = new XWPFDocument();
 
 			for (Map<String, Object> map : list) {
-				String type = MapUtils.getString(map, "type");
+				int type = MapUtils.getInteger(map, "type").intValue();
 				Object value = MapUtils.get(map, "value");
 
 				switch (type) {
