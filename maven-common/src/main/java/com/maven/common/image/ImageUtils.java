@@ -162,9 +162,11 @@ public class ImageUtils {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		int x = 0, y = 0;
 
+		// 判断截取宽度和高度是是否超出原始图片
 		w = w > width ? width : w;
 		h = h > height ? height : h;
 
+		// 判断位置索引
 		if (position == TOP_LEFT || position == TOP || position == TOP_RIGHT) {
 			switch (position) {
 			case TOP_LEFT:
@@ -230,20 +232,20 @@ public class ImageUtils {
 	private static void zoom(int w, int h) {
 		try {
 			// 获取缩放后的Image对象
-			Image _img = img.getScaledInstance(w, h, Image.SCALE_DEFAULT);
+			Image image = img.getScaledInstance(w, h, Image.SCALE_DEFAULT);
 			// 新建一个和Image对象相同大小的画布
-			BufferedImage image = new BufferedImage(w, h,
+			BufferedImage bufferedImage = new BufferedImage(w, h,
 					BufferedImage.TYPE_INT_RGB);
 			// 获取画笔
-			Graphics2D graphics = image.createGraphics();
+			Graphics2D graphics2d = bufferedImage.createGraphics();
 			// 将Image对象画在画布上,最后一个参数,ImageObserver:接收有关 Image 信息通知的异步更新接口,没用到直接传空
-			graphics.drawImage(_img, 0, 0, null);
+			graphics2d.drawImage(image, 0, 0, null);
 			// 释放资源
-			graphics.dispose();
+			graphics2d.dispose();
 			// 使用ImageIO的方法进行输出,记得关闭资源
-			OutputStream out = new FileOutputStream(targetPath);
-			ImageIO.write(image, targetSuffix, out);
-			out.close();
+			OutputStream outputStream = new FileOutputStream(targetPath);
+			ImageIO.write(bufferedImage, targetSuffix, outputStream);
+			outputStream.close();
 
 			logger.info("Zoom success");
 		} catch (Exception e) {
@@ -268,18 +270,19 @@ public class ImageUtils {
 		try {
 			Iterator<ImageReader> iterator = ImageIO
 					.getImageReadersByFormatName(sourceSuffix);
-			ImageReader reader = (ImageReader) iterator.next();
-			InputStream in = new FileInputStream(sourcePath);
-			ImageInputStream iis = ImageIO.createImageInputStream(in);
-			reader.setInput(iis, true);
-			ImageReadParam param = reader.getDefaultReadParam();
-			Rectangle rect = new Rectangle(x, y, w, h);
-			param.setSourceRegion(rect);
-			BufferedImage bi = reader.read(0, param);
+			ImageReader imageReader = (ImageReader) iterator.next();
+			InputStream inputStream = new FileInputStream(sourcePath);
+			ImageInputStream imageInputStream = ImageIO
+					.createImageInputStream(inputStream);
+			imageReader.setInput(imageInputStream, true);
+			ImageReadParam imageReadParam = imageReader.getDefaultReadParam();
+			Rectangle rectangle = new Rectangle(x, y, w, h);
+			imageReadParam.setSourceRegion(rectangle);
+			BufferedImage bufferedImage = imageReader.read(0, imageReadParam);
 			// 使用ImageIO的方法进行输出,记得关闭资源
-			OutputStream out = new FileOutputStream(targetPath);
-			ImageIO.write(bi, targetSuffix, out);
-			out.close();
+			OutputStream outputStream = new FileOutputStream(targetPath);
+			ImageIO.write(bufferedImage, targetSuffix, outputStream);
+			outputStream.close();
 
 			logger.info("Cut success");
 		} catch (Exception e) {
