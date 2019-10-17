@@ -2,6 +2,7 @@ package com.maven.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.maven.job.manage.QuartzManager;
 import com.maven.service.IBaseService;
 import com.maven.service.util.RedisUtil;
 
@@ -18,4 +19,7 @@ public class BaseController {
 
 	@Autowired
 	protected RedisUtil redisUtil;
+
+	@Autowired
+	protected QuartzManager quartzManager;
 }

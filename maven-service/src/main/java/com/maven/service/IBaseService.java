@@ -217,4 +217,24 @@ public interface IBaseService {
 	 * @return
 	 */
 	Pager findPageSql(String sql, Object[] params, int page, int pageSize);
+
+	/**
+	 * 执行Sql语句
+	 * 
+	 * @param sql
+	 *            SQL语句
+	 * @param params
+	 *            条件参数
+	 */
+	void executeSql(String sql, Map<String, Object> params);
+
+	/**
+	 * 执行Sql语句
+	 * 
+	 * @param sql
+	 *            SQL语句
+	 * @param params
+	 *            条件参数
+	 */
+	void executeSql(String sql, Object[] params);
 }

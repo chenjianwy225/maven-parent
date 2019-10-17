@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.maven.common.page.Pager;
@@ -23,6 +24,7 @@ public class BaseService implements IBaseService {
 	@Autowired
 	private IBaseDao baseDao;
 
+	@Cacheable(value = "baseCache", key = "#id")
 	@Override
 	public <T> T findById(Class<T> clazz, Serializable id) {
 		return baseDao.findById(clazz, id);
@@ -112,5 +114,15 @@ public class BaseService implements IBaseService {
 	@Override
 	public Pager findPageSql(String sql, Object[] params, int page, int pageSize) {
 		return baseDao.findPageSql(sql, params, page, pageSize);
+	}
+
+	@Override
+	public void executeSql(String sql, Map<String, Object> params) {
+		baseDao.executeSql(sql, params);
+	}
+
+	@Override
+	public void executeSql(String sql, Object[] params) {
+		baseDao.executeSql(sql, params);
 	}
 }

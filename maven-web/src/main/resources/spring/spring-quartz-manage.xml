@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/data/mongo
+       http://www.springframework.org/schema/data/mongo/spring-mongo.xsd">
+	<!-- 总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序 -->
+	<bean id="startQuertz" lazy-init="true" autowire="no"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean"></bean>
+
+	<!--这个类是用来设置触发时间的， startJobs方法启动调度容器，然后按照上面触发器每隔1s执行所配置的myJob2.doSomething()方法 -->
+	<bean id="quartzManager" class="com.maven.job.manage.QuartzManager"
+		lazy-init="false" init-method="startJobs">
+		<!--这个对象一定要注入，这样类才能进行管理，还有在类型要用get set方法，不然会报错。 -->
+		<property name="scheduler" ref="startQuertz" />
+	</bean>
+</beans>

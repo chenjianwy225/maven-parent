@@ -273,4 +273,26 @@ public class BaseDao extends HibernateDaoSupport implements IBaseDao {
 		pager.setList(query.list());
 		return pager;
 	}
+
+	@Override
+	public void executeSql(String sql, Map<String, Object> params) {
+		Session session = getSession();
+		SQLQuery query = session.createSQLQuery(sql);
+		query.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+		for (String key : params.keySet()) {
+			query.setParameter(key, params.get(key));
+		}
+		query.executeUpdate();
+	}
+
+	@Override
+	public void executeSql(String sql, Object[] params) {
+		Session session = getSession();
+		SQLQuery query = session.createSQLQuery(sql);
+		query.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+		for (int i = 0; i < params.length; i++) {
+			query.setParameter(i + 1, params[i]);
+		}
+		query.executeUpdate();
+	}
 }

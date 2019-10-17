@@ -40,6 +40,7 @@
 		<httpcomponents.version>4.5.10</httpcomponents.version>
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
+		<quartz.version>2.3.1</quartz.version>
 	</properties>
 
 	<dependencyManagement>
@@ -416,6 +417,20 @@
 				<version>${freemarker.version}</version>
 			</dependency>
 			<!-- Freemarker End -->
+
+			<!-- Quartz Start -->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>${quartz.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz-jobs</artifactId>
+				<version>${quartz.version}</version>
+			</dependency>
+			<!-- Quartz End -->
 		</dependencies>
 	</dependencyManagement>
 </project>

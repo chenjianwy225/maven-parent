@@ -148,8 +148,4 @@ public class RandomUtils {
 		int b = fc + random.nextInt(bc - fc);
 		return new Color(r, g, b);
 	}
-
-	public static void main(String[] args) {
-		System.out.println(CODES.length);
-	}
 }

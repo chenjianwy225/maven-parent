@@ -13,6 +13,7 @@
 			<list>
 				<value>classpath:common/jdbc.properties</value>
 				<value>classpath:common/redis.properties</value>
+				<value>classpath:common/quartz.properties</value>
 			</list>
 		</property>
 	</bean>
@@ -28,4 +29,6 @@
 	<import resource="classpath:spring/spring-hibernate.xml" />
 	<import resource="classpath:spring/spring-redis.xml" />
 	<import resource="classpath:spring/spring-ehcache.xml" />
+	<import resource="classpath:spring/spring-quartz.xml" />
+	<import resource="classpath:spring/spring-quartz-manage.xml" />
 </beans>

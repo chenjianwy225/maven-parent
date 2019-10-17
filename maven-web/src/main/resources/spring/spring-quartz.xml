@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 申明执行任务的类 -->
+	<bean id="testJob" class="com.maven.job.TestJob" />
+
+	<!-- 调度业务 -->
+	<bean id="testQuartz"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="testJob" />
+		<property name="targetMethod" value="execute" />
+		<!-- 作业不并发调度 -->
+		<property name="concurrent" value="false" />
+	</bean>
+
+	<!-- 触发器 -->
+	<bean id="testTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="testQuartz" />
+		<!-- 执行时间(秒 分钟 小时 日 月 星期 年(可选)) -->
+		<property name="cronExpression" value="0 0 0 * * ?" />
+	</bean>
+
+	<!-- 申请线程池 -->
+	<bean id="schedulerExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="${quartz.corePoolSize}" />
+		<property name="maxPoolSize" value="${quartz.maxPoolSize}" />
+		<property name="queueCapacity" value="${quartz.queueCapacity}" />
+		<property name="keepAliveSeconds" value="${quartz.keepAliveSeconds}" />
+	</bean>
+
+	<!-- 设置调度 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="testTrigger" />
+			</list>
+		</property>
+		<property name="taskExecutor" ref="schedulerExecutor" />
+	</bean>
+</beans>
