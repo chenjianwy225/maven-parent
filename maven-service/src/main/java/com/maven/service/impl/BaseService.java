@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.maven.common.page.Pager;
@@ -24,7 +23,6 @@ public class BaseService implements IBaseService {
 	@Autowired
 	private IBaseDao baseDao;
 
-	@Cacheable(value = "baseCache", key = "#id")
 	@Override
 	public <T> T findById(Class<T> clazz, Serializable id) {
 		return baseDao.findById(clazz, id);
