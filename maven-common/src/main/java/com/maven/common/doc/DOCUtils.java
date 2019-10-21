@@ -90,6 +90,181 @@ public class DOCUtils {
 	}
 
 	/**
+	 * 写文件
+	 * 
+	 * @param filePath
+	 *            文件路径
+	 * @param list
+	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
+	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 */
+	public static void write(String filePath, List<Map<String, Object>> list) {
+		OutputStream outputStream = null;
+		XWPFDocument document = null;
+
+		try {
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
+
+			// 判断文件后缀名
+			if (fileType.equalsIgnoreCase(DOC_NAME)
+					|| fileType.equalsIgnoreCase(DOCX_NAME)) {
+				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+				File file = new File(dir);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+
+				document = getXWPFDocument(list);
+
+				// 判断XWPFDocument
+				if (StringUtils.isNotEmpty(document)) {
+					outputStream = new FileOutputStream(new File(filePath));
+					document.write(outputStream);
+				}
+			} else {
+				logger.info("File format error");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Write DOC/DOCX file error");
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(outputStream)) {
+					outputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(document)) {
+					document.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 写文件(Byte)
+	 * 
+	 * @param list
+	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
+	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 */
+	public static byte[] write(List<Map<String, Object>> list) {
+		ByteArrayOutputStream outputStream = null;
+		XWPFDocument document = null;
+		byte[] byt = null;
+
+		try {
+			document = getXWPFDocument(list);
+
+			// 判断XWPFDocument
+			if (StringUtils.isNotEmpty(document)) {
+				outputStream = new ByteArrayOutputStream();
+				document.write(outputStream);
+				byt = outputStream.toByteArray();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Write DOC/DOCX file error");
+		} finally {
+			try {
+				if (StringUtils.isNotEmpty(outputStream)) {
+					outputStream.close();
+				}
+
+				if (StringUtils.isNotEmpty(document)) {
+					document.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return byt;
+	}
+
+	/**
+	 * 获取XWPFDocument
+	 * 
+	 * @param list
+	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
+	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private static XWPFDocument getXWPFDocument(List<Map<String, Object>> list) {
+		XWPFDocument document = null;
+
+		try {
+			document = new XWPFDocument();
+
+			for (Map<String, Object> map : list) {
+				int type = MapUtils.getInteger(map, "type").intValue();
+				Object value = MapUtils.get(map, "value");
+
+				switch (type) {
+				case PARAGRAPH:
+					XWPFParagraph paragraph = document.createParagraph();
+					XWPFRun run = paragraph.createRun();
+
+					run.setBold(true);
+					run.setFontSize(18);
+					run.setText(value.toString());
+					break;
+				case TABLE:
+					List<List<Object>> tableList = (List<List<Object>>) value;
+
+					if (tableList.size() > 0) {
+						int rows = tableList.size();
+						int cols = tableList.get(0).size();
+						XWPFTable table = document.createTable(rows, cols);
+
+						for (int i = 0; i < rows; i++) {
+							List<Object> rowList = tableList.get(i);
+							XWPFTableRow row = table.getRow(i);
+
+							for (int j = 0; j < cols; j++) {
+								row.getCell(j).setVerticalAlignment(
+										XWPFVertAlign.CENTER);
+								row.getCell(j).setWidth("1000");
+								row.getCell(j).setText(
+										rowList.get(j).toString());
+							}
+						}
+
+						XWPFParagraph tableParagraph = document
+								.createParagraph();
+						XWPFRun tableRun = tableParagraph.createRun();
+						tableRun.addBreak();
+					}
+					break;
+				case PICTURE:
+					byte[] bs = (byte[]) value;
+					int width = MapUtils.getInteger(map, "width", 400);
+					int height = MapUtils.getInteger(map, "height", 300);
+
+					XWPFParagraph p = document.createParagraph();
+					String blipId = document.addPictureData(bs,
+							XWPFDocument.PICTURE_TYPE_PNG);
+					CustomXWPFDocument.createPicture(blipId, document
+							.getAllPictures().size() - 1, width, height, p);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Write DOC/DOCX file error");
+		}
+
+		return document;
+	}
+
+	/**
 	 * 读DOC文件
 	 * 
 	 * @param filePath
@@ -254,209 +429,5 @@ public class DOCUtils {
 		}
 
 		return map;
-	}
-
-	/**
-	 * 写文件
-	 * 
-	 * @param filePath
-	 *            文件路径
-	 * @param list
-	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
-	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
-	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
-	 */
-	@SuppressWarnings("unchecked")
-	public static void write(String filePath, List<Map<String, Object>> list) {
-		OutputStream outputStream = null;
-		XWPFDocument document = null;
-
-		try {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
-
-			// 判断文件后缀名
-			if (fileType.equalsIgnoreCase(DOC_NAME)
-					|| fileType.equalsIgnoreCase(DOCX_NAME)) {
-				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
-
-				File file = new File(dir);
-				if (!file.exists()) {
-					file.mkdirs();
-				}
-
-				outputStream = new FileOutputStream(new File(filePath));
-
-				document = new XWPFDocument();
-
-				for (Map<String, Object> map : list) {
-					int type = MapUtils.getInteger(map, "type").intValue();
-					Object value = MapUtils.get(map, "value");
-
-					switch (type) {
-					case PARAGRAPH:
-						XWPFParagraph paragraph = document.createParagraph();
-						XWPFRun run = paragraph.createRun();
-
-						run.setBold(true);
-						run.setFontSize(18);
-						run.setText(value.toString());
-						break;
-					case TABLE:
-						List<List<Object>> tableList = (List<List<Object>>) value;
-
-						if (tableList.size() > 0) {
-							int rows = tableList.size();
-							int cols = tableList.get(0).size();
-							XWPFTable table = document.createTable(rows, cols);
-
-							for (int i = 0; i < rows; i++) {
-								List<Object> rowList = tableList.get(i);
-								XWPFTableRow row = table.getRow(i);
-
-								for (int j = 0; j < cols; j++) {
-									row.getCell(j).setVerticalAlignment(
-											XWPFVertAlign.CENTER);
-									row.getCell(j).setWidth("1000");
-									row.getCell(j).setText(
-											rowList.get(j).toString());
-								}
-							}
-
-							XWPFParagraph tableParagraph = document
-									.createParagraph();
-							XWPFRun tableRun = tableParagraph.createRun();
-							tableRun.addBreak();
-						}
-						break;
-					case PICTURE:
-						byte[] bs = (byte[]) value;
-						int width = MapUtils.getInteger(map, "width", 400);
-						int height = MapUtils.getInteger(map, "height", 300);
-
-						XWPFParagraph p = document.createParagraph();
-						String blipId = document.addPictureData(bs,
-								XWPFDocument.PICTURE_TYPE_PNG);
-						CustomXWPFDocument.createPicture(blipId, document
-								.getAllPictures().size() - 1, width, height, p);
-						break;
-					}
-				}
-
-				document.write(outputStream);
-			} else {
-				logger.info("File format error");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Write DOC/DOCX file error");
-		} finally {
-			try {
-				if (StringUtils.isNotEmpty(outputStream)) {
-					outputStream.close();
-				}
-
-				if (StringUtils.isNotEmpty(document)) {
-					document.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * 写文件(Byte)
-	 * 
-	 * @param list
-	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
-	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
-	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
-	 */
-	@SuppressWarnings("unchecked")
-	public static byte[] write(List<Map<String, Object>> list) {
-		ByteArrayOutputStream outputStream = null;
-		XWPFDocument document = null;
-		byte[] byt = null;
-
-		try {
-			outputStream = new ByteArrayOutputStream();
-
-			document = new XWPFDocument();
-
-			for (Map<String, Object> map : list) {
-				int type = MapUtils.getInteger(map, "type").intValue();
-				Object value = MapUtils.get(map, "value");
-
-				switch (type) {
-				case PARAGRAPH:
-					XWPFParagraph paragraph = document.createParagraph();
-					XWPFRun run = paragraph.createRun();
-
-					run.setBold(true);
-					run.setFontSize(18);
-					run.setText(value.toString());
-					break;
-				case TABLE:
-					List<List<Object>> tableList = (List<List<Object>>) value;
-
-					if (tableList.size() > 0) {
-						int rows = tableList.size();
-						int cols = tableList.get(0).size();
-						XWPFTable table = document.createTable(rows, cols);
-
-						for (int i = 0; i < rows; i++) {
-							List<Object> rowList = tableList.get(i);
-							XWPFTableRow row = table.getRow(i);
-
-							for (int j = 0; j < cols; j++) {
-								row.getCell(j).setVerticalAlignment(
-										XWPFVertAlign.CENTER);
-								row.getCell(j).setWidth("1000");
-								row.getCell(j).setText(
-										rowList.get(j).toString());
-							}
-						}
-
-						XWPFParagraph tableParagraph = document
-								.createParagraph();
-						XWPFRun tableRun = tableParagraph.createRun();
-						tableRun.addBreak();
-					}
-					break;
-				case PICTURE:
-					byte[] bs = (byte[]) value;
-					int width = MapUtils.getInteger(map, "width", 400);
-					int height = MapUtils.getInteger(map, "height", 300);
-
-					XWPFParagraph p = document.createParagraph();
-					String blipId = document.addPictureData(bs,
-							XWPFDocument.PICTURE_TYPE_PNG);
-					CustomXWPFDocument.createPicture(blipId, document
-							.getAllPictures().size() - 1, width, height, p);
-					break;
-				}
-			}
-
-			document.write(outputStream);
-			byt = outputStream.toByteArray();
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Write DOC/DOCX file error");
-		} finally {
-			try {
-				if (StringUtils.isNotEmpty(outputStream)) {
-					outputStream.close();
-				}
-
-				if (StringUtils.isNotEmpty(document)) {
-					document.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return byt;
 	}
 }
