@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -21,11 +19,9 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
@@ -40,6 +36,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.maven.common.StringUtils;
 import com.maven.common.date.DateUtils;
 import com.maven.common.xls.map.CellEntity;
@@ -78,25 +76,33 @@ public class XLSUtils {
 	 *            文件路径
 	 * @return
 	 */
-	public static List<List<Object>> read(String filePath) {
-		List<List<Object>> list = null;
-		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-				.toLowerCase();
+	public static JSONArray read(String filePath) {
+		JSONArray jsonArray = null;
 
-		// 判断文件后缀名
-		switch (fileType) {
-		case XLS_NAME:
-			list = readXLS(filePath);
-			break;
-		case XLSX_NAME:
-			list = readXLSX(filePath);
-			break;
-		default:
-			logger.error("File format error");
-			break;
+		File file = new File(filePath);
+
+		// 判断文件是否存在
+		if (file.exists()) {
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
+
+			// 判断文件后缀名
+			switch (fileType) {
+			case XLS_NAME:
+				jsonArray = readXLS(filePath);
+				break;
+			case XLSX_NAME:
+				jsonArray = readXLSX(filePath);
+				break;
+			default:
+				logger.info("File format error");
+				break;
+			}
+		} else {
+			logger.info("File not exist");
 		}
 
-		return list;
+		return jsonArray;
 	}
 
 	/**
@@ -104,22 +110,22 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 * @return
 	 */
-	public static boolean write(String filePath, String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	public static boolean write(String filePath, JSONObject jsonObject) {
 		boolean success = false;
+
 		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 				.toLowerCase();
 
@@ -135,16 +141,16 @@ public class XLSUtils {
 
 			switch (fileType) {
 			case XLS_NAME:
-				writeXLS(filePath, sheetName, titleName, titles, datas, checks);
+				writeXLS(filePath, jsonObject);
 				break;
 			default:
-				writeXLSX(filePath, sheetName, titleName, titles, datas, checks);
+				writeXLSX(filePath, jsonObject);
 				break;
 			}
 
 			success = true;
 		} else {
-			logger.error("File format error");
+			logger.info("File format error");
 		}
 
 		return success;
@@ -155,33 +161,32 @@ public class XLSUtils {
 	 * 
 	 * @param suffixIndex
 	 *            文件后缀索引(1:xls文件,2:xlsx文件)
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 * @return
 	 */
-	public static byte[] write(int suffixIndex, String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	public static byte[] write(int suffixIndex, JSONObject jsonObject) {
 		byte[] byt = null;
 
 		// 判断文件后缀索引
 		switch (suffixIndex) {
 		case XLS_INDEX:
-			byt = writeXLS(sheetName, titleName, titles, datas, checks);
+			byt = writeXLS(jsonObject);
 			break;
 		case XLSX_INDEX:
-			byt = writeXLSX(sheetName, titleName, titles, datas, checks);
+			byt = writeXLSX(jsonObject);
 			break;
 		default:
-			logger.error("File format error");
+			logger.info("File format error");
 			break;
 		}
 
@@ -199,6 +204,7 @@ public class XLSUtils {
 	 */
 	public static boolean write(String filePath, XLSEntity xlsEntity) {
 		boolean success = false;
+
 		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
 				.toLowerCase();
 
@@ -223,7 +229,7 @@ public class XLSUtils {
 
 			success = true;
 		} else {
-			logger.error("File format error");
+			logger.info("File format error");
 		}
 
 		return success;
@@ -250,7 +256,7 @@ public class XLSUtils {
 			byt = writeXLSX(xlsEntity);
 			break;
 		default:
-			logger.error("File format error");
+			logger.info("File format error");
 			break;
 		}
 
@@ -264,8 +270,8 @@ public class XLSUtils {
 	 *            文件路径
 	 * @return
 	 */
-	private static List<List<Object>> readXLS(String filePath) {
-		List<List<Object>> list = null;
+	private static JSONArray readXLS(String filePath) {
+		JSONArray jsonArray = null;
 		InputStream inputStream = null;
 		HSSFWorkbook workbook = null;
 
@@ -276,14 +282,16 @@ public class XLSUtils {
 			// Excel的页签数量
 			int sheetNum = workbook.getNumberOfSheets();
 			if (sheetNum > 0) {
-				list = new ArrayList<List<Object>>();
+				jsonArray = new JSONArray();
 
 				for (int i = 0; i < sheetNum; i++) {
-					List<Object> ls = new ArrayList<Object>();
+					JSONObject object = new JSONObject();
+					JSONArray array = new JSONArray();
 					HSSFSheet sheet = workbook.getSheetAt(i);
 
 					Iterator<Row> rowIterator = sheet.rowIterator();
 					while (rowIterator.hasNext()) {
+						JSONArray datas = new JSONArray();
 						Row row = rowIterator.next();
 
 						Iterator<Cell> cellIterator = row.cellIterator();
@@ -291,16 +299,20 @@ public class XLSUtils {
 							Cell cell = cellIterator.next();
 
 							if (cell.getCellType() == CellType.NUMERIC) {
-								ls.add(cell.getNumericCellValue());
+								datas.add(cell.getNumericCellValue());
 							} else if (cell.getCellType() == CellType.BOOLEAN) {
-								ls.add(cell.getBooleanCellValue());
+								datas.add(cell.getBooleanCellValue());
 							} else {
-								ls.add(cell.getStringCellValue());
+								datas.add(cell.getStringCellValue());
 							}
 						}
+
+						array.add(datas);
 					}
 
-					list.add(ls);
+					object.put("sheetName", sheet.getSheetName());
+					object.put("datas", array);
+					jsonArray.add(object);
 				}
 			}
 		} catch (Exception e) {
@@ -320,7 +332,7 @@ public class XLSUtils {
 			}
 		}
 
-		return list;
+		return jsonArray;
 	}
 
 	/**
@@ -330,8 +342,8 @@ public class XLSUtils {
 	 *            文件路径
 	 * @return
 	 */
-	private static List<List<Object>> readXLSX(String filePath) {
-		List<List<Object>> list = null;
+	private static JSONArray readXLSX(String filePath) {
+		JSONArray jsonArray = null;
 		InputStream inputStream = null;
 		XSSFWorkbook workbook = null;
 
@@ -342,14 +354,16 @@ public class XLSUtils {
 			// Excel的页签数量
 			int sheetNum = workbook.getNumberOfSheets();
 			if (sheetNum > 0) {
-				list = new ArrayList<List<Object>>();
+				jsonArray = new JSONArray();
 
 				for (int i = 0; i < sheetNum; i++) {
-					List<Object> ls = new ArrayList<Object>();
+					JSONObject object = new JSONObject();
+					JSONArray array = new JSONArray();
 					XSSFSheet sheet = workbook.getSheetAt(i);
 
 					Iterator<Row> rowIterator = sheet.rowIterator();
 					while (rowIterator.hasNext()) {
+						JSONArray datas = new JSONArray();
 						Row row = rowIterator.next();
 
 						Iterator<Cell> cellIterator = row.cellIterator();
@@ -357,16 +371,20 @@ public class XLSUtils {
 							Cell cell = cellIterator.next();
 
 							if (cell.getCellType() == CellType.NUMERIC) {
-								ls.add(cell.getNumericCellValue());
+								datas.add(cell.getNumericCellValue());
 							} else if (cell.getCellType() == CellType.BOOLEAN) {
-								ls.add(cell.getBooleanCellValue());
+								datas.add(cell.getBooleanCellValue());
 							} else {
-								ls.add(cell.getStringCellValue());
+								datas.add(cell.getStringCellValue());
 							}
 						}
+
+						array.add(datas);
 					}
 
-					list.add(ls);
+					object.put("sheetName", sheet.getSheetName());
+					object.put("datas", array);
+					jsonArray.add(object);
 				}
 			}
 		} catch (Exception e) {
@@ -386,7 +404,7 @@ public class XLSUtils {
 			}
 		}
 
-		return list;
+		return jsonArray;
 	}
 
 	/**
@@ -394,26 +412,24 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 */
-	private static void writeXLS(String filePath, String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	private static void writeXLS(String filePath, JSONObject jsonObject) {
 		FileOutputStream outputStream = null;
 		HSSFWorkbook workbook = null;
 
 		try {
-			workbook = getHSSFWorkbook(sheetName, titleName, titles, datas,
-					checks);
+			workbook = getHSSFWorkbook(jsonObject);
 
 			// 判断HSSFWorkbook
 			if (StringUtils.isNotEmpty(workbook)) {
@@ -439,25 +455,24 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 */
-	private static void writeXLSX(String filePath, String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	private static void writeXLSX(String filePath, JSONObject jsonObject) {
 		FileOutputStream outputStream = null;
 		XSSFWorkbook workbook = null;
 
 		try {
-			workbook = new XSSFWorkbook();
+			workbook = getXSSFWorkbook(jsonObject);
 
 			// 判断XSSFWorkbook
 			if (StringUtils.isNotEmpty(workbook)) {
@@ -485,27 +500,25 @@ public class XLSUtils {
 	/**
 	 * 写XLS文件(Byte)
 	 * 
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 */
-	private static byte[] writeXLS(String sheetName, String titleName,
-			List<String> titles, List<Map<String, Object>> datas,
-			Map<String, Number> checks) {
+	private static byte[] writeXLS(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
 		HSSFWorkbook workbook = null;
 		byte[] byt = null;
 
 		try {
-			workbook = getHSSFWorkbook(sheetName, titleName, titles, datas,
-					checks);
+			workbook = getHSSFWorkbook(jsonObject);
 
 			// 判断HSSFWorkbook
 			if (StringUtils.isNotEmpty(workbook)) {
@@ -532,27 +545,25 @@ public class XLSUtils {
 	/**
 	 * 写XLSX文件(Byte)
 	 * 
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 */
-	private static byte[] writeXLSX(String sheetName, String titleName,
-			List<String> titles, List<Map<String, Object>> datas,
-			Map<String, Number> checks) {
+	private static byte[] writeXLSX(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
 		XSSFWorkbook workbook = null;
 		byte[] byt = null;
 
 		try {
-			workbook = getXSSFWorkbook(sheetName, titleName, titles, datas,
-					checks);
+			workbook = getXSSFWorkbook(jsonObject);
 
 			// 判断XSSFWorkbook
 			if (StringUtils.isNotEmpty(workbook)) {
@@ -723,193 +734,149 @@ public class XLSUtils {
 	/**
 	 * 获取HSSFWorkbook
 	 * 
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 * @return
 	 */
-	private static HSSFWorkbook getHSSFWorkbook(String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	private static HSSFWorkbook getHSSFWorkbook(JSONObject jsonObject) {
 		HSSFWorkbook workbook = null;
-		HSSFSheet sheet = null;
-		HSSFRow row = null;
-		HSSFCell cell = null;
 
 		try {
-			workbook = new HSSFWorkbook();
-			sheet = workbook.createSheet(sheetName);
-			int rowIndex = 0;
-			boolean setWidth = false;
+			// 判断数据对象
+			if (StringUtils.isNotEmpty(jsonObject)) {
+				JSONArray styles = jsonObject.getJSONArray("styles");
+				JSONArray sheets = jsonObject.getJSONArray("sheets");
+				XLSEntity xlsEntity = new XLSEntity();
 
-			Font tFont = workbook.createFont();
-			tFont.setBold(true);
-			tFont.setColor(HSSFColorPredefined.BLACK.getIndex());
-			tFont.setFontHeightInPoints((short) 12);
+				// 判断是否有样式
+				if (StringUtils.isNotEmpty(styles) && styles.size() > 0) {
+					List<StyleEntity> styleList = new ArrayList<StyleEntity>();
 
-			Font dFont = workbook.createFont();
-			dFont.setColor(HSSFColorPredefined.RED.getIndex());
+					// 遍历样式
+					for (int i = 0; i < styles.size(); i++) {
+						JSONObject style = styles.getJSONObject(i);
+						String styleName = style.getString("name");
+						int horizontal = style.getIntValue("horizontal");
+						int vertical = style.getIntValue("vertical");
+						short fontSize = style.getShortValue("fontSize");
+						short fontColor = style.getShortValue("fontColor");
+						boolean bold = style.getBooleanValue("bold");
+						boolean italic = style.getBooleanValue("italic");
 
-			HSSFCellStyle tnStyle = workbook.createCellStyle();
-			tnStyle.setAlignment(HorizontalAlignment.CENTER);
-			tnStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			tnStyle.setFont(tFont);
+						StyleEntity styleEntity = new StyleEntity(styleName);
+						styleEntity.setHorizontal(horizontal);
+						styleEntity.setVertical(vertical);
+						styleEntity.setFontSize(fontSize);
+						styleEntity.setFontColor(fontColor);
+						styleEntity.setBold(bold);
+						styleEntity.setItalic(italic);
 
-			HSSFCellStyle tStyle = workbook.createCellStyle();
-			tStyle.setAlignment(HorizontalAlignment.CENTER);
-			tStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			tStyle.setFont(tFont);
-			tStyle.setBorderLeft(BorderStyle.THIN);
-			tStyle.setBorderTop(BorderStyle.THIN);
-			tStyle.setBorderRight(BorderStyle.THIN);
-			tStyle.setBorderBottom(BorderStyle.THIN);
-
-			HSSFCellStyle dStyle = workbook.createCellStyle();
-			dStyle.setAlignment(HorizontalAlignment.CENTER);
-			dStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			dStyle.setBorderLeft(BorderStyle.THIN);
-			dStyle.setBorderTop(BorderStyle.THIN);
-			dStyle.setBorderRight(BorderStyle.THIN);
-			dStyle.setBorderBottom(BorderStyle.THIN);
-
-			HSSFCellStyle dStyleOne = workbook.createCellStyle();
-			dStyleOne.setAlignment(HorizontalAlignment.CENTER);
-			dStyleOne.setVerticalAlignment(VerticalAlignment.CENTER);
-			dStyleOne.setFont(dFont);
-			dStyleOne.setBorderLeft(BorderStyle.THIN);
-			dStyleOne.setBorderTop(BorderStyle.THIN);
-			dStyleOne.setBorderRight(BorderStyle.THIN);
-			dStyleOne.setBorderBottom(BorderStyle.THIN);
-
-			// 判断是否有标题
-			if (StringUtils.isNotEmpty(titleName)) {
-				row = sheet.createRow(rowIndex);
-				row.setHeight((short) 600);
-				cell = row.createCell(0);
-				cell.setCellValue(titleName);
-				cell.setCellStyle(tnStyle);
-
-				CellRangeAddress region = new CellRangeAddress(0, 0, 0,
-						titles.size() - 1);
-				sheet.addMergedRegion(region);
-
-				RegionUtil.setBorderLeft(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderTop(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderRight(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderBottom(BorderStyle.THIN, region, sheet);
-
-				rowIndex += 1;
-			}
-
-			// 判断是否有标头
-			if (StringUtils.isNotEmpty(titles) && titles.size() > 0) {
-				row = sheet.createRow(rowIndex);
-				row.setHeight((short) 600);
-
-				for (int i = 0; i < titles.size(); i++) {
-					cell = row.createCell(i, CellType.STRING);
-					cell.setCellValue(titles.get(i));
-					cell.setCellStyle(tStyle);
-
-					sheet.setColumnWidth(i, 15 * 256);
-				}
-
-				rowIndex += 1;
-				setWidth = true;
-			}
-
-			// 判断是否有数据
-			if (StringUtils.isNotEmpty(datas) && datas.size() > 0) {
-				for (Map<String, Object> map : datas) {
-					row = sheet.createRow(rowIndex);
-					row.setHeight((short) 300);
-
-					Map<String, Object> newMap = new LinkedHashMap<String, Object>();
-					Iterator<Entry<String, Object>> iterator = map.entrySet()
-							.iterator();
-
-					while (iterator.hasNext()) {
-						Entry<String, Object> entry = iterator.next();
-						String key = entry.getKey();
-						Object object = entry.getValue();
-
-						if (object instanceof Object[]) {
-							Object[] objs = (Object[]) object;
-
-							for (int i = 0; i < objs.length; i++) {
-								newMap.put(key + "-" + i, objs[i]);
-							}
-						} else {
-							newMap.put(key, object);
-						}
+						styleList.add(styleEntity);
 					}
 
-					if (newMap.size() > 0) {
-						iterator = newMap.entrySet().iterator();
+					xlsEntity.setStyles(styleList);
+				}
 
-						int j = 0;
-						while (iterator.hasNext()) {
-							Entry<String, Object> entry = iterator.next();
-							String key = entry.getKey();
-							Object object = entry.getValue();
+				// 判断是否有工作簿
+				if (StringUtils.isNotEmpty(sheets) && sheets.size() > 0) {
+					List<SheetEntity> sheetList = new ArrayList<SheetEntity>();
 
-							CellType cellType = CellType.STRING;
-							HSSFCellStyle cellStyle = dStyle;
+					// 遍历工作簿
+					for (int i = 0; i < sheets.size(); i++) {
+						JSONObject sheet = sheets.getJSONObject(i);
+						String sheetName = sheet.getString("name");
+						JSONArray titles = sheet.getJSONArray("titles");
+						JSONArray rows = sheet.getJSONArray("rows");
 
-							if (object instanceof Boolean) {
-								cellType = CellType.BOOLEAN;
-							} else if (object instanceof Number) {
-								cellType = CellType.NUMERIC;
+						SheetEntity sheetEntity = new SheetEntity(sheetName);
 
-								if (StringUtils.isNotEmpty(checks)
-										&& checks.size() > 0) {
-									boolean isCheck = false;
-									Number value = 0;
-									Iterator<Entry<String, Number>> checkIterator = checks
-											.entrySet().iterator();
+						// 判断是否有标题
+						if (titles.size() > 0) {
+							List<TitleEntity> titleList = new ArrayList<TitleEntity>();
 
-									while (checkIterator.hasNext()) {
-										Entry<String, Number> checkEntry = checkIterator
-												.next();
+							// 遍历标题
+							for (int j = 0; j < titles.size(); j++) {
+								JSONObject title = titles.getJSONObject(j);
+								String titleName = title.getString("name");
+								String styleName = title.getString("styleName");
 
-										if (key.indexOf(checkEntry.getKey()) != -1) {
-											isCheck = true;
-											value = checkEntry.getValue();
-											break;
-										}
-									}
+								TitleEntity titleEntity = new TitleEntity(
+										titleName);
+								titleEntity.setStyleName(styleName);
 
-									if (isCheck) {
-										Number number = (Number) object;
-										if (number.floatValue() < value
-												.floatValue()) {
-											cellStyle = dStyleOne;
-										}
-									}
+								titleList.add(titleEntity);
+							}
+
+							sheetEntity.setTitles(titleList);
+						}
+
+						// 判断是否有行数据
+						if (rows.size() > 0) {
+							List<RowEntity> rowList = new ArrayList<RowEntity>();
+
+							// 遍历行数据
+							for (int j = 0; j < rows.size(); j++) {
+								JSONObject row = rows.getJSONObject(j);
+								short height = row.getShortValue("height");
+								JSONArray cells = row.getJSONArray("cells");
+
+								RowEntity rowEntity = new RowEntity();
+
+								// 判断是否设置行高度
+								if (height > 0) {
+									rowEntity.setHeight(height);
 								}
+
+								// 判断是否单元格数据
+								if (cells.size() > 0) {
+									List<CellEntity> cellList = new ArrayList<CellEntity>();
+
+									// 遍历单元格数据
+									for (int k = 0; k < cells.size(); k++) {
+										JSONObject cell = cells
+												.getJSONObject(k);
+										int width = cell.getIntValue("width");
+										Object value = cell.get("value");
+										String styleName = cell
+												.getString("styleName");
+
+										CellEntity cellEntity = new CellEntity(
+												value);
+										cellEntity.setStyleName(styleName);
+
+										// 判断是否设置单元格宽度
+										if (width > 0) {
+											cellEntity.setWidth(width);
+										}
+
+										cellList.add(cellEntity);
+									}
+
+									rowEntity.setCells(cellList);
+								}
+
+								rowList.add(rowEntity);
 							}
 
-							cell = row.createCell(j, cellType);
-							cell.setCellValue(object.toString());
-							cell.setCellStyle(cellStyle);
-
-							j += 1;
+							sheetEntity.setRows(rowList);
 						}
+
+						sheetList.add(sheetEntity);
 					}
 
-					rowIndex += 1;
+					xlsEntity.setSheets(sheetList);
 				}
 
-				if (!setWidth) {
-					setWidth = true;
-				}
+				workbook = getHSSFWorkbook(xlsEntity);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1129,193 +1096,141 @@ public class XLSUtils {
 	/**
 	 * 获取XSSFWorkbook
 	 * 
-	 * @param sheetName
-	 *            工作簿名称
-	 * @param titleName
-	 *            标题名称
-	 * @param titles
-	 *            列表头名称集合
-	 * @param datas
-	 *            数据集合
-	 * @param checks
-	 *            验证数据是否需要标注集合
+	 * @param jsonObject
+	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
+	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
+	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
+	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
+	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
+	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
+	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
+	 *            'styleName'-样式名称(String))
 	 * @return
 	 */
-	private static XSSFWorkbook getXSSFWorkbook(String sheetName,
-			String titleName, List<String> titles,
-			List<Map<String, Object>> datas, Map<String, Number> checks) {
+	private static XSSFWorkbook getXSSFWorkbook(JSONObject jsonObject) {
 		XSSFWorkbook workbook = null;
-		XSSFSheet sheet = null;
-		XSSFRow row = null;
-		XSSFCell cell = null;
 
 		try {
-			workbook = new XSSFWorkbook();
-			sheet = workbook.createSheet(sheetName);
-			int rowIndex = 0;
-			boolean setWidth = false;
+			// 判断数据对象
+			if (StringUtils.isNotEmpty(jsonObject)) {
+				JSONArray styles = jsonObject.getJSONArray("styles");
+				JSONArray sheets = jsonObject.getJSONArray("sheets");
+				XLSEntity xlsEntity = new XLSEntity();
 
-			Font tFont = workbook.createFont();
-			tFont.setBold(true);
-			tFont.setColor(HSSFColorPredefined.BLACK.getIndex());
-			tFont.setFontHeightInPoints((short) 12);
+				// 判断是否有样式
+				if (StringUtils.isNotEmpty(styles) && styles.size() > 0) {
+					List<StyleEntity> styleList = new ArrayList<StyleEntity>();
 
-			Font dFont = workbook.createFont();
-			dFont.setColor(HSSFColorPredefined.RED.getIndex());
+					// 遍历样式
+					for (int i = 0; i < styles.size(); i++) {
+						JSONObject style = styles.getJSONObject(i);
+						String styleName = style.getString("name");
+						int horizontal = style.getIntValue("horizontal");
+						int vertical = style.getIntValue("vertical");
+						short fontSize = style.getShortValue("fontSize");
+						short fontColor = style.getShortValue("fontColor");
+						boolean bold = style.getBooleanValue("bold");
+						boolean italic = style.getBooleanValue("italic");
 
-			XSSFCellStyle tnStyle = workbook.createCellStyle();
-			tnStyle.setAlignment(HorizontalAlignment.CENTER);
-			tnStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			tnStyle.setFont(tFont);
+						StyleEntity styleEntity = new StyleEntity(styleName);
+						styleEntity.setHorizontal(horizontal);
+						styleEntity.setVertical(vertical);
+						styleEntity.setFontSize(fontSize);
+						styleEntity.setFontColor(fontColor);
+						styleEntity.setBold(bold);
+						styleEntity.setItalic(italic);
 
-			XSSFCellStyle tStyle = workbook.createCellStyle();
-			tStyle.setAlignment(HorizontalAlignment.CENTER);
-			tStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			tStyle.setFont(tFont);
-			tStyle.setBorderLeft(BorderStyle.THIN);
-			tStyle.setBorderTop(BorderStyle.THIN);
-			tStyle.setBorderRight(BorderStyle.THIN);
-			tStyle.setBorderBottom(BorderStyle.THIN);
-
-			XSSFCellStyle dStyle = workbook.createCellStyle();
-			dStyle.setAlignment(HorizontalAlignment.CENTER);
-			dStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-			dStyle.setBorderLeft(BorderStyle.THIN);
-			dStyle.setBorderTop(BorderStyle.THIN);
-			dStyle.setBorderRight(BorderStyle.THIN);
-			dStyle.setBorderBottom(BorderStyle.THIN);
-
-			XSSFCellStyle dStyleOne = workbook.createCellStyle();
-			dStyleOne.setAlignment(HorizontalAlignment.CENTER);
-			dStyleOne.setVerticalAlignment(VerticalAlignment.CENTER);
-			dStyleOne.setFont(dFont);
-			dStyleOne.setBorderLeft(BorderStyle.THIN);
-			dStyleOne.setBorderTop(BorderStyle.THIN);
-			dStyleOne.setBorderRight(BorderStyle.THIN);
-			dStyleOne.setBorderBottom(BorderStyle.THIN);
-
-			// 判断是否有标题
-			if (StringUtils.isNotEmpty(titleName)) {
-				row = sheet.createRow(rowIndex);
-				row.setHeight((short) 600);
-				cell = row.createCell(0);
-				cell.setCellValue(titleName);
-				cell.setCellStyle(tnStyle);
-
-				CellRangeAddress region = new CellRangeAddress(0, 0, 0,
-						titles.size() - 1);
-				sheet.addMergedRegion(region);
-
-				RegionUtil.setBorderLeft(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderTop(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderRight(BorderStyle.THIN, region, sheet);
-				RegionUtil.setBorderBottom(BorderStyle.THIN, region, sheet);
-
-				rowIndex += 1;
-			}
-
-			// 判断是否有标头
-			if (StringUtils.isNotEmpty(titles) && titles.size() > 0) {
-				row = sheet.createRow(rowIndex);
-				row.setHeight((short) 600);
-
-				for (int i = 0; i < titles.size(); i++) {
-					cell = row.createCell(i, CellType.STRING);
-					cell.setCellValue(titles.get(i));
-					cell.setCellStyle(tStyle);
-
-					sheet.setColumnWidth(i, 15 * 256);
-				}
-
-				rowIndex += 1;
-				setWidth = true;
-			}
-
-			// 判断是否有数据
-			if (StringUtils.isNotEmpty(datas) && datas.size() > 0) {
-				for (Map<String, Object> map : datas) {
-					row = sheet.createRow(rowIndex);
-					row.setHeight((short) 300);
-
-					Map<String, Object> newMap = new LinkedHashMap<String, Object>();
-					Iterator<Entry<String, Object>> iterator = map.entrySet()
-							.iterator();
-
-					while (iterator.hasNext()) {
-						Entry<String, Object> entry = iterator.next();
-						String key = entry.getKey();
-						Object object = entry.getValue();
-
-						if (object instanceof Object[]) {
-							Object[] objs = (Object[]) object;
-
-							for (int i = 0; i < objs.length; i++) {
-								newMap.put(key + "-" + i, objs[i]);
-							}
-						} else {
-							newMap.put(key, object);
-						}
+						styleList.add(styleEntity);
 					}
 
-					if (newMap.size() > 0) {
-						iterator = newMap.entrySet().iterator();
+					xlsEntity.setStyles(styleList);
+				}
 
-						int j = 0;
-						while (iterator.hasNext()) {
-							Entry<String, Object> entry = iterator.next();
-							String key = entry.getKey();
-							Object object = entry.getValue();
+				// 判断是否有工作簿
+				if (StringUtils.isNotEmpty(sheets) && sheets.size() > 0) {
+					List<SheetEntity> sheetList = new ArrayList<SheetEntity>();
 
-							CellType cellType = CellType.STRING;
-							XSSFCellStyle cellStyle = dStyle;
+					// 遍历工作簿
+					for (int i = 0; i < sheets.size(); i++) {
+						JSONObject sheet = sheets.getJSONObject(i);
+						String sheetName = sheet.getString("name");
+						JSONArray titles = sheet.getJSONArray("titles");
+						JSONArray rows = sheet.getJSONArray("rows");
 
-							if (object instanceof Boolean) {
-								cellType = CellType.BOOLEAN;
-							} else if (object instanceof Number) {
-								cellType = CellType.NUMERIC;
+						SheetEntity sheetEntity = new SheetEntity(sheetName);
 
-								if (StringUtils.isNotEmpty(checks)
-										&& checks.size() > 0) {
-									boolean isCheck = false;
-									Number value = 0;
-									Iterator<Entry<String, Number>> checkIterator = checks
-											.entrySet().iterator();
+						// 判断是否有标题
+						if (titles.size() > 0) {
+							List<TitleEntity> titleList = new ArrayList<TitleEntity>();
 
-									while (checkIterator.hasNext()) {
-										Entry<String, Number> checkEntry = checkIterator
-												.next();
+							// 遍历标题
+							for (int j = 0; j < titles.size(); j++) {
+								JSONObject title = titles.getJSONObject(j);
+								String titleName = title.getString("name");
+								String styleName = title.getString("styleName");
 
-										if (key.indexOf(checkEntry.getKey()) != -1) {
-											isCheck = true;
-											value = checkEntry.getValue();
-											break;
-										}
+								TitleEntity titleEntity = new TitleEntity(
+										titleName);
+								titleEntity.setStyleName(styleName);
+
+								titleList.add(titleEntity);
+							}
+
+							sheetEntity.setTitles(titleList);
+						}
+
+						// 判断是否有行数据
+						if (rows.size() > 0) {
+							List<RowEntity> rowList = new ArrayList<RowEntity>();
+
+							// 遍历行数据
+							for (int j = 0; j < rows.size(); j++) {
+								JSONObject row = rows.getJSONObject(j);
+								short height = row.getShortValue("height");
+								JSONArray cells = row.getJSONArray("cells");
+
+								RowEntity rowEntity = new RowEntity();
+								rowEntity.setHeight(height);
+
+								// 判断是否单元格数据
+								if (cells.size() > 0) {
+									List<CellEntity> cellList = new ArrayList<CellEntity>();
+
+									// 遍历单元格数据
+									for (int k = 0; k < cells.size(); k++) {
+										JSONObject cell = cells
+												.getJSONObject(k);
+										int width = cell.getIntValue("width");
+										Object value = cell.get("value");
+										String styleName = cell
+												.getString("styleName");
+
+										CellEntity cellEntity = new CellEntity(
+												value);
+										cellEntity.setWidth(width);
+										cellEntity.setStyleName(styleName);
+
+										cellList.add(cellEntity);
 									}
 
-									if (isCheck) {
-										Number number = (Number) object;
-										if (number.floatValue() < value
-												.floatValue()) {
-											cellStyle = dStyleOne;
-										}
-									}
+									rowEntity.setCells(cellList);
 								}
+
+								rowList.add(rowEntity);
 							}
 
-							cell = row.createCell(j, cellType);
-							cell.setCellValue(object.toString());
-							cell.setCellStyle(cellStyle);
-
-							j += 1;
+							sheetEntity.setRows(rowList);
 						}
+
+						sheetList.add(sheetEntity);
 					}
 
-					rowIndex += 1;
+					xlsEntity.setSheets(sheetList);
 				}
 
-				if (!setWidth) {
-					setWidth = true;
-				}
+				workbook = getXSSFWorkbook(xlsEntity);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1530,86 +1445,5 @@ public class XLSUtils {
 		}
 
 		return workbook;
-	}
-
-	public static void main(String[] args) {
-		XLSEntity xlsEntity = new XLSEntity();
-		List<StyleEntity> styles = new ArrayList<StyleEntity>();
-		List<SheetEntity> sheets = new ArrayList<SheetEntity>();
-
-		StyleEntity styleEntity = new StyleEntity("top");
-		styleEntity.setBold(true);
-		styleEntity.setFontSize((short) 13);
-		styles.add(styleEntity);
-		styleEntity = new StyleEntity("title");
-		styleEntity.setBold(true);
-		styles.add(styleEntity);
-		styleEntity = new StyleEntity("content");
-		styles.add(styleEntity);
-
-		SheetEntity sheetEntity = new SheetEntity("学生信息");
-		List<TitleEntity> titles = new ArrayList<TitleEntity>();
-		List<RowEntity> rows = new ArrayList<RowEntity>();
-		TitleEntity titleEntity = new TitleEntity("学生成绩表");
-		titleEntity.setStyleName("top");
-		titles.add(titleEntity);
-		RowEntity rowEntity = new RowEntity();
-		List<CellEntity> cells = new ArrayList<CellEntity>();
-		CellEntity cellEntity = new CellEntity("姓名");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("性别");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("年龄");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("语文");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("数学");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("英语");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("时间");
-		cellEntity.setStyleName("title");
-		cells.add(cellEntity);
-		rowEntity.setCells(cells);
-		rows.add(rowEntity);
-		rowEntity = new RowEntity();
-		cells = new ArrayList<CellEntity>();
-		cellEntity = new CellEntity("梅西");
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity("男");
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity(20);
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity(78.5);
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity(99);
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity(88.7);
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		cellEntity = new CellEntity(new Date());
-		cellEntity.setStyleName("content");
-		cells.add(cellEntity);
-		rowEntity.setCells(cells);
-		rows.add(rowEntity);
-		sheetEntity.setTitles(titles);
-		sheetEntity.setRows(rows);
-		sheets.add(sheetEntity);
-
-		xlsEntity.setStyles(styles);
-		xlsEntity.setSheets(sheets);
-
-		write("F:\\1.xlsx", xlsEntity);
 	}
 }

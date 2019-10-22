@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.model.PicturesTable;
@@ -30,11 +28,16 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell.XWPFVertAlign;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.maven.common.StringUtils;
-import com.maven.common.request.MapUtils;
 
 /**
  * 读写DOC类
@@ -61,6 +64,18 @@ public class DOCUtils {
 	// 图片类型
 	public static final int PICTURE = 3;
 
+	// 默认表格宽度
+	private static final int DEFAULT_TABLE_WIDTH = 1500;
+
+	// 默认表格高度
+	private static final int DEFAULT_TABLE_HEIGHT = 500;
+
+	// 默认图片宽度
+	private static final int DEFAULT_PICTURE_WIDTH = 400;
+
+	// 默认图片高度
+	private static final int DEFAULT_PICTURE_HEIGHT = 300;
+
 	/**
 	 * 读文件
 	 * 
@@ -68,38 +83,45 @@ public class DOCUtils {
 	 *            文件路径
 	 * @return
 	 */
-	public static Map<String, Object> read(String filePath) {
-		Map<String, Object> map = null;
-		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-				.toLowerCase();
+	public static JSONObject read(String filePath) {
+		JSONObject jsonObject = null;
 
-		// 判断文件后缀名
-		switch (fileType) {
-		case DOC_NAME:
-			map = readDOC(filePath);
-			break;
-		case DOCX_NAME:
-			map = readDOCX(filePath);
-			break;
-		default:
-			logger.info("File format error");
-			break;
+		File file = new File(filePath);
+
+		// 判断文件是否存在
+		if (file.exists()) {
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
+
+			// 判断文件后缀名
+			switch (fileType) {
+			case DOC_NAME:
+				jsonObject = readDOC(filePath);
+				break;
+			case DOCX_NAME:
+				jsonObject = readDOCX(filePath);
+				break;
+			default:
+				logger.info("File format error");
+				break;
+			}
+		} else {
+			logger.info("File not exist");
 		}
 
-		return map;
+		return jsonObject;
 	}
 
 	/**
 	 * 写文件
 	 * 
 	 * @param filePath
-	 *            文件路径
-	 * @param list
-	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
-	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
-	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 *            文件路径 * @param jsonArray 数据集合: 1、'type':1-段落、2-表格、3-图片
+	 *            2、'value':数据(段落为String、表格为List<List<object>>、图片为byte[])
+	 *            3、'width':图片宽度(只用于图片,不设默认400px)
+	 *            4、'height':图片高度(只用于图片,不设默认300px)
 	 */
-	public static void write(String filePath, List<Map<String, Object>> list) {
+	public static void write(String filePath, JSONArray jsonArray) {
 		OutputStream outputStream = null;
 		XWPFDocument document = null;
 
@@ -117,7 +139,7 @@ public class DOCUtils {
 					file.mkdirs();
 				}
 
-				document = getXWPFDocument(list);
+				document = getXWPFDocument(jsonArray);
 
 				// 判断XWPFDocument
 				if (StringUtils.isNotEmpty(document)) {
@@ -148,18 +170,19 @@ public class DOCUtils {
 	/**
 	 * 写文件(Byte)
 	 * 
-	 * @param list
-	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
-	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
-	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 * @param filePath
+	 *            文件路径 * @param jsonArray 数据集合: 1、'type':1-段落、2-表格、3-图片
+	 *            2、'value':数据(段落为String、表格为List<List<object>>、图片为byte[])
+	 *            3、'width':图片宽度(只用于图片,不设默认400px)
+	 *            4、'height':图片高度(只用于图片,不设默认300px)
 	 */
-	public static byte[] write(List<Map<String, Object>> list) {
+	public static byte[] write(JSONArray jsonArray) {
 		ByteArrayOutputStream outputStream = null;
 		XWPFDocument document = null;
 		byte[] byt = null;
 
 		try {
-			document = getXWPFDocument(list);
+			document = getXWPFDocument(jsonArray);
 
 			// 判断XWPFDocument
 			if (StringUtils.isNotEmpty(document)) {
@@ -190,50 +213,62 @@ public class DOCUtils {
 	/**
 	 * 获取XWPFDocument
 	 * 
-	 * @param list
-	 *            数据集合: 1、type:1-段落、2-表格、3-图片 2、value:数据(
+	 * @param jsonArray
+	 *            数据集合: 1、'type':1-段落、2-表格、3-图片 2、'value':数据(
 	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
-	 *            3、width:图片宽度(只用于图片,不设默认400px) 4、height:图片高度(只用于图片,不设默认300px)
+	 *            3、'width':图片宽度(只用于图片,不设默认400px)
+	 *            4、'height':图片高度(只用于图片,不设默认300px)
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	private static XWPFDocument getXWPFDocument(List<Map<String, Object>> list) {
+	private static XWPFDocument getXWPFDocument(JSONArray jsonArray) {
 		XWPFDocument document = null;
 
 		try {
 			document = new XWPFDocument();
 
-			for (Map<String, Object> map : list) {
-				int type = MapUtils.getInteger(map, "type").intValue();
-				Object value = MapUtils.get(map, "value");
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+				int type = jsonObject.getIntValue("type");
+				int width = 0, height = 0;
 
 				switch (type) {
 				case PARAGRAPH:
+					String value = jsonObject.getString("value");
 					XWPFParagraph paragraph = document.createParagraph();
 					XWPFRun run = paragraph.createRun();
 
 					run.setBold(true);
 					run.setFontSize(18);
-					run.setText(value.toString());
+					run.setText(value);
 					break;
 				case TABLE:
-					List<List<Object>> tableList = (List<List<Object>>) value;
+					JSONArray array = jsonObject.getJSONArray("value");
+					width = StringUtils.isNotEmpty(jsonObject.get("width")) ? jsonObject
+							.getIntValue("width") : DEFAULT_TABLE_WIDTH;
+					height = StringUtils.isNotEmpty(jsonObject.get("height")) ? jsonObject
+							.getIntValue("height") : DEFAULT_TABLE_HEIGHT;
 
-					if (tableList.size() > 0) {
-						int rows = tableList.size();
-						int cols = tableList.get(0).size();
+					if (array.size() > 0) {
+						int rows = array.size();
+						int cols = array.getJSONArray(0).size();
 						XWPFTable table = document.createTable(rows, cols);
 
-						for (int i = 0; i < rows; i++) {
-							List<Object> rowList = tableList.get(i);
-							XWPFTableRow row = table.getRow(i);
+						for (int j = 0; j < rows; j++) {
+							JSONArray datas = array.getJSONArray(j);
+							XWPFTableRow row = table.getRow(j);
+							row.setHeight(height);
 
-							for (int j = 0; j < cols; j++) {
-								row.getCell(j).setVerticalAlignment(
-										XWPFVertAlign.CENTER);
-								row.getCell(j).setWidth("1000");
-								row.getCell(j).setText(
-										rowList.get(j).toString());
+							for (int k = 0; k < cols; k++) {
+								XWPFTableCell cell = row.getCell(k);
+								cell.setVerticalAlignment(XWPFVertAlign.CENTER);
+								cell.setWidth(Integer.valueOf(width).toString());
+								cell.setText(datas.get(k).toString());
+								CTTc cttc = cell.getCTTc();
+								CTTcPr ctPr = cttc.addNewTcPr();
+								ctPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+								cttc.getPList().get(0).addNewPPr().addNewJc()
+										.setVal(STJc.CENTER);
 							}
 						}
 
@@ -244,12 +279,14 @@ public class DOCUtils {
 					}
 					break;
 				case PICTURE:
-					byte[] bs = (byte[]) value;
-					int width = MapUtils.getInteger(map, "width", 400);
-					int height = MapUtils.getInteger(map, "height", 300);
+					byte[] byt = jsonObject.getBytes("value");
+					width = StringUtils.isNotEmpty(jsonObject.get("width")) ? jsonObject
+							.getIntValue("width") : DEFAULT_PICTURE_WIDTH;
+					height = StringUtils.isNotEmpty(jsonObject.get("height")) ? jsonObject
+							.getIntValue("height") : DEFAULT_PICTURE_HEIGHT;
 
 					XWPFParagraph p = document.createParagraph();
-					String blipId = document.addPictureData(bs,
+					String blipId = document.addPictureData(byt,
 							XWPFDocument.PICTURE_TYPE_PNG);
 					CustomXWPFDocument.createPicture(blipId, document
 							.getAllPictures().size() - 1, width, height, p);
@@ -271,8 +308,8 @@ public class DOCUtils {
 	 *            文件路径
 	 * @return
 	 */
-	private static Map<String, Object> readDOC(String filePath) {
-		Map<String, Object> map = null;
+	private static JSONObject readDOC(String filePath) {
+		JSONObject jsonObject = null;
 		InputStream inputStream = null;
 		HWPFDocument document = null;
 
@@ -281,7 +318,7 @@ public class DOCUtils {
 			document = new HWPFDocument(inputStream);
 			Range range = document.getRange();
 
-			map = new HashMap<String, Object>();
+			jsonObject = new JSONObject();
 
 			// 获取所有段落
 			List<String> paragraphList = new ArrayList<String>();
@@ -293,7 +330,7 @@ public class DOCUtils {
 					paragraphList.add(content);
 				}
 			}
-			map.put("paragraphs", paragraphList);
+			jsonObject.put("paragraphs", paragraphList);
 
 			// 获取所有表格
 			List<List<Object>> tableList = new ArrayList<List<Object>>();
@@ -313,7 +350,7 @@ public class DOCUtils {
 
 				tableList.add(list);
 			}
-			map.put("tables", tableList);
+			jsonObject.put("tables", tableList);
 
 			// 获取所有图片
 			List<byte[]> pictureList = new ArrayList<byte[]>();
@@ -334,7 +371,7 @@ public class DOCUtils {
 					outputStream.close();
 				}
 			}
-			map.put("pictures", pictureList);
+			jsonObject.put("pictures", pictureList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Read DOC file error");
@@ -352,7 +389,7 @@ public class DOCUtils {
 			}
 		}
 
-		return map;
+		return jsonObject;
 	}
 
 	/**
@@ -362,8 +399,8 @@ public class DOCUtils {
 	 *            文件路径
 	 * @return
 	 */
-	private static Map<String, Object> readDOCX(String filePath) {
-		Map<String, Object> map = null;
+	private static JSONObject readDOCX(String filePath) {
+		JSONObject jsonObject = null;
 		InputStream inputStream = null;
 		XWPFDocument document = null;
 
@@ -371,7 +408,7 @@ public class DOCUtils {
 			inputStream = new FileInputStream(new File(filePath));
 			document = new XWPFDocument(inputStream);
 
-			map = new HashMap<String, Object>();
+			jsonObject = new JSONObject();
 
 			// 获取所有段落
 			List<String> paragraphList = new ArrayList<String>();
@@ -383,7 +420,7 @@ public class DOCUtils {
 					paragraphList.add(content);
 				}
 			}
-			map.put("paragraphs", paragraphList);
+			jsonObject.put("paragraphs", paragraphList);
 
 			// 获取所有表格
 			List<List<Object>> tableList = new ArrayList<List<Object>>();
@@ -402,7 +439,7 @@ public class DOCUtils {
 
 				tableList.add(list);
 			}
-			map.put("tables", tableList);
+			jsonObject.put("tables", tableList);
 
 			// 获取所有图片
 			List<byte[]> pictureList = new ArrayList<byte[]>();
@@ -410,7 +447,7 @@ public class DOCUtils {
 			for (XWPFPictureData picture : ist_picture) {
 				pictureList.add(picture.getData());
 			}
-			map.put("pictures", pictureList);
+			jsonObject.put("pictures", pictureList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Read DOCX file error");
@@ -428,6 +465,6 @@ public class DOCUtils {
 			}
 		}
 
-		return map;
+		return jsonObject;
 	}
 }

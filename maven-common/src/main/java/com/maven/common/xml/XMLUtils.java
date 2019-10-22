@@ -50,18 +50,25 @@ public class XMLUtils {
 		JSONObject jsonObject = null;
 
 		try {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
+			File file = new File(filePath);
 
-			// 判断文件后缀名
-			if (fileType.equalsIgnoreCase(XML_NAME)) {
-				SAXReader reader = new SAXReader();
-				Document document = reader.read(new File(filePath));
+			// 判断文件是否存在
+			if (file.exists()) {
+				String fileType = filePath.substring(
+						filePath.lastIndexOf(".") + 1).toLowerCase();
 
-				Element root = document.getRootElement();
-				jsonObject = structureData(root);
+				// 判断文件后缀名
+				if (fileType.equalsIgnoreCase(XML_NAME)) {
+					SAXReader reader = new SAXReader();
+					Document document = reader.read(new File(filePath));
+
+					Element root = document.getRootElement();
+					jsonObject = structureData(root);
+				} else {
+					logger.info("File format error");
+				}
 			} else {
-				logger.info("File format error");
+				logger.info("File not exist");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

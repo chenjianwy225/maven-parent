@@ -8,11 +8,15 @@
         http://www.springframework.org/schema/context/spring-context.xsd">
 	<!-- Redis连接池 -->
 	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
-		<property name="maxTotal" value="${redis.maxActive}" />
+		<property name="maxTotal" value="${redis.maxTotal}" />
 		<property name="maxIdle" value="${redis.maxIdle}" />
 		<property name="maxWaitMillis" value="${redis.maxWaitMillis}" />
 		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
 		<property name="testOnReturn" value="${redis.testOnReturn}" />
+		<property name="testWhileIdle" value="${redis.testWhileIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${redis.timeBetweenEvictionRunsMillis}" />
+		<property name="numTestsPerEvictionRun" value="${redis.numTestsPerEvictionRun}" />
+		<property name="minEvictableIdleTimeMillis" value="${redis.minEvictableIdleTimeMillis}" />
 	</bean>
 
 	<!-- 连接池配置，类似数据库连接池 -->
@@ -23,7 +27,7 @@
 		<property name="port" value="${redis.port}"></property>
 		<property name="password" value="${redis.password}"></property>
 		<property name="timeout" value="${redis.timeout}" />
-        <property name="database" value="${redis.dbIndex}"></property>
+		<property name="database" value="${redis.dbIndex}"></property>
 		<property name="poolConfig" ref="poolConfig"></property>
 	</bean>
 
