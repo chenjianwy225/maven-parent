@@ -773,10 +773,22 @@ public class XLSUtils {
 						boolean italic = style.getBooleanValue("italic");
 
 						StyleEntity styleEntity = new StyleEntity(styleName);
-						styleEntity.setHorizontal(horizontal);
-						styleEntity.setVertical(vertical);
-						styleEntity.setFontSize(fontSize);
-						styleEntity.setFontColor(fontColor);
+
+						if (horizontal > 0) {
+							styleEntity.setHorizontal(horizontal);
+						}
+
+						if (vertical > 0) {
+							styleEntity.setVertical(vertical);
+						}
+
+						if (fontSize > 0) {
+							styleEntity.setFontSize(fontSize);
+						}
+
+						if (fontColor > 0) {
+							styleEntity.setFontColor(fontColor);
+						}
 						styleEntity.setBold(bold);
 						styleEntity.setItalic(italic);
 
