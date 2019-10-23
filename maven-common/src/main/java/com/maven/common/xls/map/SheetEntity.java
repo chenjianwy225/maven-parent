@@ -14,6 +14,9 @@ public class SheetEntity {
 	// 名称
 	private String name;
 
+	// 下拉列表集合
+	private List<TextListEntity> texts = new ArrayList<TextListEntity>();
+
 	// 标题集合
 	private List<TitleEntity> titles = new ArrayList<TitleEntity>();
 
@@ -26,6 +29,14 @@ public class SheetEntity {
 
 	public String getName() {
 		return name;
+	}
+
+	public List<TextListEntity> getTexts() {
+		return texts;
+	}
+
+	public void setTexts(List<TextListEntity> texts) {
+		this.texts = texts;
 	}
 
 	public void setName(String name) {

@@ -13,8 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -22,13 +24,20 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FontFormatting;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -44,6 +53,7 @@ import com.maven.common.xls.map.CellEntity;
 import com.maven.common.xls.map.RowEntity;
 import com.maven.common.xls.map.SheetEntity;
 import com.maven.common.xls.map.StyleEntity;
+import com.maven.common.xls.map.TextListEntity;
 import com.maven.common.xls.map.TitleEntity;
 import com.maven.common.xls.map.XLSEntity;
 
@@ -113,14 +123,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 * @return
 	 */
 	public static boolean write(String filePath, JSONObject jsonObject) {
@@ -164,14 +179,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 * @return
 	 */
 	public static byte[] write(int suffixIndex, JSONObject jsonObject) {
@@ -415,14 +435,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 */
 	private static void writeXLS(String filePath, JSONObject jsonObject) {
 		FileOutputStream outputStream = null;
@@ -458,14 +483,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 */
 	private static void writeXLSX(String filePath, JSONObject jsonObject) {
 		FileOutputStream outputStream = null;
@@ -503,14 +533,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 */
 	private static byte[] writeXLS(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
@@ -548,14 +583,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 */
 	private static byte[] writeXLSX(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
@@ -737,14 +777,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 * @return
 	 */
 	private static HSSFWorkbook getHSSFWorkbook(JSONObject jsonObject) {
@@ -767,10 +812,16 @@ public class XLSUtils {
 						String styleName = style.getString("name");
 						int horizontal = style.getIntValue("horizontal");
 						int vertical = style.getIntValue("vertical");
+						String fontName = style.getString("fontName");
 						short fontSize = style.getShortValue("fontSize");
 						short fontColor = style.getShortValue("fontColor");
+						int underline = style.getIntValue("underline");
+						int typeOffset = style.getIntValue("typeOffset");
+						short backgroundColor = style
+								.getShortValue("backgroundColor");
 						boolean bold = style.getBooleanValue("bold");
 						boolean italic = style.getBooleanValue("italic");
+						boolean strikeout = style.getBooleanValue("strikeout");
 
 						StyleEntity styleEntity = new StyleEntity(styleName);
 
@@ -782,6 +833,10 @@ public class XLSUtils {
 							styleEntity.setVertical(vertical);
 						}
 
+						if (StringUtils.isNotEmpty(fontName)) {
+							styleEntity.setFontName(fontName);
+						}
+
 						if (fontSize > 0) {
 							styleEntity.setFontSize(fontSize);
 						}
@@ -789,8 +844,22 @@ public class XLSUtils {
 						if (fontColor > 0) {
 							styleEntity.setFontColor(fontColor);
 						}
+
+						if (underline > 0) {
+							styleEntity.setUnderline(underline);
+						}
+
+						if (typeOffset > 0) {
+							styleEntity.setTypeOffset(typeOffset);
+						}
+
+						if (backgroundColor > 0) {
+							styleEntity.setBackgroundColor(backgroundColor);
+						}
+
 						styleEntity.setBold(bold);
 						styleEntity.setItalic(italic);
+						styleEntity.setStrikeout(strikeout);
 
 						styleList.add(styleEntity);
 					}
@@ -806,23 +875,57 @@ public class XLSUtils {
 					for (int i = 0; i < sheets.size(); i++) {
 						JSONObject sheet = sheets.getJSONObject(i);
 						String sheetName = sheet.getString("name");
+						JSONArray texts = sheet.getJSONArray("texts");
 						JSONArray titles = sheet.getJSONArray("titles");
 						JSONArray rows = sheet.getJSONArray("rows");
 
 						SheetEntity sheetEntity = new SheetEntity(sheetName);
 
+						// 判断是否有下拉列表
+						if (StringUtils.isNotEmpty(texts) && texts.size() > 0) {
+							List<TextListEntity> textList = new ArrayList<TextListEntity>();
+
+							// 遍历下拉列表
+							for (int j = 0; j < texts.size(); j++) {
+								JSONObject text = texts.getJSONObject(j);
+								JSONArray datas = text.getJSONArray("datas");
+
+								// 判断是否有下拉列表数据
+								if (StringUtils.isNotEmpty(datas)
+										&& datas.size() > 0) {
+									int firstRow = text.getIntValue("firstRow");
+									int lastRow = text.getIntValue("lastRow");
+									int firstColumn = text
+											.getIntValue("firstColumn");
+									int lastColumn = text
+											.getIntValue("lastColumn");
+
+									TextListEntity textListEntity = new TextListEntity(
+											datas.toJavaList(String.class),
+											firstRow, lastRow, firstColumn,
+											lastColumn);
+
+									textList.add(textListEntity);
+								}
+							}
+
+							sheetEntity.setTexts(textList);
+						}
+
 						// 判断是否有标题
-						if (titles.size() > 0) {
+						if (StringUtils.isNotEmpty(titles) && titles.size() > 0) {
 							List<TitleEntity> titleList = new ArrayList<TitleEntity>();
 
 							// 遍历标题
 							for (int j = 0; j < titles.size(); j++) {
 								JSONObject title = titles.getJSONObject(j);
 								String titleName = title.getString("name");
+								short height = title.getShortValue("height");
 								String styleName = title.getString("styleName");
 
 								TitleEntity titleEntity = new TitleEntity(
 										titleName);
+								titleEntity.setHeight(height);
 								titleEntity.setStyleName(styleName);
 
 								titleList.add(titleEntity);
@@ -832,7 +935,7 @@ public class XLSUtils {
 						}
 
 						// 判断是否有行数据
-						if (rows.size() > 0) {
+						if (StringUtils.isNotEmpty(rows) && rows.size() > 0) {
 							List<RowEntity> rowList = new ArrayList<RowEntity>();
 
 							// 遍历行数据
@@ -849,7 +952,8 @@ public class XLSUtils {
 								}
 
 								// 判断是否单元格数据
-								if (cells.size() > 0) {
+								if (StringUtils.isNotEmpty(cells)
+										&& cells.size() > 0) {
 									List<CellEntity> cellList = new ArrayList<CellEntity>();
 
 									// 遍历单元格数据
@@ -929,29 +1033,89 @@ public class XLSUtils {
 					for (StyleEntity sEntity : styleList) {
 						cellStyle = workbook.createCellStyle();
 						String styleName = sEntity.getName();
+						String fontName = sEntity.getFontName();
 						short fontSize = sEntity.getFontSize();
 						short fontColor = sEntity.getFontColor();
+						int underline = sEntity.getUnderline();
+						int typeOffset = sEntity.getTypeOffset();
+						short backgroundColor = sEntity.getBackgroundColor();
 						boolean bold = sEntity.getBold();
 						boolean italic = sEntity.getItalic();
+						boolean strikeout = sEntity.getStrikeout();
 
-						// 判断是否有字体大小、字体颜色、加粗或斜体
-						if (fontSize > 0 || fontColor > 0 || bold || italic) {
+						// 判断是否有字体名称、字体大小、字体颜色、下划线、加粗、斜体或删除线
+						if (StringUtils.isNotEmpty(fontName) || fontSize > 0
+								|| fontColor > 0 || underline > 0
+								|| typeOffset > 0 || backgroundColor > 0
+								|| bold || italic || strikeout) {
 							font = workbook.createFont();
 
+							// 设置字体名称
+							if (StringUtils.isNotEmpty(fontName)) {
+								font.setFontName(fontName);
+							}
+
+							// 设置字体大小
 							if (fontSize > 0) {
 								font.setFontHeightInPoints(fontSize);
 							}
 
+							// 设置字体颜色
 							if (fontColor > 0) {
 								font.setColor(fontColor);
 							}
 
+							// 设置下划线
+							if (underline > 0) {
+								byte fontUnderline = Font.U_NONE;
+
+								switch (sEntity.getUnderline()) {
+								case 1:
+									fontUnderline = Font.U_SINGLE;
+									break;
+								case 2:
+									fontUnderline = Font.U_DOUBLE;
+									break;
+								case 3:
+									fontUnderline = Font.U_SINGLE_ACCOUNTING;
+									break;
+								case 4:
+									fontUnderline = Font.U_DOUBLE_ACCOUNTING;
+									break;
+								}
+
+								font.setUnderline(fontUnderline);
+							}
+
+							// 设置上下标
+							if (typeOffset > 0) {
+								short fontFormatting = FontFormatting.SS_NONE;
+
+								switch (typeOffset) {
+								case 1:
+									fontFormatting = FontFormatting.SS_SUPER;
+									break;
+								case 2:
+									fontFormatting = FontFormatting.SS_SUB;
+									break;
+								}
+
+								font.setTypeOffset(fontFormatting);
+							}
+
+							// 设置粗体
 							if (bold) {
 								font.setBold(bold);
 							}
 
+							// 设置斜体
 							if (italic) {
 								font.setItalic(italic);
+							}
+
+							// 设置删除线
+							if (strikeout) {
+								font.setStrikeout(strikeout);
 							}
 
 							cellStyle.setFont(font);
@@ -963,10 +1127,25 @@ public class XLSUtils {
 						// 设置水平位置
 						switch (sEntity.getHorizontal()) {
 						case 1:
+							horizontal = HorizontalAlignment.GENERAL;
+							break;
+						case 2:
 							horizontal = HorizontalAlignment.LEFT;
 							break;
-						case 3:
+						case 4:
 							horizontal = HorizontalAlignment.RIGHT;
+							break;
+						case 5:
+							horizontal = HorizontalAlignment.FILL;
+							break;
+						case 6:
+							horizontal = HorizontalAlignment.JUSTIFY;
+							break;
+						case 7:
+							horizontal = HorizontalAlignment.CENTER_SELECTION;
+							break;
+						case 8:
+							horizontal = HorizontalAlignment.DISTRIBUTED;
 							break;
 						}
 
@@ -986,6 +1165,13 @@ public class XLSUtils {
 							break;
 						}
 
+						// 设置背景颜色
+						if (backgroundColor > 0) {
+							cellStyle.setFillForegroundColor(backgroundColor);
+							cellStyle
+									.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+						}
+
 						cellStyle.setAlignment(horizontal);
 						cellStyle.setVerticalAlignment(vertical);
 						cellStyle.setBorderLeft(BorderStyle.THIN);
@@ -1002,11 +1188,35 @@ public class XLSUtils {
 					// 遍历数据
 					for (SheetEntity shEntity : sheetList) {
 						String sheetName = shEntity.getName();
+						List<TextListEntity> textList = shEntity.getTexts();
 						List<TitleEntity> titleList = shEntity.getTitles();
 						List<RowEntity> rowList = shEntity.getRows();
 
 						int rowIndex = 0;
 						sheet = workbook.createSheet(sheetName);
+
+						// 判断是否有下拉列表数据
+						if (textList.size() > 0) {
+							// 遍历下拉列表数据
+							for (TextListEntity textListEntity : textList) {
+								String[] datas = new String[] {};
+
+								// 设置下拉列表作用的单元格(firstRow、lastRow、firstColumn、lastColumn)
+								CellRangeAddressList regions = new CellRangeAddressList(
+										textListEntity.getFirstRow(),
+										textListEntity.getLastRow(),
+										textListEntity.getFirstColumn(),
+										textListEntity.getLastColumn());
+								// 生成并设置数据有效性验证
+								DVConstraint constraint = DVConstraint
+										.createExplicitListConstraint(textListEntity
+												.getDatas().toArray(datas));
+								HSSFDataValidation dataValidation = new HSSFDataValidation(
+										regions, constraint);
+								// 将有效性验证添加到表单
+								sheet.addValidationData(dataValidation);
+							}
+						}
 
 						// 判断是否有合并的标题数据
 						if (titleList.size() > 0) {
@@ -1111,14 +1321,19 @@ public class XLSUtils {
 	 * @param jsonObject
 	 *            数据包含：1、'styles'-样式集合(JSONArray) 2、'sheets'-工作簿集合(JSONArray)
 	 *            A、样式数据('name'-样式名称(String) 'horizontal'-水平位置(Integer)
-	 *            'vertical'-垂直位置(Integer) 'fontSize'-字体大小(Short)
-	 *            'fontColor'-字体颜色(Short) 'bold'-是否粗体(Boolean)
-	 *            'italic'-是否斜体(Boolean)) B、工作簿数据('name'-工作簿名称(String)
+	 *            'vertical'-垂直位置(Integer) 'fontName'-字体名称(String)
+	 *            'fontSize'-字体大小(Short) 'fontColor'-字体颜色(Short)
+	 *            'underline'-下划线(Integer) 'typeOffset'-上下标(Integer)
+	 *            'backgroundColor'-背景颜色(Short) 'bold'-是否粗体(Boolean)
+	 *            'italic'-是否斜体(Boolean)) 'strikeout'-是否删除线(Boolean)
+	 *            B、工作簿数据('name'-工作簿名称(String) 'texts'-下拉列表集合(JSONArray)
 	 *            'titles'-标题集合(JSONArray) 'rows'-行数据集合(JSONArray))
-	 *            C、标题数据('name'-标题值(String) 'styleName'-样式名称(String))
-	 *            D、行数据('height'-行高度(Short) 'cells'-单元格集合(JSONArray))
-	 *            E、单元格数据('width'-单元格宽度(Integer) 'value'-单元格值(Object)
-	 *            'styleName'-样式名称(String))
+	 *            C、下拉列表数据('datas'-数据集合(JSONArray) 'firstRow'-开始行(Integer)
+	 *            'lastRow'-结束行(Integer) 'firstColumn'-开始列 'lastColumn'-结束列)
+	 *            D、标题数据('name'-标题值(String) 'height'-标题高度
+	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
+	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
+	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
 	 * @return
 	 */
 	private static XSSFWorkbook getXSSFWorkbook(JSONObject jsonObject) {
@@ -1141,18 +1356,54 @@ public class XLSUtils {
 						String styleName = style.getString("name");
 						int horizontal = style.getIntValue("horizontal");
 						int vertical = style.getIntValue("vertical");
+						String fontName = style.getString("fontName");
 						short fontSize = style.getShortValue("fontSize");
 						short fontColor = style.getShortValue("fontColor");
+						int underline = style.getIntValue("underline");
+						int typeOffset = style.getIntValue("typeOffset");
+						short backgroundColor = style
+								.getShortValue("backgroundColor");
 						boolean bold = style.getBooleanValue("bold");
 						boolean italic = style.getBooleanValue("italic");
+						boolean strikeout = style.getBooleanValue("strikeout");
 
 						StyleEntity styleEntity = new StyleEntity(styleName);
-						styleEntity.setHorizontal(horizontal);
-						styleEntity.setVertical(vertical);
-						styleEntity.setFontSize(fontSize);
-						styleEntity.setFontColor(fontColor);
+
+						if (horizontal > 0) {
+							styleEntity.setHorizontal(horizontal);
+						}
+
+						if (vertical > 0) {
+							styleEntity.setVertical(vertical);
+						}
+
+						if (StringUtils.isNotEmpty(fontName)) {
+							styleEntity.setFontName(fontName);
+						}
+
+						if (fontSize > 0) {
+							styleEntity.setFontSize(fontSize);
+						}
+
+						if (fontColor > 0) {
+							styleEntity.setFontColor(fontColor);
+						}
+
+						if (underline > 0) {
+							styleEntity.setUnderline(underline);
+						}
+
+						if (typeOffset > 0) {
+							styleEntity.setTypeOffset(typeOffset);
+						}
+
+						if (backgroundColor > 0) {
+							styleEntity.setBackgroundColor(backgroundColor);
+						}
+
 						styleEntity.setBold(bold);
 						styleEntity.setItalic(italic);
+						styleEntity.setStrikeout(strikeout);
 
 						styleList.add(styleEntity);
 					}
@@ -1168,23 +1419,57 @@ public class XLSUtils {
 					for (int i = 0; i < sheets.size(); i++) {
 						JSONObject sheet = sheets.getJSONObject(i);
 						String sheetName = sheet.getString("name");
+						JSONArray texts = sheet.getJSONArray("texts");
 						JSONArray titles = sheet.getJSONArray("titles");
 						JSONArray rows = sheet.getJSONArray("rows");
 
 						SheetEntity sheetEntity = new SheetEntity(sheetName);
 
+						// 判断是否有下拉列表
+						if (StringUtils.isNotEmpty(texts) && texts.size() > 0) {
+							List<TextListEntity> textList = new ArrayList<TextListEntity>();
+
+							// 遍历下拉列表
+							for (int j = 0; j < texts.size(); j++) {
+								JSONObject text = texts.getJSONObject(j);
+								JSONArray datas = text.getJSONArray("datas");
+
+								// 判断是否有下拉列表数据
+								if (StringUtils.isNotEmpty(datas)
+										&& datas.size() > 0) {
+									int firstRow = text.getIntValue("firstRow");
+									int lastRow = text.getIntValue("lastRow");
+									int firstColumn = text
+											.getIntValue("firstColumn");
+									int lastColumn = text
+											.getIntValue("lastColumn");
+
+									TextListEntity textListEntity = new TextListEntity(
+											datas.toJavaList(String.class),
+											firstRow, lastRow, firstColumn,
+											lastColumn);
+
+									textList.add(textListEntity);
+								}
+							}
+
+							sheetEntity.setTexts(textList);
+						}
+
 						// 判断是否有标题
-						if (titles.size() > 0) {
+						if (StringUtils.isNotEmpty(titles) && titles.size() > 0) {
 							List<TitleEntity> titleList = new ArrayList<TitleEntity>();
 
 							// 遍历标题
 							for (int j = 0; j < titles.size(); j++) {
 								JSONObject title = titles.getJSONObject(j);
 								String titleName = title.getString("name");
+								short height = title.getShortValue("height");
 								String styleName = title.getString("styleName");
 
 								TitleEntity titleEntity = new TitleEntity(
 										titleName);
+								titleEntity.setHeight(height);
 								titleEntity.setStyleName(styleName);
 
 								titleList.add(titleEntity);
@@ -1194,7 +1479,7 @@ public class XLSUtils {
 						}
 
 						// 判断是否有行数据
-						if (rows.size() > 0) {
+						if (StringUtils.isNotEmpty(rows) && rows.size() > 0) {
 							List<RowEntity> rowList = new ArrayList<RowEntity>();
 
 							// 遍历行数据
@@ -1204,10 +1489,15 @@ public class XLSUtils {
 								JSONArray cells = row.getJSONArray("cells");
 
 								RowEntity rowEntity = new RowEntity();
-								rowEntity.setHeight(height);
+
+								// 判断是否设置行高度
+								if (height > 0) {
+									rowEntity.setHeight(height);
+								}
 
 								// 判断是否单元格数据
-								if (cells.size() > 0) {
+								if (StringUtils.isNotEmpty(cells)
+										&& cells.size() > 0) {
 									List<CellEntity> cellList = new ArrayList<CellEntity>();
 
 									// 遍历单元格数据
@@ -1283,29 +1573,89 @@ public class XLSUtils {
 					for (StyleEntity sEntity : styleList) {
 						cellStyle = workbook.createCellStyle();
 						String styleName = sEntity.getName();
+						String fontName = sEntity.getFontName();
 						short fontSize = sEntity.getFontSize();
 						short fontColor = sEntity.getFontColor();
+						int underline = sEntity.getUnderline();
+						int typeOffset = sEntity.getTypeOffset();
+						short backgroundColor = sEntity.getBackgroundColor();
 						boolean bold = sEntity.getBold();
 						boolean italic = sEntity.getItalic();
+						boolean strikeout = sEntity.getStrikeout();
 
-						// 判断是否有字体大小、字体颜色、加粗或斜体
-						if (fontSize > 0 || fontColor > 0 || bold || italic) {
+						// 判断是否有字体名称、字体大小、字体颜色、下划线、加粗、斜体或删除线
+						if (StringUtils.isNotEmpty(fontName) || fontSize > 0
+								|| fontColor > 0 || underline > 0
+								|| typeOffset > 0 || backgroundColor > 0
+								|| bold || italic || strikeout) {
 							font = workbook.createFont();
 
+							// 设置字体名称
+							if (StringUtils.isNotEmpty(fontName)) {
+								font.setFontName(fontName);
+							}
+
+							// 设置字体大小
 							if (fontSize > 0) {
 								font.setFontHeightInPoints(fontSize);
 							}
 
+							// 设置字体颜色
 							if (fontColor > 0) {
 								font.setColor(fontColor);
 							}
 
+							// 设置下划线
+							if (underline > 0) {
+								byte fontUnderline = Font.U_NONE;
+
+								switch (sEntity.getUnderline()) {
+								case 1:
+									fontUnderline = Font.U_SINGLE;
+									break;
+								case 2:
+									fontUnderline = Font.U_DOUBLE;
+									break;
+								case 3:
+									fontUnderline = Font.U_SINGLE_ACCOUNTING;
+									break;
+								case 4:
+									fontUnderline = Font.U_DOUBLE_ACCOUNTING;
+									break;
+								}
+
+								font.setUnderline(fontUnderline);
+							}
+
+							// 设置上下标
+							if (typeOffset > 0) {
+								short fontFormatting = FontFormatting.SS_NONE;
+
+								switch (typeOffset) {
+								case 1:
+									fontFormatting = FontFormatting.SS_SUPER;
+									break;
+								case 2:
+									fontFormatting = FontFormatting.SS_SUB;
+									break;
+								}
+
+								font.setTypeOffset(fontFormatting);
+							}
+
+							// 设置粗体
 							if (bold) {
 								font.setBold(bold);
 							}
 
+							// 设置斜体
 							if (italic) {
 								font.setItalic(italic);
+							}
+
+							// 设置删除线
+							if (strikeout) {
+								font.setStrikeout(strikeout);
 							}
 
 							cellStyle.setFont(font);
@@ -1317,10 +1667,25 @@ public class XLSUtils {
 						// 设置水平位置
 						switch (sEntity.getHorizontal()) {
 						case 1:
+							horizontal = HorizontalAlignment.GENERAL;
+							break;
+						case 2:
 							horizontal = HorizontalAlignment.LEFT;
 							break;
-						case 3:
+						case 4:
 							horizontal = HorizontalAlignment.RIGHT;
+							break;
+						case 5:
+							horizontal = HorizontalAlignment.FILL;
+							break;
+						case 6:
+							horizontal = HorizontalAlignment.JUSTIFY;
+							break;
+						case 7:
+							horizontal = HorizontalAlignment.CENTER_SELECTION;
+							break;
+						case 8:
+							horizontal = HorizontalAlignment.DISTRIBUTED;
 							break;
 						}
 
@@ -1340,6 +1705,13 @@ public class XLSUtils {
 							break;
 						}
 
+						// 设置背景颜色
+						if (backgroundColor > 0) {
+							cellStyle.setFillForegroundColor(backgroundColor);
+							cellStyle
+									.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+						}
+
 						cellStyle.setAlignment(horizontal);
 						cellStyle.setVerticalAlignment(vertical);
 						cellStyle.setBorderLeft(BorderStyle.THIN);
@@ -1356,11 +1728,36 @@ public class XLSUtils {
 					// 遍历数据
 					for (SheetEntity shEntity : sheetList) {
 						String sheetName = shEntity.getName();
+						List<TextListEntity> textList = shEntity.getTexts();
 						List<TitleEntity> titleList = shEntity.getTitles();
 						List<RowEntity> rowList = shEntity.getRows();
 
 						int rowIndex = 0;
 						sheet = workbook.createSheet(sheetName);
+
+						// 判断是否有下拉列表数据
+						if (textList.size() > 0) {
+							// 遍历下拉列表数据
+							for (TextListEntity textListEntity : textList) {
+								String[] datas = new String[] {};
+
+								// 设置下拉列表作用的单元格(firstRow、lastRow、firstColumn、lastColumn)
+								CellRangeAddressList regions = new CellRangeAddressList(
+										textListEntity.getFirstRow(),
+										textListEntity.getLastRow(),
+										textListEntity.getFirstColumn(),
+										textListEntity.getLastColumn());
+								XSSFDataValidationHelper validationHelper = new XSSFDataValidationHelper(
+										sheet);
+								XSSFDataValidationConstraint constraint = (XSSFDataValidationConstraint) validationHelper
+										.createExplicitListConstraint(textListEntity
+												.getDatas().toArray(datas));
+								XSSFDataValidation dataValidation = (XSSFDataValidation) validationHelper
+										.createValidation(constraint, regions);
+								// 将有效性验证添加到表单
+								sheet.addValidationData(dataValidation);
+							}
+						}
 
 						// 判断是否有合并的标题数据
 						if (titleList.size() > 0) {

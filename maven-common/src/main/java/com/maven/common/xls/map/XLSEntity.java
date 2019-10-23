@@ -1,5 +1,6 @@
 package com.maven.common.xls.map;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,10 +12,10 @@ import java.util.List;
 public class XLSEntity {
 
 	// 样式集合
-	private List<StyleEntity> styles;
+	private List<StyleEntity> styles = new ArrayList<StyleEntity>();
 
 	// 工作簿集合
-	private List<SheetEntity> sheets;
+	private List<SheetEntity> sheets = new ArrayList<SheetEntity>();
 
 	public List<StyleEntity> getStyles() {
 		return styles;
