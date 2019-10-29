@@ -41,6 +41,7 @@
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
 		<quartz.version>2.3.1</quartz.version>
+		<elasticsearch.version>7.4.1</elasticsearch.version>
 	</properties>
 
 	<dependencyManagement>
@@ -431,6 +432,26 @@
 				<version>${quartz.version}</version>
 			</dependency>
 			<!-- Quartz End -->
+
+			<!-- Elasticsearch Start -->
+			<dependency>
+				<groupId>org.elasticsearch</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>transport</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-high-level-client</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
+			<!-- Elasticsearch End -->
 		</dependencies>
 	</dependencyManagement>
 </project>

@@ -1,15 +1,18 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Sheet实体类
+ * 工作簿实体类
  * 
  * @author chenjian
  * @createDate 2019-10-18
  */
-public class SheetEntity {
+public class SheetEntity implements Serializable {
+
+	private static final long serialVersionUID = 4064347468868958296L;
 
 	// 名称
 	private String name;
@@ -23,6 +26,12 @@ public class SheetEntity {
 	// 行数据集合
 	private List<RowEntity> rows = new ArrayList<RowEntity>();
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param name
+	 *            名称
+	 */
 	public SheetEntity(String name) {
 		this.name = name;
 	}

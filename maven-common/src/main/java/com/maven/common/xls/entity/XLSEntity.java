@@ -1,5 +1,6 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,9 @@ import java.util.List;
  * @author chenjian
  * @createDate 2019-10-18
  */
-public class XLSEntity {
+public class XLSEntity implements Serializable {
+
+	private static final long serialVersionUID = 8206054496729990990L;
 
 	// 样式集合
 	private List<StyleEntity> styles = new ArrayList<StyleEntity>();

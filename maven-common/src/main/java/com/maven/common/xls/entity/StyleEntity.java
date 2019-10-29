@@ -1,12 +1,16 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
+
+import java.io.Serializable;
 
 /**
- * Style信息
+ * 样式实体类
  * 
  * @author chenjian
  * @createDate 2019-10-18
  */
-public class StyleEntity {
+public class StyleEntity implements Serializable {
+
+	private static final long serialVersionUID = 1156778728803251636L;
 
 	// 名称
 	private String name;
@@ -44,6 +48,12 @@ public class StyleEntity {
 	// 是否删除线
 	private Boolean strikeout = false;
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param name
+	 *            名称
+	 */
 	public StyleEntity(String name) {
 		this.name = name;
 	}

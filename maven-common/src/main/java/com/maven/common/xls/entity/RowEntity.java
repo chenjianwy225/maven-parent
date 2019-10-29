@@ -1,15 +1,18 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Row实体类
+ * 行实体类
  * 
  * @author chenjian
  * @createDate 2019-10-18
  */
-public class RowEntity {
+public class RowEntity implements Serializable {
+
+	private static final long serialVersionUID = 814731542716078757L;
 
 	// 高度
 	private short height = 300;

@@ -1,12 +1,16 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
+
+import java.io.Serializable;
 
 /**
- * Cell实体类
+ * 单元格实体类
  * 
  * @author chenjian
  * @createDate 2019-10-18
  */
-public class CellEntity {
+public class CellEntity implements Serializable {
+
+	private static final long serialVersionUID = -4636375039400864460L;
 
 	// 内容值
 	private Object value;
@@ -17,6 +21,12 @@ public class CellEntity {
 	// 样式名称
 	private String styleName;
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param value
+	 *            内容值
+	 */
 	public CellEntity(Object value) {
 		this.value = value;
 	}

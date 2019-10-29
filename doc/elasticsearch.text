@@ -1,0 +1,33 @@
+PUT studentindex
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "text"
+      },
+      "userName": {
+        "type": "text",
+        "fielddata": true
+      },
+      "nickName": {
+        "type": "text",
+        "fielddata": true
+      },
+      "sex": {
+        "type": "text",
+        "fielddata": true
+      },
+      "age": {
+        "type": "integer"
+      },
+      "address": {
+        "type": "text",
+        "fielddata": true
+      }
+    }
+  }
+}

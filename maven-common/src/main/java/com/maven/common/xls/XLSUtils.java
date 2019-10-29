@@ -49,13 +49,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.maven.common.StringUtils;
 import com.maven.common.date.DateUtils;
-import com.maven.common.xls.map.CellEntity;
-import com.maven.common.xls.map.RowEntity;
-import com.maven.common.xls.map.SheetEntity;
-import com.maven.common.xls.map.StyleEntity;
-import com.maven.common.xls.map.TextListEntity;
-import com.maven.common.xls.map.TitleEntity;
-import com.maven.common.xls.map.XLSEntity;
+import com.maven.common.xls.entity.CellEntity;
+import com.maven.common.xls.entity.RowEntity;
+import com.maven.common.xls.entity.SheetEntity;
+import com.maven.common.xls.entity.StyleEntity;
+import com.maven.common.xls.entity.TextListEntity;
+import com.maven.common.xls.entity.TitleEntity;
+import com.maven.common.xls.entity.XLSEntity;
 
 /**
  * 读写XLS类

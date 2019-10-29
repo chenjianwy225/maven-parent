@@ -1,17 +1,20 @@
-package com.maven.common.xls.map;
+package com.maven.common.xls.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TextList实体类
+ * 下拉实体类
  * 
  * @author chenjian
  * @createDate 2019-10-23
  */
-public class TextListEntity {
+public class TextListEntity implements Serializable {
 
-	// 下拉数据集合
+	private static final long serialVersionUID = -2986835951998453054L;
+
+	// 数据集合
 	private List<String> datas = new ArrayList<String>();
 
 	// 开始行
@@ -26,6 +29,12 @@ public class TextListEntity {
 	// 结束列
 	private int lastColumn = 0;
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param datas
+	 *            数据集合
+	 */
 	public TextListEntity(List<String> datas) {
 		this.datas = datas;
 	}
