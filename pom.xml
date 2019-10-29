@@ -35,7 +35,7 @@
 		<fileupload.version>1.4</fileupload.version>
 		<servlet.version>4.0.1</servlet.version>
 		<redis.version>2.9.3</redis.version>
-		<jackson.version>2.9.9</jackson.version>
+		<jackson.version>2.10.0</jackson.version>
 		<httpclient.version>3.1</httpclient.version>
 		<httpcomponents.version>4.5.10</httpcomponents.version>
 		<xmlbeans.version>3.1.0</xmlbeans.version>
