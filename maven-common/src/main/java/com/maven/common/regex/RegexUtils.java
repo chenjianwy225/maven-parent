@@ -6,6 +6,11 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.maven.common.StringUtils;
+
 /**
  * 正则表达式验证类
  * 
@@ -13,6 +18,8 @@ import java.util.regex.Pattern;
  * @createDate 2019-01-02
  */
 public class RegexUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(RegexUtils.class);
 
 	// 邮箱正则表达式
 	private static final String REGEX_EMAIL = "^([\\w-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
@@ -195,78 +202,88 @@ public class RegexUtils {
 	 */
 	public static boolean isIDCard(String source, boolean isDetail) {
 		boolean res = false;
-		int lens = source.length();
 
 		try {
-			// 判断身份证长度
-			if (lens == 15 || lens == 18) {
-				// 判断是否详细验证
-				if (isDetail) {
-					String Ai = "";
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source)) {
+				int lens = source.length();
 
-					if (lens == 18) {
-						Ai = source.substring(0, 17);
-					} else if (lens == 15) {
-						Ai = source.substring(0, 6) + "19"
-								+ source.substring(6, 15);
-					}
+				// 判断身份证长度
+				if (lens == 15 || lens == 18) {
+					// 判断是否详细验证
+					if (isDetail) {
+						String Ai = "";
 
-					// 判断是否是否数字
-					if (isNumber(Ai)) {
-						String year = Ai.substring(6, 10);// 年份
-						String month = Ai.substring(10, 12);// 月份
-						String day = Ai.substring(12, 14);// 月份
+						if (lens == 18) {
+							Ai = source.substring(0, 17);
+						} else if (lens == 15) {
+							Ai = source.substring(0, 6) + "19"
+									+ source.substring(6, 15);
+						}
 
-						// 判断日期是否有效
-						if (isDate(year + "-" + month + "-" + day, false)) {
-							Calendar calendar = Calendar.getInstance();
-							SimpleDateFormat s = new SimpleDateFormat(
-									"yyyy-MM-dd");
+						// 判断是否是否数字
+						if (isNumber(Ai)) {
+							String year = Ai.substring(6, 10);// 年份
+							String month = Ai.substring(10, 12);// 月份
+							String day = Ai.substring(12, 14);// 月份
 
-							// 判断年份
-							if ((calendar.get(Calendar.YEAR) - Integer
-									.parseInt(year)) < 150
-									&& Integer.parseInt(month) > 0
-									&& Integer.parseInt(month) <= 12
-									&& Integer.parseInt(day) > 0
-									&& Integer.parseInt(day) <= 31
-									&& (calendar.getTime().getTime() - s.parse(
-											year + "-" + month + "-" + day)
-											.getTime()) > 0) {
-								Hashtable<?, ?> h = GetAreaCode();
+							// 判断日期是否有效
+							if (isDate(year + "-" + month + "-" + day, false)) {
+								Calendar calendar = Calendar.getInstance();
+								SimpleDateFormat s = new SimpleDateFormat(
+										"yyyy-MM-dd");
 
-								// 判断省级编号是否存在
-								if (h.containsKey(Ai.substring(0, 2))) {
-									if (lens == 18) {
-										int TotalmulAiWi = 0;
-										for (int i = 0; i < 17; i++) {
-											TotalmulAiWi += +Integer
-													.parseInt(String.valueOf(Ai
-															.charAt(i)))
-													* Integer.parseInt(Wi[i]);
-										}
-										int modValue = TotalmulAiWi % 11;
+								// 判断年份
+								if ((calendar.get(Calendar.YEAR) - Integer
+										.parseInt(year)) < 150
+										&& Integer.parseInt(month) > 0
+										&& Integer.parseInt(month) <= 12
+										&& Integer.parseInt(day) > 0
+										&& Integer.parseInt(day) <= 31
+										&& (calendar.getTime().getTime() - s
+												.parse(year + "-" + month + "-"
+														+ day).getTime()) > 0) {
+									Hashtable<?, ?> h = GetAreaCode();
 
-										if (ValCodeArr[modValue]
-												.equalsIgnoreCase(source
-														.substring(17))) {
-											res = true;
+									// 判断省级编号是否存在
+									if (h.containsKey(Ai.substring(0, 2))) {
+										if (lens == 18) {
+											int TotalmulAiWi = 0;
+											for (int i = 0; i < 17; i++) {
+												TotalmulAiWi += +Integer
+														.parseInt(String.valueOf(Ai
+																.charAt(i)))
+														* Integer
+																.parseInt(Wi[i]);
+											}
+											int modValue = TotalmulAiWi % 11;
+
+											if (ValCodeArr[modValue]
+													.equalsIgnoreCase(source
+															.substring(17))) {
+												res = true;
+											}
 										}
 									}
 								}
 							}
 						}
-					}
-				} else {
-					if (lens == 15) {
-						res = match(source, REGEX_IDCARD_FIFTEEN);
-					} else if (lens == 18) {
-						res = match(source, REGEX_IDCARD_EIGHTEEN);
+					} else {
+						if (lens == 15) {
+							res = match(source, REGEX_IDCARD_FIFTEEN);
+						} else if (lens == 18) {
+							res = match(source, REGEX_IDCARD_EIGHTEEN);
+						}
 					}
 				}
+
+				logger.info("Judge success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Judge error");
 		}
 
 		return res;
@@ -386,9 +403,25 @@ public class RegexUtils {
 	 * @return 如果source符合regex的正则表达式格式,返回true;否则返回false
 	 */
 	public static boolean match(String source, String regex) {
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(source);
-		return matcher.matches();
+		boolean result = false;
+
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(regex)) {
+				Pattern pattern = Pattern.compile(regex);
+				Matcher matcher = pattern.matcher(source);
+				result = matcher.matches();
+
+				logger.error("Judge success");
+			} else {
+				logger.info("Parameter error");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Judge error");
+		}
+
+		return result;
 	}
 
 	/**

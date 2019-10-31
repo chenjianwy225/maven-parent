@@ -81,7 +81,7 @@ public class DOCUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONObject数据
 	 */
 	public static JSONObject read(String filePath) {
 		JSONObject jsonObject = null;
@@ -175,6 +175,7 @@ public class DOCUtils {
 	 *            2、'value':数据(段落为String、表格为List<List<object>>、图片为byte[])
 	 *            3、'width':图片宽度(只用于图片,不设默认400px)
 	 *            4、'height':图片高度(只用于图片,不设默认300px)
+	 * @return byte数组
 	 */
 	public static byte[] write(JSONArray jsonArray) {
 		ByteArrayOutputStream outputStream = null;
@@ -218,7 +219,7 @@ public class DOCUtils {
 	 *            段落为String、表格为List<List<object>>、图片为byte[] ）
 	 *            3、'width':图片宽度(只用于图片,不设默认400px)
 	 *            4、'height':图片高度(只用于图片,不设默认300px)
-	 * @return
+	 * @return XWPFDocument对象
 	 */
 	private static XWPFDocument getXWPFDocument(JSONArray jsonArray) {
 		XWPFDocument document = null;
@@ -306,7 +307,7 @@ public class DOCUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONObject对象
 	 */
 	private static JSONObject readDOC(String filePath) {
 		JSONObject jsonObject = null;
@@ -397,7 +398,7 @@ public class DOCUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONObject对象
 	 */
 	private static JSONObject readDOCX(String filePath) {
 		JSONObject jsonObject = null;

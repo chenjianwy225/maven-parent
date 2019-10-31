@@ -304,7 +304,7 @@ public class ImageUtils {
 	public static boolean zoomImage(String picPath, String extName, double scale) {
 		boolean result = true;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
 				&& scale > 0) {
 			File file = new File(picPath);
@@ -344,7 +344,7 @@ public class ImageUtils {
 			String fileName, double scale) {
 		boolean result = true;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
 				&& StringUtils.isNotEmpty(fileName) && scale > 0) {
 			File file = new File(picPath);
@@ -389,7 +389,7 @@ public class ImageUtils {
 	public static boolean zoomImage(String picPath, String extName, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
 				&& w > 0 && h > 0) {
 			File file = new File(picPath);
@@ -427,7 +427,7 @@ public class ImageUtils {
 			String fileName, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
 				&& StringUtils.isNotEmpty(fileName) && w > 0 && h > 0) {
 			File file = new File(picPath);
@@ -472,7 +472,7 @@ public class ImageUtils {
 			int position, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
 				&& w > 0 && h > 0) {
 			File file = new File(picPath);
@@ -514,7 +514,7 @@ public class ImageUtils {
 			String fileName, int position, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
 				&& StringUtils.isNotEmpty(fileName) && w > 0 && h > 0) {
 			File file = new File(picPath);
@@ -563,7 +563,7 @@ public class ImageUtils {
 			int y, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
 				&& x >= 0 && y >= 0 && w > 0 && h > 0) {
 			File file = new File(picPath);
@@ -605,7 +605,7 @@ public class ImageUtils {
 			String fileName, int x, int y, int w, int h) {
 		boolean result = false;
 
-		// 判断参数
+		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
 				&& StringUtils.isNotEmpty(fileName) && x >= 0 && y >= 0
 				&& w > 0 && h > 0) {

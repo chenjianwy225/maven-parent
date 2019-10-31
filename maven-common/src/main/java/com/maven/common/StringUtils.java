@@ -1,6 +1,8 @@
 package com.maven.common;
 
-import com.alibaba.fastjson.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -11,32 +13,43 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class StringUtils {
 
+	private static Logger logger = LoggerFactory.getLogger(StringUtils.class);
+
 	/**
 	 * 判断Object是否为空
 	 * 
 	 * @param object
-	 * @return
+	 *            验证对象
+	 * @return 是否为空
 	 */
 	public static boolean isEmpty(Object object) {
-		boolean res = false;
+		boolean result = false;
 
-		if (object == null) {
-			res = true;
-		} else if (object.toString().trim().equalsIgnoreCase("")) {
-			res = true;
-		} else if (object.toString().trim().toLowerCase()
-				.equalsIgnoreCase("null")) {
-			res = true;
+		try {
+			if (object == null) {
+				result = true;
+			} else if (object.toString().trim().equalsIgnoreCase("")) {
+				result = true;
+			} else if (object.toString().trim().toLowerCase()
+					.equalsIgnoreCase("null")) {
+				result = true;
+			}
+
+			logger.info("Judge success");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Judge error");
 		}
 
-		return res;
+		return result;
 	}
 
 	/**
 	 * 判断Object是否不为空
 	 * 
 	 * @param object
-	 * @return
+	 *            验证对象
+	 * @return 是否不为空
 	 */
 	public static boolean isNotEmpty(Object object) {
 		return !isEmpty(object);
@@ -46,18 +59,28 @@ public class StringUtils {
 	 * 判断Object是否JSON格式
 	 * 
 	 * @param object
-	 * @return
+	 *            验证对象
+	 * @return 是否JSON格式
 	 */
 	public static boolean isJson(Object object) {
+		boolean result = false;
+
 		try {
 			JSONObject.parseObject(object.toString());
-		} catch (JSONException ex) {
+			result = true;
+
+			logger.error("Judge success");
+		} catch (Exception e) {
 			try {
 				JSONObject.parseArray(object.toString());
-			} catch (JSONException ex1) {
-				return false;
+				result = true;
+
+				logger.error("Judge success");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				logger.error("Judge error");
 			}
 		}
-		return true;
+		return result;
 	}
 }

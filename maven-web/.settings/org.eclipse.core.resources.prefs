@@ -4,4 +4,5 @@ encoding//src/main/resources/common/log4j.properties=UTF-8
 encoding//src/main/resources/common/quartz.properties=UTF-8
 encoding//src/main/resources/common/redis.properties=UTF-8
 encoding//src/main/resources/demo.properties=UTF-8
+encoding//src/main/resources/es.properties=UTF-8
 encoding//src/main/resources/ftp.properties=UTF-8

@@ -32,6 +32,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.maven.common.StringUtils;
 
@@ -42,6 +44,9 @@ import com.maven.common.StringUtils;
  * @createDate 2019-09-10
  */
 public class HttpComponentsUtils {
+
+	private static Logger logger = LoggerFactory
+			.getLogger(HttpComponentsUtils.class);
 
 	/**
 	 * Get请求
@@ -62,77 +67,86 @@ public class HttpComponentsUtils {
 		HttpGet httpGet = null;
 
 		try {
-			httpClient = HttpClientBuilder.create().build();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(url)) {
+				httpClient = HttpClientBuilder.create().build();
 
-			// 判断是否有参数
-			if (StringUtils.isNotEmpty(params) && params.size() > 0) {
-				Iterator<Entry<String, Object>> iterator = params.entrySet()
-						.iterator();
+				// 判断是否有参数
+				if (StringUtils.isNotEmpty(params) && params.size() > 0) {
+					Iterator<Entry<String, Object>> iterator = params
+							.entrySet().iterator();
 
-				String paramUrl = "";
-				while (iterator.hasNext()) {
-					Entry<String, Object> entry = iterator.next();
+					String paramUrl = "";
+					while (iterator.hasNext()) {
+						Entry<String, Object> entry = iterator.next();
 
-					paramUrl += "&"
-							+ entry.getKey()
-							+ "="
-							+ URLEncoder.encode(entry.getValue().toString(),
-									"utf-8");
-				}
-
-				url += "?" + paramUrl.substring(1);
-			}
-
-			httpGet = new HttpGet(url);
-
-			// 配置信息
-			RequestConfig requestConfig = RequestConfig.custom()
-			// 设置连接超时时间(单位毫秒)
-					.setConnectTimeout(5000)
-					// 设置请求超时时间(单位毫秒)
-					.setConnectionRequestTimeout(5000)
-					// socket读写超时时间(单位毫秒)
-					.setSocketTimeout(5000)
-					// 设置是否允许重定向(默认为true)
-					.setRedirectsEnabled(true).build();
-
-			// 将上面的配置信息 运用到这个Get请求里
-			httpGet.setConfig(requestConfig);
-
-			// 设置Token到Header
-			if (StringUtils.isNotEmpty(token)) {
-				httpGet.setHeader("token", token);
-			}
-
-			// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
-			httpGet.setHeader("Content-Type", "application/json;charset=UTF-8");
-
-			// 由客户端执行(发送)Get请求
-			response = httpClient.execute(httpGet);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode == HttpStatus.SC_OK) {
-				// 从响应模型中获取响应实体
-				HttpEntity responseEntity = response.getEntity();
-
-				if (StringUtils.isNotEmpty(responseEntity)) {
-					Header[] headers = response.getHeaders("token");
-
-					if (headers.length > 0) {
-						token = headers[0].getValue();
+						paramUrl += "&"
+								+ entry.getKey()
+								+ "="
+								+ URLEncoder.encode(
+										entry.getValue().toString(), "utf-8");
 					}
 
-					result = JSONObject.fromObject(EntityUtils
-							.toString(responseEntity));
+					url += "?" + paramUrl.substring(1);
+				}
 
-					if (StringUtils.isNotEmpty(token)) {
-						result.put("token", token);
+				httpGet = new HttpGet(url);
+
+				// 配置信息
+				RequestConfig requestConfig = RequestConfig.custom()
+				// 设置连接超时时间(单位毫秒)
+						.setConnectTimeout(5000)
+						// 设置请求超时时间(单位毫秒)
+						.setConnectionRequestTimeout(5000)
+						// socket读写超时时间(单位毫秒)
+						.setSocketTimeout(5000)
+						// 设置是否允许重定向(默认为true)
+						.setRedirectsEnabled(true).build();
+
+				// 将上面的配置信息 运用到这个Get请求里
+				httpGet.setConfig(requestConfig);
+
+				// 设置Token到Header
+				if (StringUtils.isNotEmpty(token)) {
+					httpGet.setHeader("token", token);
+				}
+
+				// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
+				httpGet.setHeader("Content-Type",
+						"application/json;charset=UTF-8");
+
+				// 由客户端执行(发送)Get请求
+				response = httpClient.execute(httpGet);
+
+				int statusCode = response.getStatusLine().getStatusCode();
+
+				if (statusCode == HttpStatus.SC_OK) {
+					// 从响应模型中获取响应实体
+					HttpEntity responseEntity = response.getEntity();
+
+					if (StringUtils.isNotEmpty(responseEntity)) {
+						Header[] headers = response.getHeaders("token");
+
+						if (headers.length > 0) {
+							token = headers[0].getValue();
+						}
+
+						result = JSONObject.fromObject(EntityUtils
+								.toString(responseEntity));
+
+						if (StringUtils.isNotEmpty(token)) {
+							result.put("token", token);
+						}
 					}
 				}
+
+				logger.info("Get request success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Get request success");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(httpClient)) {
@@ -176,80 +190,90 @@ public class HttpComponentsUtils {
 		URI uri = null;
 
 		try {
-			httpClient = HttpClientBuilder.create().build();
-			URIBuilder builder = new URIBuilder();
-			builder.setScheme(scheme);
-			builder.setHost(host);
-			builder.setPort(port);
-			builder.setPath(path);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(scheme) && StringUtils.isNotEmpty(host)
+					&& port > 0 && StringUtils.isNotEmpty(path)) {
+				httpClient = HttpClientBuilder.create().build();
+				URIBuilder builder = new URIBuilder();
+				builder.setScheme(scheme);
+				builder.setHost(host);
+				builder.setPort(port);
+				builder.setPath(path);
 
-			// 判断是否有参数
-			if (StringUtils.isNotEmpty(params) && params.size() > 0) {
-				List<NameValuePair> nameValuePair = new ArrayList<>();
-				Iterator<Entry<String, Object>> iterator = params.entrySet()
-						.iterator();
+				// 判断是否有参数
+				if (StringUtils.isNotEmpty(params) && params.size() > 0) {
+					List<NameValuePair> nameValuePair = new ArrayList<>();
+					Iterator<Entry<String, Object>> iterator = params
+							.entrySet().iterator();
 
-				while (iterator.hasNext()) {
-					Entry<String, Object> entry = iterator.next();
+					while (iterator.hasNext()) {
+						Entry<String, Object> entry = iterator.next();
 
-					nameValuePair.add(new BasicNameValuePair(entry.getKey(),
-							entry.getValue().toString()));
-				}
-
-				builder.setParameters(nameValuePair);
-			}
-
-			uri = builder.build();
-			httpGet = new HttpGet(uri);
-
-			// 配置信息
-			RequestConfig requestConfig = RequestConfig.custom()
-			// 设置连接超时时间(单位毫秒)
-					.setConnectTimeout(5000)
-					// 设置请求超时时间(单位毫秒)
-					.setConnectionRequestTimeout(5000)
-					// socket读写超时时间(单位毫秒)
-					.setSocketTimeout(5000)
-					// 设置是否允许重定向(默认为true)
-					.setRedirectsEnabled(true).build();
-
-			// 将上面的配置信息 运用到这个Get请求里
-			httpGet.setConfig(requestConfig);
-
-			// 设置Token到Header
-			if (StringUtils.isNotEmpty(token)) {
-				httpGet.setHeader("token", token);
-			}
-
-			// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
-			httpGet.setHeader("Content-Type", "application/json;charset=UTF-8");
-
-			// 由客户端执行(发送)Get请求
-			response = httpClient.execute(httpGet);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode == HttpStatus.SC_OK) {
-				// 从响应模型中获取响应实体
-				HttpEntity responseEntity = response.getEntity();
-
-				if (StringUtils.isNotEmpty(responseEntity)) {
-					Header[] headers = response.getHeaders("token");
-
-					if (headers.length > 0) {
-						token = headers[0].getValue();
+						nameValuePair.add(new BasicNameValuePair(
+								entry.getKey(), entry.getValue().toString()));
 					}
 
-					result = JSONObject.fromObject(EntityUtils
-							.toString(responseEntity));
+					builder.setParameters(nameValuePair);
+				}
 
-					if (StringUtils.isNotEmpty(token)) {
-						result.put("token", token);
+				uri = builder.build();
+				httpGet = new HttpGet(uri);
+
+				// 配置信息
+				RequestConfig requestConfig = RequestConfig.custom()
+				// 设置连接超时时间(单位毫秒)
+						.setConnectTimeout(5000)
+						// 设置请求超时时间(单位毫秒)
+						.setConnectionRequestTimeout(5000)
+						// socket读写超时时间(单位毫秒)
+						.setSocketTimeout(5000)
+						// 设置是否允许重定向(默认为true)
+						.setRedirectsEnabled(true).build();
+
+				// 将上面的配置信息 运用到这个Get请求里
+				httpGet.setConfig(requestConfig);
+
+				// 设置Token到Header
+				if (StringUtils.isNotEmpty(token)) {
+					httpGet.setHeader("token", token);
+				}
+
+				// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
+				httpGet.setHeader("Content-Type",
+						"application/json;charset=UTF-8");
+
+				// 由客户端执行(发送)Get请求
+				response = httpClient.execute(httpGet);
+
+				int statusCode = response.getStatusLine().getStatusCode();
+
+				if (statusCode == HttpStatus.SC_OK) {
+					// 从响应模型中获取响应实体
+					HttpEntity responseEntity = response.getEntity();
+
+					if (StringUtils.isNotEmpty(responseEntity)) {
+						Header[] headers = response.getHeaders("token");
+
+						if (headers.length > 0) {
+							token = headers[0].getValue();
+						}
+
+						result = JSONObject.fromObject(EntityUtils
+								.toString(responseEntity));
+
+						if (StringUtils.isNotEmpty(token)) {
+							result.put("token", token);
+						}
 					}
 				}
+
+				logger.info("Get request success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Get request error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(httpClient)) {
@@ -286,77 +310,86 @@ public class HttpComponentsUtils {
 		HttpPost httpPost = null;
 
 		try {
-			httpClient = HttpClientBuilder.create().build();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(url)) {
+				httpClient = HttpClientBuilder.create().build();
 
-			// 判断是否有参数
-			if (StringUtils.isNotEmpty(params) && params.size() > 0) {
-				Iterator<Entry<String, Object>> iterator = params.entrySet()
-						.iterator();
+				// 判断是否有参数
+				if (StringUtils.isNotEmpty(params) && params.size() > 0) {
+					Iterator<Entry<String, Object>> iterator = params
+							.entrySet().iterator();
 
-				String paramUrl = "";
-				while (iterator.hasNext()) {
-					Entry<String, Object> entry = iterator.next();
+					String paramUrl = "";
+					while (iterator.hasNext()) {
+						Entry<String, Object> entry = iterator.next();
 
-					paramUrl += "&"
-							+ entry.getKey()
-							+ "="
-							+ URLEncoder.encode(entry.getValue().toString(),
-									"utf-8");
-				}
-
-				url += "?" + paramUrl.substring(1);
-			}
-
-			httpPost = new HttpPost(url);
-
-			// 配置信息
-			RequestConfig requestConfig = RequestConfig.custom()
-			// 设置连接超时时间(单位毫秒)
-					.setConnectTimeout(5000)
-					// 设置请求超时时间(单位毫秒)
-					.setConnectionRequestTimeout(5000)
-					// socket读写超时时间(单位毫秒)
-					.setSocketTimeout(5000)
-					// 设置是否允许重定向(默认为true)
-					.setRedirectsEnabled(true).build();
-
-			// 将上面的配置信息 运用到这个Post请求里
-			httpPost.setConfig(requestConfig);
-
-			// 设置Token到Header
-			if (StringUtils.isNotEmpty(token)) {
-				httpPost.setHeader("token", token);
-			}
-
-			// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
-			httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");
-
-			// 由客户端执行(发送)Post请求
-			response = httpClient.execute(httpPost);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode == HttpStatus.SC_OK) {
-				// 从响应模型中获取响应实体
-				HttpEntity responseEntity = response.getEntity();
-
-				if (StringUtils.isNotEmpty(responseEntity)) {
-					Header[] headers = response.getHeaders("token");
-
-					if (headers.length > 0) {
-						token = headers[0].getValue();
+						paramUrl += "&"
+								+ entry.getKey()
+								+ "="
+								+ URLEncoder.encode(
+										entry.getValue().toString(), "utf-8");
 					}
 
-					result = JSONObject.fromObject(EntityUtils
-							.toString(responseEntity));
+					url += "?" + paramUrl.substring(1);
+				}
 
-					if (StringUtils.isNotEmpty(token)) {
-						result.put("token", token);
+				httpPost = new HttpPost(url);
+
+				// 配置信息
+				RequestConfig requestConfig = RequestConfig.custom()
+				// 设置连接超时时间(单位毫秒)
+						.setConnectTimeout(5000)
+						// 设置请求超时时间(单位毫秒)
+						.setConnectionRequestTimeout(5000)
+						// socket读写超时时间(单位毫秒)
+						.setSocketTimeout(5000)
+						// 设置是否允许重定向(默认为true)
+						.setRedirectsEnabled(true).build();
+
+				// 将上面的配置信息 运用到这个Post请求里
+				httpPost.setConfig(requestConfig);
+
+				// 设置Token到Header
+				if (StringUtils.isNotEmpty(token)) {
+					httpPost.setHeader("token", token);
+				}
+
+				// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
+				httpPost.setHeader("Content-Type",
+						"application/json;charset=UTF-8");
+
+				// 由客户端执行(发送)Post请求
+				response = httpClient.execute(httpPost);
+
+				int statusCode = response.getStatusLine().getStatusCode();
+
+				if (statusCode == HttpStatus.SC_OK) {
+					// 从响应模型中获取响应实体
+					HttpEntity responseEntity = response.getEntity();
+
+					if (StringUtils.isNotEmpty(responseEntity)) {
+						Header[] headers = response.getHeaders("token");
+
+						if (headers.length > 0) {
+							token = headers[0].getValue();
+						}
+
+						result = JSONObject.fromObject(EntityUtils
+								.toString(responseEntity));
+
+						if (StringUtils.isNotEmpty(token)) {
+							result.put("token", token);
+						}
 					}
 				}
+
+				logger.info("Post request success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Post request error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(httpClient)) {
@@ -400,80 +433,90 @@ public class HttpComponentsUtils {
 		URI uri = null;
 
 		try {
-			httpClient = HttpClientBuilder.create().build();
-			URIBuilder builder = new URIBuilder();
-			builder.setScheme(scheme);
-			builder.setHost(host);
-			builder.setPort(port);
-			builder.setPath(path);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(scheme) && StringUtils.isNotEmpty(host)
+					&& port > 0 && StringUtils.isNotEmpty(path)) {
+				httpClient = HttpClientBuilder.create().build();
+				URIBuilder builder = new URIBuilder();
+				builder.setScheme(scheme);
+				builder.setHost(host);
+				builder.setPort(port);
+				builder.setPath(path);
 
-			// 判断是否有参数
-			if (StringUtils.isNotEmpty(params) && params.size() > 0) {
-				List<NameValuePair> nameValuePair = new ArrayList<>();
-				Iterator<Entry<String, Object>> iterator = params.entrySet()
-						.iterator();
+				// 判断是否有参数
+				if (StringUtils.isNotEmpty(params) && params.size() > 0) {
+					List<NameValuePair> nameValuePair = new ArrayList<>();
+					Iterator<Entry<String, Object>> iterator = params
+							.entrySet().iterator();
 
-				while (iterator.hasNext()) {
-					Entry<String, Object> entry = iterator.next();
+					while (iterator.hasNext()) {
+						Entry<String, Object> entry = iterator.next();
 
-					nameValuePair.add(new BasicNameValuePair(entry.getKey(),
-							entry.getValue().toString()));
-				}
-
-				builder.setParameters(nameValuePair);
-			}
-
-			uri = builder.build();
-			httpPost = new HttpPost(uri);
-
-			// 配置信息
-			RequestConfig requestConfig = RequestConfig.custom()
-			// 设置连接超时时间(单位毫秒)
-					.setConnectTimeout(5000)
-					// 设置请求超时时间(单位毫秒)
-					.setConnectionRequestTimeout(5000)
-					// socket读写超时时间(单位毫秒)
-					.setSocketTimeout(5000)
-					// 设置是否允许重定向(默认为true)
-					.setRedirectsEnabled(true).build();
-
-			// 将上面的配置信息 运用到这个Post请求里
-			httpPost.setConfig(requestConfig);
-
-			// 设置Token到Header
-			if (StringUtils.isNotEmpty(token)) {
-				httpPost.setHeader("token", token);
-			}
-
-			// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
-			httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");
-
-			// 由客户端执行(发送)Get请求
-			response = httpClient.execute(httpPost);
-
-			int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode == HttpStatus.SC_OK) {
-				// 从响应模型中获取响应实体
-				HttpEntity responseEntity = response.getEntity();
-
-				if (StringUtils.isNotEmpty(responseEntity)) {
-					Header[] headers = response.getHeaders("token");
-
-					if (headers.length > 0) {
-						token = headers[0].getValue();
+						nameValuePair.add(new BasicNameValuePair(
+								entry.getKey(), entry.getValue().toString()));
 					}
 
-					result = JSONObject.fromObject(EntityUtils
-							.toString(responseEntity));
+					builder.setParameters(nameValuePair);
+				}
 
-					if (StringUtils.isNotEmpty(token)) {
-						result.put("token", token);
+				uri = builder.build();
+				httpPost = new HttpPost(uri);
+
+				// 配置信息
+				RequestConfig requestConfig = RequestConfig.custom()
+				// 设置连接超时时间(单位毫秒)
+						.setConnectTimeout(5000)
+						// 设置请求超时时间(单位毫秒)
+						.setConnectionRequestTimeout(5000)
+						// socket读写超时时间(单位毫秒)
+						.setSocketTimeout(5000)
+						// 设置是否允许重定向(默认为true)
+						.setRedirectsEnabled(true).build();
+
+				// 将上面的配置信息 运用到这个Post请求里
+				httpPost.setConfig(requestConfig);
+
+				// 设置Token到Header
+				if (StringUtils.isNotEmpty(token)) {
+					httpPost.setHeader("token", token);
+				}
+
+				// 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
+				httpPost.setHeader("Content-Type",
+						"application/json;charset=UTF-8");
+
+				// 由客户端执行(发送)Get请求
+				response = httpClient.execute(httpPost);
+
+				int statusCode = response.getStatusLine().getStatusCode();
+
+				if (statusCode == HttpStatus.SC_OK) {
+					// 从响应模型中获取响应实体
+					HttpEntity responseEntity = response.getEntity();
+
+					if (StringUtils.isNotEmpty(responseEntity)) {
+						Header[] headers = response.getHeaders("token");
+
+						if (headers.length > 0) {
+							token = headers[0].getValue();
+						}
+
+						result = JSONObject.fromObject(EntityUtils
+								.toString(responseEntity));
+
+						if (StringUtils.isNotEmpty(token)) {
+							result.put("token", token);
+						}
 					}
 				}
+
+				logger.info("Post request success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Post request error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(httpClient)) {
@@ -510,85 +553,93 @@ public class HttpComponentsUtils {
 		HttpPost httpPost = null;
 
 		try {
-			httpClient = HttpClientBuilder.create().build();
-			httpPost = new HttpPost(url);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(url)) {
+				httpClient = HttpClientBuilder.create().build();
+				httpPost = new HttpPost(url);
 
-			// 配置信息
-			RequestConfig requestConfig = RequestConfig.custom()
-			// 设置连接超时时间(单位毫秒)
-					.setConnectTimeout(5000)
-					// 设置请求超时时间(单位毫秒)
-					.setConnectionRequestTimeout(5000)
-					// socket读写超时时间(单位毫秒)
-					.setSocketTimeout(15000).build();
+				// 配置信息
+				RequestConfig requestConfig = RequestConfig.custom()
+				// 设置连接超时时间(单位毫秒)
+						.setConnectTimeout(5000)
+						// 设置请求超时时间(单位毫秒)
+						.setConnectionRequestTimeout(5000)
+						// socket读写超时时间(单位毫秒)
+						.setSocketTimeout(15000).build();
 
-			// 将上面的配置信息 运用到这个Post请求里
-			httpPost.setConfig(requestConfig);
+				// 将上面的配置信息 运用到这个Post请求里
+				httpPost.setConfig(requestConfig);
 
-			// 设置Token到Header
-			if (StringUtils.isNotEmpty(token)) {
-				httpPost.setHeader("token", token);
-			}
+				// 设置Token到Header
+				if (StringUtils.isNotEmpty(token)) {
+					httpPost.setHeader("token", token);
+				}
 
-			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder
-					.create();
+				MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder
+						.create();
 
-			// 判断是否有参数
-			if (StringUtils.isNotEmpty(params) && params.size() > 0) {
-				Iterator<Entry<String, Object>> iterator = params.entrySet()
-						.iterator();
+				// 判断是否有参数
+				if (StringUtils.isNotEmpty(params) && params.size() > 0) {
+					Iterator<Entry<String, Object>> iterator = params
+							.entrySet().iterator();
 
-				while (iterator.hasNext()) {
-					Entry<String, Object> entry = iterator.next();
-					String key = entry.getKey();
-					Object object = entry.getValue();
+					while (iterator.hasNext()) {
+						Entry<String, Object> entry = iterator.next();
+						String key = entry.getKey();
+						Object object = entry.getValue();
 
-					ContentBody contentBody = null;
-					if (object instanceof File) {
-						contentBody = new FileBody((File) object);
-					} else if (object instanceof InputStream) {
-						contentBody = new InputStreamBody((InputStream) object,
-								key);
-					} else if (object instanceof String) {
-						contentBody = new StringBody(object.toString(),
-								ContentType.MULTIPART_FORM_DATA);
-					}
+						ContentBody contentBody = null;
+						if (object instanceof File) {
+							contentBody = new FileBody((File) object);
+						} else if (object instanceof InputStream) {
+							contentBody = new InputStreamBody(
+									(InputStream) object, key);
+						} else if (object instanceof String) {
+							contentBody = new StringBody(object.toString(),
+									ContentType.MULTIPART_FORM_DATA);
+						}
 
-					if (StringUtils.isNotEmpty(contentBody)) {
-						multipartEntityBuilder.addPart(key, contentBody);
+						if (StringUtils.isNotEmpty(contentBody)) {
+							multipartEntityBuilder.addPart(key, contentBody);
+						}
 					}
 				}
-			}
 
-			HttpEntity httpEntity = multipartEntityBuilder.build();
-			httpPost.setEntity(httpEntity);
+				HttpEntity httpEntity = multipartEntityBuilder.build();
+				httpPost.setEntity(httpEntity);
 
-			// 由客户端执行(发送)Post请求
-			response = httpClient.execute(httpPost);
+				// 由客户端执行(发送)Post请求
+				response = httpClient.execute(httpPost);
 
-			int statusCode = response.getStatusLine().getStatusCode();
+				int statusCode = response.getStatusLine().getStatusCode();
 
-			if (statusCode == HttpStatus.SC_OK) {
-				// 从响应模型中获取响应实体
-				HttpEntity responseEntity = response.getEntity();
+				if (statusCode == HttpStatus.SC_OK) {
+					// 从响应模型中获取响应实体
+					HttpEntity responseEntity = response.getEntity();
 
-				if (StringUtils.isNotEmpty(responseEntity)) {
-					Header[] headers = response.getHeaders("token");
+					if (StringUtils.isNotEmpty(responseEntity)) {
+						Header[] headers = response.getHeaders("token");
 
-					if (headers.length > 0) {
-						token = headers[0].getValue();
-					}
+						if (headers.length > 0) {
+							token = headers[0].getValue();
+						}
 
-					result = JSONObject.fromObject(EntityUtils
-							.toString(responseEntity));
+						result = JSONObject.fromObject(EntityUtils
+								.toString(responseEntity));
 
-					if (StringUtils.isNotEmpty(token)) {
-						result.put("token", token);
+						if (StringUtils.isNotEmpty(token)) {
+							result.put("token", token);
+						}
 					}
 				}
+
+				logger.info("Upload request success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Upload request error");
 		} finally {
 			try {
 				if (StringUtils.isNotEmpty(httpClient)) {

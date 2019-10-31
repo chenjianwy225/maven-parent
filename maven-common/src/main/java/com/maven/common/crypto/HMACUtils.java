@@ -6,6 +6,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.maven.common.StringUtils;
 
 /**
  * Hmac加密类
@@ -15,31 +19,41 @@ import org.apache.commons.codec.binary.Hex;
  */
 public class HMACUtils {
 
+	private static Logger logger = LoggerFactory.getLogger(HMACUtils.class);
+
 	// MD5加密方式
-	private static String hmacMD5 = "HmacMD5";
+	private static final String HMACMD5 = "HmacMD5";
 
 	// SHA1加密方式
-	private static String hmacSHA1 = "HmacSHA1";
+	private static final String HMACSHA1 = "HmacSHA1";
 
 	/**
 	 * 加密方法(MD5)
 	 * 
 	 * @param source
-	 * @return
-	 * @throws Exception
+	 *            数据源
+	 * @return 加密后的数据
 	 */
 	public static String encoderToMD5(String source) {
 		String res = null;
 
 		try {
-			KeyGenerator keyGenerator = KeyGenerator.getInstance(hmacMD5);
-			SecretKey secretKey = keyGenerator.generateKey();
-			Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-			mac.init(secretKey);
-			byte[] bytes = mac.doFinal(source.getBytes());
-			res = Hex.encodeHexString(bytes);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source)) {
+				KeyGenerator keyGenerator = KeyGenerator.getInstance(HMACMD5);
+				SecretKey secretKey = keyGenerator.generateKey();
+				Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+				mac.init(secretKey);
+				byte[] bytes = mac.doFinal(source.getBytes());
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -49,21 +63,31 @@ public class HMACUtils {
 	 * 加密方法(MD5)
 	 * 
 	 * @param source
+	 *            数据源
 	 * @param key
-	 * @return
-	 * @throws Exception
+	 *            秘钥
+	 * @return 加密后的数据
 	 */
 	public static String encoderToMD5(String source, String key) {
 		String res = null;
 
 		try {
-			SecretKey secretKey = new SecretKeySpec(key.getBytes(), hmacMD5);
-			Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-			mac.init(secretKey);
-			byte[] bytes = mac.doFinal(source.getBytes());
-			res = Hex.encodeHexString(bytes);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				SecretKey secretKey = new SecretKeySpec(key.getBytes(),
+						HMACSHA1);
+				Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+				mac.init(secretKey);
+				byte[] bytes = mac.doFinal(source.getBytes());
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -73,21 +97,29 @@ public class HMACUtils {
 	 * 加密方法(SHA1)
 	 * 
 	 * @param source
-	 * @return
-	 * @throws Exception
+	 *            数据源
+	 * @return 加密后的数据
 	 */
 	public static String encoderToSHA1(String source) {
 		String res = null;
 
 		try {
-			KeyGenerator keyGenerator = KeyGenerator.getInstance(hmacSHA1);
-			SecretKey secretKey = keyGenerator.generateKey();
-			Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-			mac.init(secretKey);
-			byte[] bytes = mac.doFinal(source.getBytes());
-			res = Hex.encodeHexString(bytes);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source)) {
+				KeyGenerator keyGenerator = KeyGenerator.getInstance(HMACSHA1);
+				SecretKey secretKey = keyGenerator.generateKey();
+				Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+				mac.init(secretKey);
+				byte[] bytes = mac.doFinal(source.getBytes());
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -97,21 +129,31 @@ public class HMACUtils {
 	 * 加密方法(SHA1)
 	 * 
 	 * @param source
+	 *            数据源
 	 * @param key
-	 * @return
-	 * @throws Exception
+	 *            秘钥
+	 * @return 加密后的数据
 	 */
 	public static String encoderToSHA1(String source, String key) {
 		String res = null;
 
 		try {
-			SecretKey secretKey = new SecretKeySpec(key.getBytes(), hmacSHA1);
-			Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-			mac.init(secretKey);
-			byte[] bytes = mac.doFinal(source.getBytes());
-			res = Hex.encodeHexString(bytes);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source)) {
+				SecretKey secretKey = new SecretKeySpec(key.getBytes(),
+						HMACSHA1);
+				Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+				mac.init(secretKey);
+				byte[] bytes = mac.doFinal(source.getBytes());
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;

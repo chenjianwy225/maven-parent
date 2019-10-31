@@ -3,8 +3,12 @@ package com.maven.common.url;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.json.JSONObject;
 
+import com.maven.common.StringUtils;
 import com.maven.common.http.HttpComponentsUtils;
 
 /**
@@ -14,6 +18,8 @@ import com.maven.common.http.HttpComponentsUtils;
  * @createDate 2019-10-12
  */
 public class ShortUrlUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(ShortUrlUtils.class);
 
 	// 草田签生成短网址地址
 	private static final String CTQ_url = "https://ctsign.cn/Web/open/generateShortUrl";
@@ -32,11 +38,26 @@ public class ShortUrlUtils {
 	 *         "createTime":创建时间}}
 	 */
 	public JSONObject getCTQShortUrl(String url) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("secretKey", CTQ_secretKey);
-		params.put("url", url);
+		JSONObject jsonObject = null;
 
-		JSONObject jsonObject = HttpComponentsUtils.post(CTQ_url, params, "");
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(url)) {
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put("secretKey", CTQ_secretKey);
+				params.put("url", url);
+
+				jsonObject = HttpComponentsUtils.post(CTQ_url, params, "");
+
+				logger.info("Create short url success");
+			} else {
+				logger.info("Parameter error");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Create short url error");
+		}
+
 		return jsonObject;
 	}
 }

@@ -11,8 +11,13 @@ import java.util.Map;
  */
 public class SQLAndParam {
 
+	// SQL语句
 	private String sql;
+
+	// 参数集合
 	private List<Object> paramList;
+
+	// 参数集合
 	private Map<String, Object> paramMap;
 
 	public String getSql() {

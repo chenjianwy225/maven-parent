@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 随机生成类
  * 
@@ -16,6 +19,8 @@ import java.util.Random;
  * @createDate 2019-09-11
  */
 public class RandomUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(RandomUtils.class);
 
 	// 字符集合
 	private static final String[][] CODES = {
@@ -49,41 +54,56 @@ public class RandomUtils {
 	 *            长度
 	 * @param codeIndex
 	 *            字符索引
-	 * @return
+	 * @return Object数组
 	 */
 	public static Object[] getCode(int length, int... codeIndexs) {
-		int width = EVERY_WIDTH * length;
-		int height = HEIGHT;
+		Object[] result = null;
 
-		BufferedImage image = new BufferedImage(width, height, 1);
-		Graphics g = image.getGraphics();
-		Random random = new Random();
-		g.setColor(getRandomColor(200, 250));
-		g.fillRect(0, 0, width, height);
-		g.setFont(new Font("Times New Roman", 0, 24));
-		g.setColor(getRandomColor(160, 200));
+		try {
+			// 判断传入参数
+			if (length > 0 && codeIndexs.length > 0) {
+				int width = EVERY_WIDTH * length;
+				int height = HEIGHT;
 
-		for (int i = 0; i < 155; i++) {
-			int x = random.nextInt(width);
-			int y = random.nextInt(height);
-			int xl = random.nextInt(12);
-			int yl = random.nextInt(12);
-			g.drawLine(x, y, x + xl, y + yl);
+				BufferedImage image = new BufferedImage(width, height, 1);
+				Graphics g = image.getGraphics();
+				Random random = new Random();
+				g.setColor(getRandomColor(200, 250));
+				g.fillRect(0, 0, width, height);
+				g.setFont(new Font("Times New Roman", 0, 24));
+				g.setColor(getRandomColor(160, 200));
+
+				for (int i = 0; i < 155; i++) {
+					int x = random.nextInt(width);
+					int y = random.nextInt(height);
+					int xl = random.nextInt(12);
+					int yl = random.nextInt(12);
+					g.drawLine(x, y, x + xl, y + yl);
+				}
+
+				String sRand = getRandomCode(length, codeIndexs);
+				char[] chars = sRand.toCharArray();
+				for (int i = 0; i < chars.length; i++) {
+					String rand = Character.toString(chars[i]);
+
+					g.setColor(new Color(20 + random.nextInt(110), 20 + random
+							.nextInt(110), 20 + random.nextInt(110)));
+					g.drawString(rand, 13 * i + 6, 24);
+				}
+
+				g.dispose();
+				result = new Object[] { sRand.toUpperCase(), image };
+
+				logger.info("Get code success");
+			} else {
+				logger.info("Parameter error");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get code error");
 		}
 
-		String sRand = getRandomCode(length, codeIndexs);
-		char[] chars = sRand.toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			String rand = Character.toString(chars[i]);
-
-			g.setColor(new Color(20 + random.nextInt(110), 20 + random
-					.nextInt(110), 20 + random.nextInt(110)));
-			g.drawString(rand, 13 * i + 6, 24);
-		}
-
-		g.dispose();
-
-		return new Object[] { sRand.toUpperCase(), image };
+		return result;
 	}
 
 	/**
@@ -93,37 +113,53 @@ public class RandomUtils {
 	 *            长度
 	 * @param codeIndexs
 	 *            字符索引
-	 * @return
+	 * @return 随机字符串
 	 */
 	public static String getRandomCode(int length, int... codeIndexs) {
-		StringBuffer rand = new StringBuffer();
+		String result = null;
 
-		// 判断字符串长度
-		if (length > 0 && codeIndexs.length > 0) {
-			Random random = new Random();
-			List<Integer> indexList = new ArrayList<Integer>();
+		try {
+			// 判断传入参数
+			if (length > 0 && codeIndexs.length > 0) {
+				StringBuffer rand = new StringBuffer();
 
-			// 遍历索引集合
-			List<String> codeList = new ArrayList<String>();
-			for (int codeIndex : codeIndexs) {
-				if (!indexList.contains(codeIndex) && codeIndex >= 0
-						&& codeIndex < CODES.length) {
-					codeList.addAll(Arrays.asList(CODES[codeIndex]));
-					indexList.add(codeIndex);
+				// 判断字符串长度
+				if (length > 0 && codeIndexs.length > 0) {
+					Random random = new Random();
+					List<Integer> indexList = new ArrayList<Integer>();
+
+					// 遍历索引集合
+					List<String> codeList = new ArrayList<String>();
+					for (int codeIndex : codeIndexs) {
+						if (!indexList.contains(codeIndex) && codeIndex >= 0
+								&& codeIndex < CODES.length) {
+							codeList.addAll(Arrays.asList(CODES[codeIndex]));
+							indexList.add(codeIndex);
+						}
+					}
+
+					// 生成字符串
+					if (codeList.size() > 0) {
+						for (int i = 0; i < length; i++) {
+							int index = random.nextInt(codeList.size());
+
+							rand.append(codeList.get(index));
+						}
+					}
 				}
-			}
 
-			// 生成字符串
-			if (codeList.size() > 0) {
-				for (int i = 0; i < length; i++) {
-					int index = random.nextInt(codeList.size());
+				result = rand.toString();
 
-					rand.append(codeList.get(index));
-				}
+				logger.info("Get random code success");
+			} else {
+				logger.info("Parameter error");
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get random code error");
 		}
 
-		return rand.toString();
+		return result;
 	}
 
 	/**

@@ -13,6 +13,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.maven.common.StringUtils;
 
 /**
  * DES加密类
@@ -21,6 +25,8 @@ import org.apache.commons.codec.binary.Hex;
  * @createDate 2018-12-28
  */
 public class DESUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(DESUtils.class);
 
 	// 向量
 	private static final String IV = "1234567-";
@@ -58,36 +64,44 @@ public class DESUtils {
 	 *            密钥,长度必须是8的倍数
 	 * @param isIv
 	 *            是否使用向量加密
-	 * @return 返回加密后的数据
-	 * @throws Exception
+	 * @return 加密后的数据
 	 */
 	public static String encoderToDES(String source, String key, boolean isIv) {
 		String res = null;
 
 		try {
-			// 生成key
-			DESKeySpec desKeySpec = new DESKeySpec(key.getBytes(ENCODING));
-			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
-			SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 生成key
+				DESKeySpec desKeySpec = new DESKeySpec(key.getBytes(ENCODING));
+				SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
+				SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
 
-			Cipher cipher = null;
-			// 判断是否使用向量
-			if (isIv) {
-				// 向量
-				IvParameterSpec iv = new IvParameterSpec(IV.getBytes(ENCODING));
+				Cipher cipher = null;
+				// 判断是否使用向量
+				if (isIv) {
+					// 向量
+					IvParameterSpec iv = new IvParameterSpec(
+							IV.getBytes(ENCODING));
 
-				cipher = Cipher.getInstance(DESPADDING_CBC);
-				cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
+					cipher = Cipher.getInstance(DESPADDING_CBC);
+					cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
+				} else {
+					cipher = Cipher.getInstance(DESPADDING_ECB);
+					cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+				}
+				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
+
+				// 通过base64,将加密数组转换成字符串
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
 			} else {
-				cipher = Cipher.getInstance(DESPADDING_ECB);
-				cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+				logger.info("Parameter error");
 			}
-			byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
-
-			// --通过base64,将加密数组转换成字符串
-			res = Hex.encodeHexString(bytes);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -102,34 +116,42 @@ public class DESUtils {
 	 *            密钥,长度必须是8的倍数
 	 * @param isIv
 	 *            是否使用向量加密
-	 * @return 返回解密后的原始数据
-	 * @throws Exception
+	 * @return 解密后的原始数据
 	 */
 	public static String decoderToDES(String source, String key, boolean isIv) {
 		String res = null;
 
 		try {
-			// 解密key
-			DESKeySpec desKeySpec = new DESKeySpec(key.getBytes(ENCODING));
-			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
-			SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 解密key
+				DESKeySpec desKeySpec = new DESKeySpec(key.getBytes(ENCODING));
+				SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
+				SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
 
-			Cipher cipher = null;
-			// 判断是否使用向量
-			if (isIv) {
-				// 向量
-				IvParameterSpec iv = new IvParameterSpec(IV.getBytes(ENCODING));
+				Cipher cipher = null;
+				// 判断是否使用向量
+				if (isIv) {
+					// 向量
+					IvParameterSpec iv = new IvParameterSpec(
+							IV.getBytes(ENCODING));
 
-				cipher = Cipher.getInstance(DESPADDING_CBC);
-				cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+					cipher = Cipher.getInstance(DESPADDING_CBC);
+					cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+				} else {
+					cipher = Cipher.getInstance(DESPADDING_ECB);
+					cipher.init(Cipher.DECRYPT_MODE, secretKey);
+				}
+				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
+				res = new String(bytes, ENCODING);
+
+				logger.info("Decoder success");
 			} else {
-				cipher = Cipher.getInstance(DESPADDING_ECB);
-				cipher.init(Cipher.DECRYPT_MODE, secretKey);
+				logger.info("Parameter error");
 			}
-			byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
-			res = new String(bytes, ENCODING);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Decoder error");
 		}
 
 		return res;
@@ -142,25 +164,34 @@ public class DESUtils {
 	 *            数据源
 	 * @param key
 	 *            密钥,key必须是长度大于等于 3 * 8
-	 * @return 返回加密后的数据
-	 * @throws Exception
+	 * @return 加密后的数据
 	 */
 	public static String encoderToDESEDE(String source, String key) {
 		String res = null;
 
 		try {
-			// 生成key
-			DESedeKeySpec desKeySpec = new DESedeKeySpec(key.getBytes(ENCODING));
-			SecretKeyFactory secretKeyFactory = SecretKeyFactory
-					.getInstance(DESEDE);
-			SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 生成key
+				DESedeKeySpec desKeySpec = new DESedeKeySpec(
+						key.getBytes(ENCODING));
+				SecretKeyFactory secretKeyFactory = SecretKeyFactory
+						.getInstance(DESEDE);
+				SecretKey secretKey = secretKeyFactory
+						.generateSecret(desKeySpec);
 
-			Cipher cipher = Cipher.getInstance(DESEDEPADDING);
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-			byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
-			res = Hex.encodeHexString(bytes);
+				Cipher cipher = Cipher.getInstance(DESEDEPADDING);
+				cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -173,24 +204,33 @@ public class DESUtils {
 	 *            数据源
 	 * @param key
 	 *            密钥,key必须是长度大于等于 3 * 8
-	 * @return 返回解密后的原始数据
-	 * @throws Exception
+	 * @return 解密后的原始数据
 	 */
 	public static String decoderToDESEDE(String source, String key) {
 		String res = null;
 
 		try {
-			// 解密key
-			DESedeKeySpec desKeySpec = new DESedeKeySpec(key.getBytes(ENCODING));
-			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DESEDE);
-			SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 解密key
+				DESedeKeySpec desKeySpec = new DESedeKeySpec(
+						key.getBytes(ENCODING));
+				SecretKeyFactory keyFactory = SecretKeyFactory
+						.getInstance(DESEDE);
+				SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
 
-			Cipher cipher = Cipher.getInstance(DESEDEPADDING);
-			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-			byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
-			res = new String(bytes, ENCODING);
+				Cipher cipher = Cipher.getInstance(DESEDEPADDING);
+				cipher.init(Cipher.DECRYPT_MODE, secretKey);
+				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
+				res = new String(bytes, ENCODING);
+
+				logger.info("Decoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Decoder error");
 		}
 
 		return res;
@@ -203,22 +243,29 @@ public class DESUtils {
 	 *            数据源
 	 * @param key
 	 *            密钥,key必须是长度大于等于 3 * 8
-	 * @return 返回加密后的数据
-	 * @throws Exception
+	 * @return 加密后的数据
 	 */
 	public static String encoderToAES(String source, String key) {
 		String res = null;
 
 		try {
-			// 生成key
-			Key secretKey = new SecretKeySpec(key.getBytes(), AES);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 生成key
+				Key secretKey = new SecretKeySpec(key.getBytes(), AES);
 
-			Cipher cipher = Cipher.getInstance(AESPADDING);
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-			byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
-			res = Hex.encodeHexString(bytes);
+				Cipher cipher = Cipher.getInstance(AESPADDING);
+				cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Encoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Encoder error");
 		}
 
 		return res;
@@ -231,22 +278,29 @@ public class DESUtils {
 	 *            数据源
 	 * @param key
 	 *            密钥,key必须是长度大于等于 3 * 8
-	 * @return 返回解密后的原始数据
-	 * @throws Exception
+	 * @return 解密后的原始数据
 	 */
 	public static String decoderToAES(String source, String key) {
 		String res = null;
 
 		try {
-			// 解密key
-			Key secretKey = new SecretKeySpec(key.getBytes(), AES);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
+				// 解密key
+				Key secretKey = new SecretKeySpec(key.getBytes(), AES);
 
-			Cipher cipher = Cipher.getInstance(AESPADDING);
-			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-			byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
-			res = new String(bytes, ENCODING);
+				Cipher cipher = Cipher.getInstance(AESPADDING);
+				cipher.init(Cipher.DECRYPT_MODE, secretKey);
+				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
+				res = new String(bytes, ENCODING);
+
+				logger.info("Decoder success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Decoder error");
 		}
 
 		return res;
@@ -255,21 +309,31 @@ public class DESUtils {
 	/**
 	 * 获取随机秘钥
 	 * 
-	 * @return 返回秘钥s
-	 * @throws Exception
+	 * @param codeMode
+	 *            加密方式
+	 * @return 秘钥
 	 */
 	public static String getKey(String codeMode) {
 		String res = null;
 
 		try {
-			KeyGenerator keyGenerator = KeyGenerator.getInstance(codeMode);
-			// 指定key长度，同时也是密钥长度(56位)
-			keyGenerator.init(new SecureRandom());
-			SecretKey secretKey = keyGenerator.generateKey();
-			byte[] bytes = secretKey.getEncoded();
-			res = Hex.encodeHexString(bytes);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(codeMode)) {
+				KeyGenerator keyGenerator = KeyGenerator.getInstance(codeMode);
+
+				// 指定key长度，同时也是密钥长度(56位)
+				keyGenerator.init(new SecureRandom());
+				SecretKey secretKey = keyGenerator.generateKey();
+				byte[] bytes = secretKey.getEncoded();
+				res = Hex.encodeHexString(bytes);
+
+				logger.info("Get secretKey success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.info("Get secretKey error");
 		}
 
 		return res;

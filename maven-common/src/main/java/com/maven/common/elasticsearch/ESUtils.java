@@ -1,5 +1,6 @@
 package com.maven.common.elasticsearch;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,12 +24,14 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -45,6 +48,7 @@ import com.maven.common.elasticsearch.entity.QueryEntity;
 import com.maven.common.elasticsearch.entity.SearchEntity;
 import com.maven.common.elasticsearch.entity.SortEntity;
 import com.maven.common.page.Pager;
+import com.maven.common.properties.LoadPropertiesUtils;
 import com.maven.common.request.MapUtils;
 
 /**
@@ -61,117 +65,120 @@ public class ESUtils {
 	private String host;
 
 	// ES服务器端口
-	private int port;
+	private int port = 0;
 
 	// ES的Index名称
 	private String index;
 
 	// ES默认服务器地址
-	private static final String DEFAULT_HOST = "localhost";
+	private final String DEFAULT_HOST = "127.0.0.1";
 
 	// ES默认服务器端口
-	private static final int DEFAULT_PORT = 9200;
+	private final int DEFAULT_PORT = 9200;
 
 	// ES默认Index名称
-	private static final String DEFAULT_INDEX = "studentindex";
-
-	// ESUtils实例类
-	private static ESUtils esUtils = null;
+	private final String DEFAULT_INDEX = "studentindex";
 
 	// RestHighLevelClient实例类
 	private RestHighLevelClient client = null;
 
 	/**
 	 * 构造函数
+	 */
+	public ESUtils() {
+		init();
+	}
+
+	/**
+	 * 构造函数
 	 * 
 	 * @param host
-	 *            地址
+	 *            ES服务器地址
 	 * @param port
-	 *            端口
+	 *            ES服务器端口
+	 */
+	public ESUtils(String host, int port) {
+		this.host = host;
+		this.port = port;
+		init();
+	}
+
+	/**
+	 * 构造函数
+	 * 
 	 * @param index
-	 *            索引名
+	 *            ES的Index名称
+	 */
+	public ESUtils(String index) {
+		this.index = index;
+		init();
+	}
+
+	/**
+	 * 构造函数
+	 * 
+	 * @param host
+	 *            ES服务器地址
+	 * @param port
+	 *            ES服务器端口
+	 * @param index
+	 *            ES的Index名称
 	 */
 	public ESUtils(String host, int port, String index) {
 		this.host = host;
 		this.port = port;
 		this.index = index;
+		init();
 	}
 
 	/**
-	 * 实例化
-	 * 
-	 * @return
+	 * 初始化
 	 */
-	public static ESUtils getInstance() {
-		return getInstance(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_INDEX);
+	private void init() {
+		LoadPropertiesUtils loadPropertiesUtils = LoadPropertiesUtils
+				.getInstance("es.properties");
+
+		this.host = StringUtils.isNotEmpty(this.host) ? this.host
+				: StringUtils.isNotEmpty(loadPropertiesUtils.getKey("host")) ? loadPropertiesUtils
+						.getKey("host") : DEFAULT_HOST;
+		this.port = this.port > 0 ? this.port : StringUtils
+				.isNotEmpty(loadPropertiesUtils.getKey("port")) ? Integer
+				.valueOf(loadPropertiesUtils.getKey("port")).intValue()
+				: DEFAULT_PORT;
+		this.index = StringUtils.isNotEmpty(this.index) ? this.index
+				: StringUtils.isNotEmpty(loadPropertiesUtils.getKey("index")) ? loadPropertiesUtils
+						.getKey("index") : DEFAULT_INDEX;
 	}
 
 	/**
-	 * 实例化
-	 * 
-	 * @param host
-	 *            地址
-	 * @param port
-	 *            端口
-	 * @return
-	 */
-	public static ESUtils getInstance(String host, int port) {
-		return getInstance(host, port, DEFAULT_INDEX);
-	}
-
-	/**
-	 * 实例化
-	 * 
-	 * @param index
-	 *            索引名
-	 * @return
-	 */
-	public static ESUtils getInstance(String index) {
-		return getInstance(DEFAULT_HOST, DEFAULT_PORT, index);
-	}
-
-	/**
-	 * 实例化
-	 * 
-	 * @param host
-	 *            地址
-	 * @param port
-	 *            端口
-	 * @param index
-	 *            索引名
-	 * @return
-	 */
-	public static ESUtils getInstance(String host, int port, String index) {
-		if (StringUtils.isEmpty(esUtils)) {
-			esUtils = new ESUtils(host, port, index);
-		}
-
-		return esUtils;
-	}
-
-	/**
-	 * 根据ID获取信息
+	 * 根据ID获取数据
 	 * 
 	 * @param id
 	 *            ID编号
-	 * @return
+	 * @return Map对象
 	 */
 	public Map<String, Object> findById(String id) {
 		Map<String, Object> map = null;
 
 		try {
-			connect();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(id)) {
+				connect();
 
-			GetRequest getRequest = new GetRequest(this.index, id);
-			GetResponse response = client.get(getRequest,
-					RequestOptions.DEFAULT);
-			map = response.getSourceAsMap();
+				GetRequest getRequest = new GetRequest(this.index, id);
+				GetResponse getResponse = client.get(getRequest,
+						RequestOptions.DEFAULT);
+				map = getResponse.getSourceAsMap();
+
+				logger.info("Find single success");
+			} else {
+				logger.info("Parameter error");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Find single error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
 
 		return map;
@@ -186,7 +193,7 @@ public class ESUtils {
 	 *            当前页数
 	 * @param size
 	 *            每页数量
-	 * @return
+	 * @return Pager对象
 	 */
 	public Pager findPager(SearchEntity searchEntity, int pageNo, int size) {
 		Pager pager = null;
@@ -199,9 +206,9 @@ public class ESUtils {
 					searchEntity, pageNo, size);
 			searchRequest.source(searchSourceBuilder);
 
-			SearchResponse response = client.search(searchRequest,
+			SearchResponse searchResponse = client.search(searchRequest,
 					RequestOptions.DEFAULT);
-			SearchHits searchHits = response.getHits();
+			SearchHits searchHits = searchResponse.getHits();
 
 			// 设置分页数据
 			pager = new Pager();
@@ -236,37 +243,38 @@ public class ESUtils {
 				pager.setPageSize(size);
 				pager.setList(list);
 			}
+
+			logger.info("Find pager success");
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Find pager error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
 
 		return pager;
 	}
 
 	/**
-	 * 添加一条信息
+	 * 添加一条数据
 	 * 
 	 * @param jsonObject
 	 *            数据对象
-	 * @return
+	 * @return 是否添加成功
 	 */
 	@SuppressWarnings("unchecked")
-	public int addSingle(JSONObject jsonObject) {
+	public boolean addSingle(JSONObject jsonObject) {
 		return addSingle(JSONObject.toJavaObject(jsonObject, Map.class));
 	}
 
 	/**
-	 * 添加一条信息
+	 * 添加一条数据
 	 * 
 	 * @param map
 	 *            数据对象
-	 * @return
+	 * @return 是否添加成功
 	 */
-	public int addSingle(Map<String, Object> map) {
+	public boolean addSingle(Map<String, Object> map) {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 		// 判断数据对象是否存在
@@ -278,32 +286,32 @@ public class ESUtils {
 	}
 
 	/**
-	 * 添加多条信息
+	 * 添加多条数据
 	 * 
 	 * @param jsonArray
 	 *            数据对象集合
-	 * @return
+	 * @return 是否添加成功
 	 */
 	@SuppressWarnings("unchecked")
-	public int addAll(JSONArray jsonArray) {
+	public boolean addAll(JSONArray jsonArray) {
 		return addAll(JSONArray.toJavaObject(jsonArray, List.class));
 	}
 
 	/**
-	 * 添加多条信息
+	 * 添加多条数据
 	 * 
 	 * @param list
 	 *            数据对象集合
-	 * @return
+	 * @return 是否添加成功
 	 */
-	public int addAll(List<Map<String, Object>> list) {
-		int status = -1;
+	public boolean addAll(List<Map<String, Object>> list) {
+		boolean result = false;
 
 		try {
-			connect();
-
-			// 判断数据对象是否存在
+			// 判断传入参数
 			if (StringUtils.isNotEmpty(list) && list.size() > 0) {
+				connect();
+
 				BulkRequest bulkRequest = new BulkRequest();
 
 				for (Map<String, Object> source : list) {
@@ -320,9 +328,9 @@ public class ESUtils {
 						RequestOptions.DEFAULT);
 
 				createLogger(bulkResponse);
-				status = bulkResponse.status().getStatus();
+				result = true;
 
-				logger.info("Add succee");
+				logger.info("Add success");
 			} else {
 				logger.info("Not data");
 			}
@@ -330,34 +338,32 @@ public class ESUtils {
 			e.printStackTrace();
 			logger.error("Add error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
 
-		return status;
+		return result;
 	}
 
 	/**
-	 * 修改一条信息
+	 * 修改一条数据
 	 * 
 	 * @param jsonObject
 	 *            数据对象
-	 * @return
+	 * @return 是否修改成功
 	 */
 	@SuppressWarnings("unchecked")
-	public int updateSingle(JSONObject jsonObject) {
+	public boolean updateSingle(JSONObject jsonObject) {
 		return updateSingle(JSONObject.toJavaObject(jsonObject, Map.class));
 	}
 
 	/**
-	 * 修改一条信息
+	 * 修改一条数据
 	 * 
 	 * @param map
 	 *            数据对象
-	 * @return
+	 * @return 是否修改成功
 	 */
-	public int updateSingle(Map<String, Object> map) {
+	public boolean updateSingle(Map<String, Object> map) {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 		// 判断数据对象是否存在
@@ -369,32 +375,32 @@ public class ESUtils {
 	}
 
 	/**
-	 * 修改多条信息
+	 * 修改多条数据
 	 * 
 	 * @param jsonArray
 	 *            数据对象集合
-	 * @return
+	 * @return 是否修改成功
 	 */
 	@SuppressWarnings("unchecked")
-	public int updateAll(JSONArray jsonArray) {
+	public boolean updateAll(JSONArray jsonArray) {
 		return updateAll(JSONArray.toJavaObject(jsonArray, List.class));
 	}
 
 	/**
-	 * 修改多条信息
+	 * 修改多条数据
 	 * 
 	 * @param list
 	 *            数据对象集合
-	 * @return
+	 * @return 是否修改成功
 	 */
-	public int updateAll(List<Map<String, Object>> list) {
-		int status = -1;
+	public boolean updateAll(List<Map<String, Object>> list) {
+		boolean result = false;
 
 		try {
-			connect();
-
-			// 判断数据对象是否存在
+			// 判断传入参数
 			if (StringUtils.isNotEmpty(list) && list.size() > 0) {
+				connect();
+
 				BulkRequest bulkRequest = new BulkRequest();
 
 				for (Map<String, Object> source : list) {
@@ -411,7 +417,7 @@ public class ESUtils {
 						RequestOptions.DEFAULT);
 
 				createLogger(bulkResponse);
-				status = bulkResponse.status().getStatus();
+				result = true;
 
 				logger.info("Update success");
 			} else {
@@ -421,29 +427,27 @@ public class ESUtils {
 			e.printStackTrace();
 			logger.error("Update error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
 
-		return status;
+		return result;
 	}
 
 	/**
-	 * 删除一个或多个信息
+	 * 根据编号删除一个或多个数据
 	 * 
 	 * @param ids
 	 *            ID编号集合
-	 * @return
+	 * @return 是否删除成功
 	 */
-	public int deleteAll(String... ids) {
-		int status = -1;
+	public boolean deleteByIds(String... ids) {
+		boolean result = false;
 
 		try {
-			connect();
-
-			// 判断数据对象是否存在
+			// 判断传入参数
 			if (StringUtils.isNotEmpty(ids) && ids.length > 0) {
+				connect();
+
 				BulkRequest bulkRequest = new BulkRequest();
 
 				for (String id : ids) {
@@ -458,7 +462,7 @@ public class ESUtils {
 						RequestOptions.DEFAULT);
 
 				createLogger(bulkResponse);
-				status = bulkResponse.status().getStatus();
+				result = true;
 
 				logger.info("Delete success");
 			} else {
@@ -468,18 +472,70 @@ public class ESUtils {
 			e.printStackTrace();
 			logger.error("Delete error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
 
-		return status;
+		return result;
 	}
 
 	/**
-	 * 删除索引所有信息
+	 * 根据条件删除数据
+	 * 
+	 * @param queryBuilder
+	 *            条件对象
+	 * @return 是否删除成功
 	 */
-	public void deleteIndex() {
+	public boolean deleteByQuery(QueryBuilder queryBuilder) {
+		boolean result = false;
+
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(queryBuilder)) {
+				connect();
+
+				DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(
+						this.index);
+				deleteByQueryRequest.setQuery(queryBuilder);
+				deleteByQueryRequest.setRefresh(true);
+
+				BulkByScrollResponse bulkByScrollResponse = client
+						.deleteByQuery(deleteByQueryRequest,
+								RequestOptions.DEFAULT);
+
+				createLogger(bulkByScrollResponse);
+				result = true;
+
+				logger.info("Delete success");
+			} else {
+				logger.info("Parameter error");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Delete error");
+		} finally {
+			disconnect();
+		}
+
+		return result;
+	}
+
+	/**
+	 * 删除索引所有数据
+	 * 
+	 * @return 是否删除成功
+	 */
+	public boolean deleteAll() {
+		return deleteByQuery(QueryBuilders.matchAllQuery());
+	}
+
+	/**
+	 * 删除索引并删除所有数据
+	 * 
+	 * @return 是否删除成功
+	 */
+	public boolean deleteIndex() {
+		boolean result = false;
+
 		try {
 			connect();
 
@@ -487,19 +543,19 @@ public class ESUtils {
 					this.index);
 			client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
 
-			logger.error("Delete index success");
+			logger.info("Delete success");
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Delete index error");
+			logger.error("Delete error");
 		} finally {
-			if (StringUtils.isNotEmpty(client)) {
-				disconnect();
-			}
+			disconnect();
 		}
+
+		return result;
 	}
 
 	/**
-	 * 生成查询信息
+	 * 生成查询Query
 	 * 
 	 * @param searchEntity
 	 *            查询对象
@@ -507,7 +563,7 @@ public class ESUtils {
 	 *            当前页数
 	 * @param size
 	 *            每页数量
-	 * @return
+	 * @return SearchSourceBuilder对象
 	 */
 	private SearchSourceBuilder createQuerySource(SearchEntity searchEntity,
 			int pageNo, int size) {
@@ -536,9 +592,9 @@ public class ESUtils {
 
 				// 性别搜索
 				if (StringUtils.isNotEmpty(query.getSex())) {
-					WildcardQueryBuilder sexWQB = QueryBuilders.wildcardQuery(
-							"sex", query.getSex());
-					boolQueryBuilder.must(sexWQB);
+					TermQueryBuilder sexTQB = QueryBuilders.termQuery("sex",
+							query.getSex());
+					boolQueryBuilder.must(sexTQB);
 				}
 
 				// 年龄搜索
@@ -560,9 +616,9 @@ public class ESUtils {
 
 				// 住址搜索
 				if (StringUtils.isNotEmpty(query.getAddress())) {
-					MatchQueryBuilder addressMQB = QueryBuilders.matchQuery(
-							"address", query.getAddress());
-					boolQueryBuilder.must(addressMQB);
+					MatchPhraseQueryBuilder addressMPQB = QueryBuilders
+							.matchPhraseQuery("address", query.getAddress());
+					boolQueryBuilder.must(addressMPQB);
 				}
 
 				queryBuilder = boolQueryBuilder;
@@ -610,9 +666,7 @@ public class ESUtils {
 		}
 
 		// 设置查询起始位置和查询数量
-		if (pageNo <= 0) {
-			pageNo = 1;
-		}
+		pageNo = pageNo > 0 ? pageNo : 1;
 		int start = (pageNo - 1) * size;
 		searchSourceBuilder.from(start).size(size);
 
@@ -620,13 +674,12 @@ public class ESUtils {
 	}
 
 	/**
-	 * 生成日志信息
+	 * 生成日志数据
 	 * 
 	 * @param bulkResponse
 	 */
 	private void createLogger(BulkResponse bulkResponse) {
 		int addNum = 0, updateNum = 0, deleteNum = 0;
-		StringBuffer loggerInfo = new StringBuffer();
 
 		// 遍历Response
 		for (BulkItemResponse bulkItemResponse : bulkResponse) {
@@ -645,26 +698,62 @@ public class ESUtils {
 			}
 		}
 
-		// 判断是否有新增
+		// 判断是否有日志数据
+		if (addNum > 0 || updateNum > 0 || deleteNum > 0) {
+			// 判断是否有新增
+			if (addNum > 0) {
+				logger.info("Add data number："
+						+ Integer.valueOf(addNum).toString());
+			}
+
+			// 判断是否有新增
+			if (updateNum > 0) {
+				logger.info("Update data number："
+						+ Integer.valueOf(updateNum).toString());
+			}
+
+			// 判断是否有新增
+			if (deleteNum > 0) {
+				logger.info("Delete data number："
+						+ Integer.valueOf(deleteNum).toString());
+			}
+		} else {
+			logger.info("No data");
+		}
+	}
+
+	/**
+	 * 生成日志数据
+	 * 
+	 * @param bulkByScrollResponse
+	 */
+	private void createLogger(BulkByScrollResponse bulkByScrollResponse) {
+		long totalNum = bulkByScrollResponse.getTotal();
+		long addNum = bulkByScrollResponse.getCreated();
+		long updateNum = bulkByScrollResponse.getUpdated();
+		long deleteNum = bulkByScrollResponse.getDeleted();
+
+		// 判断处理总数
+		if (totalNum > 0) {
+			logger.info("Handle data number："
+					+ Long.valueOf(totalNum).toString());
+		}
+
+		// 判断添加总数
 		if (addNum > 0) {
-			loggerInfo.append("新增数据总数：" + Integer.valueOf(addNum).toString());
+			logger.info("Add data number：" + Long.valueOf(addNum).toString());
 		}
 
-		// 判断是否有新增
+		// 判断修改总数
 		if (updateNum > 0) {
-			loggerInfo
-					.append("更新数据总数：" + Integer.valueOf(updateNum).toString());
+			logger.info("Update data number："
+					+ Long.valueOf(updateNum).toString());
 		}
 
-		// 判断是否有新增
+		// 判断删除总数
 		if (deleteNum > 0) {
-			loggerInfo
-					.append("删除数据总数：" + Integer.valueOf(deleteNum).toString());
-		}
-
-		// 判断是否有日志信息
-		if (StringUtils.isNotEmpty(loggerInfo)) {
-			logger.info(loggerInfo.toString());
+			logger.info("Delete data number："
+					+ Long.valueOf(deleteNum).toString());
 		}
 	}
 
@@ -673,17 +762,18 @@ public class ESUtils {
 	 */
 	public void connect() {
 		try {
+			// 判断是否创建RestHighLevelClient对象
 			if (StringUtils.isEmpty(client)) {
 				// 设置ES实例的名称
 				client = new RestHighLevelClient(
-						RestClient.builder(new HttpHost(this.host, this.port,
-								"http")));
+						RestClient.builder(new HttpHost(InetAddress
+								.getByName(this.host), this.port)));
 
-				logger.info("Connect success");
+				logger.info("Elasticsearch connect success");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Connect error");
+			logger.error("Elasticsearch connect error");
 		}
 	}
 
@@ -692,13 +782,14 @@ public class ESUtils {
 	 */
 	public void disconnect() {
 		try {
+			// 判断是否关闭RestHighLevelClient对象
 			if (StringUtils.isNotEmpty(client)) {
 				client.close();
-				logger.info("Disconnect success");
+				logger.info("Elasticsearch disconnect success");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.info("Disconnect error");
+			logger.error("Elasticsearch disconnect error");
 		}
 	}
 }

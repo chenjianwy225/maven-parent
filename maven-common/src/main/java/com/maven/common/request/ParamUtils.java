@@ -2,6 +2,9 @@ package com.maven.common.request;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.maven.common.StringUtils;
 import com.maven.common.charset.CharsetUtils;
 
@@ -13,6 +16,8 @@ import com.maven.common.charset.CharsetUtils;
  */
 public class ParamUtils {
 
+	private static Logger logger = LoggerFactory.getLogger(ParamUtils.class);
+
 	/**
 	 * 获取Request的String类型
 	 * 
@@ -20,7 +25,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return String对象
 	 */
 	public static String getString(HttpServletRequest request, String key) {
 		return getStringDefault(request, key, null);
@@ -35,23 +40,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return String对象
 	 */
 	public static String getStringDefault(HttpServletRequest request,
 			String key, String defaultValue) {
-		String value = request.getParameter(key);
+		String result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			value = CharsetUtils.charsetConverter(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? CharsetUtils
+						.charsetConverter(object) : defaultValue;
 
-			if (StringUtils.isNotEmpty(value)) {
-				return value;
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -61,7 +72,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return Integer对象
 	 */
 	public static Integer getInteger(HttpServletRequest request, String key) {
 		return getIntegerDefault(request, key, null);
@@ -76,21 +87,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return Integer对象
 	 */
 	public static Integer getIntegerDefault(HttpServletRequest request,
 			String key, Integer defaultValue) {
-		String value = request.getParameter(key);
+		Integer result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			if (StringUtils.isNotEmpty(value)) {
-				return Integer.valueOf(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? Integer
+						.valueOf(object) : defaultValue;
+
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -100,7 +119,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return Long对象
 	 */
 	public static Long getLong(HttpServletRequest request, String key) {
 		return getLongDefault(request, key, null);
@@ -115,21 +134,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return Long对象
 	 */
 	public static Long getLongDefault(HttpServletRequest request, String key,
 			Long defaultValue) {
-		String value = request.getParameter(key);
+		Long result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			if (StringUtils.isNotEmpty(value)) {
-				return Long.valueOf(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? Long.valueOf(object)
+						: defaultValue;
+
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -139,7 +166,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return Float对象
 	 */
 	public static Float getFloat(HttpServletRequest request, String key) {
 		return getFloatDefault(request, key, null);
@@ -154,21 +181,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return Float对象
 	 */
 	public static Float getFloatDefault(HttpServletRequest request, String key,
 			Float defaultValue) {
-		String value = request.getParameter(key);
+		Float result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			if (StringUtils.isNotEmpty(value)) {
-				return Float.valueOf(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? Float.valueOf(object)
+						: defaultValue;
+
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -178,7 +213,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return Double对象
 	 */
 	public static Double getDouble(HttpServletRequest request, String key) {
 		return getDoubleDefault(request, key, null);
@@ -193,21 +228,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return Double对象
 	 */
 	public static Double getDoubleDefault(HttpServletRequest request,
 			String key, Double defaultValue) {
-		String value = request.getParameter(key);
+		Double result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			if (StringUtils.isNotEmpty(value)) {
-				return Double.valueOf(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? Double
+						.valueOf(object) : defaultValue;
+
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -217,7 +260,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return Boolean对象
 	 */
 	public static Boolean getBoolean(HttpServletRequest request, String key) {
 		return getBooleanDefault(request, key, null);
@@ -232,21 +275,29 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return Boolean对象
 	 */
 	public static Boolean getBooleanDefault(HttpServletRequest request,
 			String key, Boolean defaultValue) {
-		String value = request.getParameter(key);
+		Boolean result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			if (StringUtils.isNotEmpty(value)) {
-				return Boolean.valueOf(value);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String object = request.getParameter(key);
+				result = StringUtils.isNotEmpty(object) ? Boolean
+						.valueOf(object) : defaultValue;
+
+				logger.info("Get request parameter success");
 			} else {
-				return defaultValue;
+				logger.info("Parameter error");
 			}
-		} else {
-			return defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -256,7 +307,7 @@ public class ParamUtils {
 	 *            Request请求对象
 	 * @param key
 	 *            Key名称
-	 * @return
+	 * @return String集合
 	 */
 	public static String[] getValues(HttpServletRequest request, String key,
 			String[] defaultValue) {
@@ -272,19 +323,34 @@ public class ParamUtils {
 	 *            Key名称
 	 * @param defaultValue
 	 *            默认值
-	 * @return
+	 * @return String集合
 	 */
 	public static String[] getValuesDefault(HttpServletRequest request,
 			String key, String[] defaultValue) {
-		String[] value = request.getParameterValues(key);
+		String[] result = null;
 
-		if (StringUtils.isNotEmpty(value)) {
-			for (String string : value) {
-				string = CharsetUtils.charsetConverter(string);
+		try {
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
+				String[] objects = request.getParameterValues(key);
+
+				if (StringUtils.isNotEmpty(objects)) {
+					for (String string : objects) {
+						string = CharsetUtils.charsetConverter(string);
+					}
+				} else {
+					result = defaultValue;
+				}
+
+				logger.info("Get request parameter success");
+			} else {
+				logger.info("Parameter error");
 			}
-		} else {
-			value = defaultValue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Get request parameter error");
 		}
-		return defaultValue;
+
+		return result;
 	}
 }

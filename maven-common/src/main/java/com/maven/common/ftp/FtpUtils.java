@@ -32,42 +32,100 @@ public class FtpUtils {
 
 	private Logger logger = LoggerFactory.getLogger(FtpUtils.class);
 
-	// 默认FTP地址
-	private String host = "";
+	// FTP服务器地址
+	private String host;
 
-	// 默认FTP端口
-	private int port = 21;
+	// FTP服务器端口
+	private int port = 0;
 
-	// 默认FTP用户名
-	private String userName = "";
+	// FTP用户名
+	private String userName;
 
-	// 默认FTP密码
-	private String password = "";
+	// FTP密码
+	private String password;
 
-	// 默认FTP编码
-	private String encoding = "utf-8";
+	// 远程访问地址
+	private String visitPath;
 
-	// 远程访问路径
-	private String visitPath = "";
+	// FTP编码
+	private String encoding;
 
+	// FTP默认服务器地址
+	private final String DEFAULT_HOST = "127.0.0.1";
+
+	// FTP默认服务器端口
+	private final int DEFAULT_PORT = 21;
+
+	// FTP默认用户名
+	private final String DEFAULT_USERNAME = "messi";
+
+	// FTP默认密码
+	private final String DEFAULT_PASSWORD = "chenjian";
+
+	// FTP默认远程访问地址
+	private final String DEFAULT_VISITPATH = "http://www.baidu.com";
+
+	// FTP编码
+	private final String DEFAULT_ENCODING = "utf-8";
+
+	// FTPClient对象
 	private FTPClient ftpClient = null;
 
+	/**
+	 * 构造函数
+	 */
 	public FtpUtils() {
-		LoadPropertiesUtils loadPropertiesUtils = LoadPropertiesUtils
-				.getInstance("ftp.properties");
-
-		this.host = loadPropertiesUtils.getKey("host");
-		this.port = Integer.valueOf(loadPropertiesUtils.getKey("port"))
-				.intValue();
-		this.userName = loadPropertiesUtils.getKey("userName");
-		this.password = loadPropertiesUtils.getKey("password");
+		init();
 	}
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param host
+	 *            FTP服务器地址
+	 * @param port
+	 *            FTP服务器端口
+	 * @param userName
+	 *            FTP用户名
+	 * @param password
+	 *            FTP密码
+	 */
 	public FtpUtils(String host, int port, String userName, String password) {
 		this.host = host;
 		this.port = port;
 		this.userName = userName;
 		this.password = password;
+		init();
+	}
+
+	/**
+	 * 初始化
+	 */
+	private void init() {
+		LoadPropertiesUtils loadPropertiesUtils = LoadPropertiesUtils
+				.getInstance("ftp.properties");
+
+		this.host = StringUtils.isNotEmpty(this.host) ? this.host
+				: StringUtils.isNotEmpty(loadPropertiesUtils.getKey("host")) ? loadPropertiesUtils
+						.getKey("host") : DEFAULT_HOST;
+		this.port = this.port > 0 ? this.port : StringUtils
+				.isNotEmpty(loadPropertiesUtils.getKey("port")) ? Integer
+				.valueOf(loadPropertiesUtils.getKey("port")).intValue()
+				: DEFAULT_PORT;
+		this.userName = StringUtils.isNotEmpty(this.userName) ? this.userName
+				: StringUtils
+						.isNotEmpty(loadPropertiesUtils.getKey("userName")) ? loadPropertiesUtils
+						.getKey("userName") : DEFAULT_USERNAME;
+		this.password = StringUtils.isNotEmpty(this.password) ? this.password
+				: StringUtils
+						.isNotEmpty(loadPropertiesUtils.getKey("password")) ? loadPropertiesUtils
+						.getKey("password") : DEFAULT_PASSWORD;
+		this.visitPath = StringUtils.isNotEmpty(loadPropertiesUtils
+				.getKey("visitPath")) ? loadPropertiesUtils.getKey("visitPath")
+				: DEFAULT_VISITPATH;
+		this.encoding = StringUtils.isNotEmpty(loadPropertiesUtils
+				.getKey("encoding")) ? loadPropertiesUtils.getKey("encoding")
+				: DEFAULT_ENCODING;
 	}
 
 	/**
@@ -77,47 +135,57 @@ public class FtpUtils {
 	 *            目录路径
 	 * @param fileMap
 	 *            文件集合
+	 * @return Map对象
 	 */
 	public Map<String, Object> uploadFile(String remotePath,
 			Map<String, Object> fileMap) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			connectFTP();
-			createDir(remotePath);
-			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-			ftpClient.changeWorkingDirectory(remotePath);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(remotePath)
+					&& StringUtils.isNotEmpty(fileMap) && fileMap.size() > 0) {
+				connect();
+				createDir(remotePath);
+				ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+				ftpClient.changeWorkingDirectory(remotePath);
 
-			Iterator<Entry<String, Object>> iterator = fileMap.entrySet()
-					.iterator();
-			while (iterator.hasNext()) {
-				Entry<String, Object> entry = iterator.next();
+				Iterator<Entry<String, Object>> iterator = fileMap.entrySet()
+						.iterator();
+				while (iterator.hasNext()) {
+					Entry<String, Object> entry = iterator.next();
 
-				String fileName = entry.getKey();
-				Object object = entry.getValue();
+					String fileName = entry.getKey();
+					Object object = entry.getValue();
 
-				InputStream input = null;
-				if (object instanceof byte[]) {
-					byte[] byt = (byte[]) object;
-					input = new ByteArrayInputStream(byt);
-				} else if (object instanceof File) {
-					File file = (File) object;
-					input = new FileInputStream(file);
-				} else if (object instanceof InputStream) {
-					input = (InputStream) object;
+					InputStream input = null;
+					if (object instanceof byte[]) {
+						byte[] byt = (byte[]) object;
+						input = new ByteArrayInputStream(byt);
+					} else if (object instanceof File) {
+						File file = (File) object;
+						input = new FileInputStream(file);
+					} else if (object instanceof InputStream) {
+						input = (InputStream) object;
+					}
+
+					if (StringUtils.isNotEmpty(input)) {
+						ftpClient.storeFile(fileName, input);
+						input.close();
+
+						map.put(fileName, this.visitPath + fileName);
+					}
 				}
 
-				if (StringUtils.isNotEmpty(input)) {
-					ftpClient.storeFile(fileName, input);
-					input.close();
-
-					map.put(fileName, this.visitPath + fileName);
-				}
+				logger.info("Upload file success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Upload file error");
 		} finally {
-			disconnectFTP();
+			disconnect();
 		}
 
 		return map;
@@ -130,45 +198,54 @@ public class FtpUtils {
 	 *            本地路径
 	 * @param fileList
 	 *            文件集合
-	 * @return
+	 * @return Map对象
 	 */
 	public Map<String, Object> downloadFile(String localPath,
 			List<String> fileList) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			connectFTP();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(localPath)
+					&& StringUtils.isNotEmpty(fileList) && fileList.size() > 0) {
+				connect();
 
-			for (String filePath : fileList) {
-				int index = filePath.lastIndexOf("\\");
+				for (String filePath : fileList) {
+					int index = filePath.lastIndexOf("\\");
 
-				String remotePath = filePath.substring(0, index);
-				String fileName = filePath.substring(index + 1);
+					String remotePath = filePath.substring(0, index);
+					String fileName = filePath.substring(index + 1);
 
-				ftpClient.changeWorkingDirectory(remotePath);
+					ftpClient.changeWorkingDirectory(remotePath);
 
-				FTPFile[] ftpFiles = ftpClient.listFiles();
-				for (FTPFile file : ftpFiles) {
-					if (fileName.equalsIgnoreCase(file.getName())) {
-						File localFile = new File(localPath + "/"
-								+ file.getName());
-						OutputStream os = new FileOutputStream(localFile);
-						ftpClient.retrieveFile(file.getName(), os);
-						os.close();
+					FTPFile[] ftpFiles = ftpClient.listFiles();
+					for (FTPFile file : ftpFiles) {
+						if (fileName.equalsIgnoreCase(file.getName())) {
+							File localFile = new File(localPath + "/"
+									+ file.getName());
+							OutputStream os = new FileOutputStream(localFile);
+							ftpClient.retrieveFile(file.getName(), os);
+							os.close();
 
-						InputStream inputStream = ftpClient
-								.retrieveFileStream(file.getName());
-						byte[] bytes = new byte[inputStream.available()];
-						inputStream.read(bytes);
+							InputStream inputStream = ftpClient
+									.retrieveFileStream(file.getName());
+							byte[] bytes = new byte[inputStream.available()];
+							inputStream.read(bytes);
 
-						map.put(filePath, bytes);
+							map.put(filePath, bytes);
+						}
 					}
 				}
+
+				logger.info("Download file success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Download file error");
 		} finally {
-			disconnectFTP();
+			disconnect();
 		}
 
 		return map;
@@ -182,21 +259,29 @@ public class FtpUtils {
 	 */
 	public void deleteFile(List<String> fileList) {
 		try {
-			connectFTP();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(fileList) && fileList.size() > 0) {
+				connect();
 
-			for (String filePath : fileList) {
-				int index = filePath.lastIndexOf("\\");
+				for (String filePath : fileList) {
+					int index = filePath.lastIndexOf("\\");
 
-				String remotePath = filePath.substring(0, index);
-				String fileName = filePath.substring(index + 1);
+					String remotePath = filePath.substring(0, index);
+					String fileName = filePath.substring(index + 1);
 
-				ftpClient.changeWorkingDirectory(remotePath);
-				ftpClient.dele(fileName);
+					ftpClient.changeWorkingDirectory(remotePath);
+					ftpClient.dele(fileName);
+				}
+
+				logger.info("Delete file success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Delete file error");
 		} finally {
-			disconnectFTP();
+			disconnect();
 		}
 	}
 
@@ -209,15 +294,18 @@ public class FtpUtils {
 	private void createDir(String remotePath) {
 		try {
 			ftpClient.makeDirectory(remotePath);
+
+			logger.info("Create dir success");
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("Create dir error");
 		}
 	}
 
 	/**
 	 * 连接FTP
 	 */
-	private void connectFTP() {
+	private void connect() {
 		try {
 			ftpClient = new FTPClient();
 			ftpClient.setControlEncoding(this.encoding);
@@ -229,24 +317,26 @@ public class FtpUtils {
 			if (FTPReply.isPositiveCompletion(replyCode)) {
 				logger.info("FTP connect success");
 			} else {
-				disconnectFTP();
+				disconnect();
 				logger.info("FTP connect fail");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("FTP connect error");
 		}
 	}
 
 	/**
 	 * 断开FTP
 	 */
-	private void disconnectFTP() {
+	private void disconnect() {
 		if (ftpClient.isConnected()) {
 			try {
 				ftpClient.disconnect();
-				logger.info("FTP disconnect");
+				logger.info("FTP disconnect success");
 			} catch (Exception e) {
 				e.printStackTrace();
+				logger.error("FTP disconnect error");
 			}
 		}
 	}

@@ -15,6 +15,14 @@ public enum CodeUtils {
 	// 返回信息
 	private final String message;
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param code
+	 *            编码
+	 * @param message
+	 *            信息
+	 */
 	private CodeUtils(int code, String message) {
 		this.code = code;
 		this.message = message;

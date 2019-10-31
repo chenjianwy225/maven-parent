@@ -2,6 +2,9 @@ package com.maven.common.charset;
 
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.maven.common.StringUtils;
 
 /**
@@ -12,10 +15,21 @@ import com.maven.common.StringUtils;
  */
 public class CharsetUtils {
 
+	private static Logger logger = LoggerFactory.getLogger(CharsetUtils.class);
+
+	// ISO编码
 	public static final String CHARSET_ISO = "ISO-8859-1";
+
+	// GB2312编码
 	public static final String CHARSET_GB2312 = "GB2312";
+
+	// GBK编码
 	public static final String CHARSET_GBK = "GBK";
+
+	// UTF-8编码
 	public static final String CHARSET_UTF8 = "UTF-8";
+
+	// BIG5编码
 	public static final String CHARSET_BIG5 = "big5";
 
 	/**
@@ -23,35 +37,41 @@ public class CharsetUtils {
 	 * 
 	 * @param str
 	 *            数据源
-	 * @return
+	 * @return 数据源的字符集
 	 */
 	public static String getCharset(String str) {
-		String res = null;
+		String result = null;
 
 		try {
+			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				if (str.equals(new String(str.getBytes(CHARSET_ISO),
 						CHARSET_ISO))) {
-					res = CHARSET_ISO;
+					result = CHARSET_ISO;
 				} else if (str.equals(new String(str.getBytes(CHARSET_GB2312),
 						CHARSET_GB2312))) {
-					res = CHARSET_GB2312;
+					result = CHARSET_GB2312;
 				} else if (str.equals(new String(str.getBytes(CHARSET_GBK),
 						CHARSET_GBK))) {
-					res = CHARSET_GBK;
+					result = CHARSET_GBK;
 				} else if (str.equals(new String(str.getBytes(CHARSET_UTF8),
 						CHARSET_UTF8))) {
-					res = CHARSET_UTF8;
+					result = CHARSET_UTF8;
 				} else if (str.equals(new String(str.getBytes(CHARSET_BIG5),
 						CHARSET_BIG5))) {
-					res = CHARSET_BIG5;
+					result = CHARSET_BIG5;
 				}
+
+				logger.info("Get charset success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.info("Get charset error");
 		}
 
-		return res;
+		return result;
 	}
 
 	/**
@@ -59,22 +79,29 @@ public class CharsetUtils {
 	 * 
 	 * @param str
 	 *            数据源
-	 * @return
+	 * @return 字符集转换后的数据
 	 */
 	public static String charsetConverter(String str) {
-		String res = null;
+		String result = null;
 
 		try {
+			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				if (getCharset(str).equals(CHARSET_ISO)) {
-					res = new String(str.getBytes(CHARSET_ISO), CHARSET_UTF8);
+					result = new String(str.getBytes(CHARSET_ISO), CHARSET_UTF8);
 				} else {
-					res = str;
+					result = str;
 				}
+
+				logger.info("Change charset success");
+			} else {
+				logger.info("Parameter error");
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			logger.info("Change charset error");
 		}
-		return res;
+
+		return result;
 	}
 }
