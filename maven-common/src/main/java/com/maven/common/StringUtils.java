@@ -69,18 +69,19 @@ public class StringUtils {
 			JSONObject.parseObject(object.toString());
 			result = true;
 
-			logger.error("Judge success");
+			logger.info("Judge success");
 		} catch (Exception e) {
 			try {
 				JSONObject.parseArray(object.toString());
 				result = true;
 
-				logger.error("Judge success");
+				logger.info("Judge success");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				logger.error("Judge error");
 			}
 		}
+
 		return result;
 	}
 }

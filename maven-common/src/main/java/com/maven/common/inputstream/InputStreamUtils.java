@@ -35,14 +35,16 @@ public class InputStreamUtils {
 		InputStream inputStream = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(file)) {
 				inputStream = new FileInputStream(file);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");
@@ -63,16 +65,18 @@ public class InputStreamUtils {
 		byte[] byt = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(file)) {
 				inputStream = new FileInputStream(file);
 				byt = new byte[inputStream.available()];
 				inputStream.read(byt);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");
@@ -104,6 +108,8 @@ public class InputStreamUtils {
 		File file = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(inputStream)
 					&& StringUtils.isNotEmpty(filePath)) {
@@ -119,10 +125,10 @@ public class InputStreamUtils {
 				outputStream = new FileOutputStream(file);
 				outputStream.write(byt);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");
@@ -154,15 +160,17 @@ public class InputStreamUtils {
 		byte[] byt = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(inputStream)) {
 				byt = new byte[inputStream.available()];
 				inputStream.read(byt);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");
@@ -193,6 +201,8 @@ public class InputStreamUtils {
 		File file = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(byt) && byt.length > 0
 					&& StringUtils.isNotEmpty(filePath)) {
@@ -205,10 +215,10 @@ public class InputStreamUtils {
 				outputStream = new FileOutputStream(file);
 				outputStream.write(byt);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");
@@ -236,14 +246,16 @@ public class InputStreamUtils {
 		InputStream inputStream = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(byt) && byt.length > 0) {
 				inputStream = new ByteArrayInputStream(byt);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Change error");

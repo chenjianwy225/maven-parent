@@ -70,6 +70,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 生成key
@@ -95,10 +97,10 @@ public class DESUtils {
 				// 通过base64,将加密数组转换成字符串
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -122,6 +124,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 解密key
@@ -145,10 +149,10 @@ public class DESUtils {
 				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
 				res = new String(bytes, ENCODING);
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Decoder error");
@@ -170,6 +174,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 生成key
@@ -185,10 +191,10 @@ public class DESUtils {
 				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -210,6 +216,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 解密key
@@ -224,10 +232,10 @@ public class DESUtils {
 				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
 				res = new String(bytes, ENCODING);
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Decoder error");
@@ -249,6 +257,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 生成key
@@ -259,10 +269,10 @@ public class DESUtils {
 				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -284,6 +294,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				// 解密key
@@ -294,10 +306,10 @@ public class DESUtils {
 				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
 				res = new String(bytes, ENCODING);
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Decoder error");
@@ -317,6 +329,8 @@ public class DESUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(codeMode)) {
 				KeyGenerator keyGenerator = KeyGenerator.getInstance(codeMode);
@@ -327,10 +341,10 @@ public class DESUtils {
 				byte[] bytes = secretKey.getEncoded();
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Get secretKey success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get secretKey success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("Get secretKey error");

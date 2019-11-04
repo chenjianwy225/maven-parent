@@ -85,29 +85,41 @@ public class DOCUtils {
 	 */
 	public static JSONObject read(String filePath) {
 		JSONObject jsonObject = null;
+		String message = "Parameter error";
 
-		File file = new File(filePath);
+		// 判断传入参数
+		if (StringUtils.isNotEmpty(filePath)) {
+			message = "File not exist";
 
-		// 判断文件是否存在
-		if (file.exists()) {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
+			File file = new File(filePath);
 
-			// 判断文件后缀名
-			switch (fileType) {
-			case DOC_NAME:
-				jsonObject = readDOC(filePath);
-				break;
-			case DOCX_NAME:
-				jsonObject = readDOCX(filePath);
-				break;
-			default:
-				logger.info("File format error");
-				break;
+			// 判断文件是否存在
+			if (file.exists()) {
+				String fileType = filePath.substring(
+						filePath.lastIndexOf(".") + 1).toLowerCase();
+
+				message = "Read DOC/DOCX file fail";
+				// 判断文件后缀名
+				switch (fileType) {
+				case DOC_NAME:
+					jsonObject = readDOC(filePath);
+					break;
+				case DOCX_NAME:
+					jsonObject = readDOCX(filePath);
+					break;
+				default:
+					message = "File format error";
+					break;
+				}
+
+				// 判断是否读取成功
+				if (StringUtils.isNotEmpty(jsonObject)) {
+					message = "Read DOC file success";
+				}
 			}
-		} else {
-			logger.info("File not exist");
 		}
+
+		logger.info(message);
 
 		return jsonObject;
 	}
@@ -120,35 +132,51 @@ public class DOCUtils {
 	 *            2、'value':数据(段落为String、表格为List<List<object>>、图片为byte[])
 	 *            3、'width':图片宽度(只用于图片,不设默认400px)
 	 *            4、'height':图片高度(只用于图片,不设默认300px)
+	 * @return 是否写入成功
 	 */
-	public static void write(String filePath, JSONArray jsonArray) {
+	public static boolean write(String filePath, JSONArray jsonArray) {
+		boolean result = false;
 		OutputStream outputStream = null;
 		XWPFDocument document = null;
 
 		try {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
+			String message = "Parameter error";
 
-			// 判断文件后缀名
-			if (fileType.equalsIgnoreCase(DOC_NAME)
-					|| fileType.equalsIgnoreCase(DOCX_NAME)) {
-				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(filePath)
+					&& StringUtils.isNotEmpty(jsonArray)) {
+				message = "File format error";
 
-				File file = new File(dir);
-				if (!file.exists()) {
-					file.mkdirs();
+				String fileType = filePath.substring(
+						filePath.lastIndexOf(".") + 1).toLowerCase();
+
+				// 判断文件后缀名
+				if (fileType.equalsIgnoreCase(DOC_NAME)
+						|| fileType.equalsIgnoreCase(DOCX_NAME)) {
+					message = "Write DOC/DOCX file fail";
+
+					String dir = filePath.substring(0,
+							filePath.lastIndexOf("\\"));
+
+					// 判断文件夹是否存在
+					File file = new File(dir);
+					if (!file.exists()) {
+						file.mkdirs();
+					}
+
+					document = getXWPFDocument(jsonArray);
+
+					// 判断XWPFDocument
+					if (StringUtils.isNotEmpty(document)) {
+						outputStream = new FileOutputStream(new File(filePath));
+						document.write(outputStream);
+
+						message = "Write DOC/DOCX file success";
+					}
 				}
-
-				document = getXWPFDocument(jsonArray);
-
-				// 判断XWPFDocument
-				if (StringUtils.isNotEmpty(document)) {
-					outputStream = new FileOutputStream(new File(filePath));
-					document.write(outputStream);
-				}
-			} else {
-				logger.info("File format error");
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Write DOC/DOCX file error");
@@ -165,6 +193,8 @@ public class DOCUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return result;
 	}
 
 	/**
@@ -183,14 +213,25 @@ public class DOCUtils {
 		byte[] byt = null;
 
 		try {
-			document = getXWPFDocument(jsonArray);
+			String message = "Parameter error";
 
-			// 判断XWPFDocument
-			if (StringUtils.isNotEmpty(document)) {
-				outputStream = new ByteArrayOutputStream();
-				document.write(outputStream);
-				byt = outputStream.toByteArray();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(jsonArray)) {
+				message = "Write DOC/DOCX file fail";
+
+				document = getXWPFDocument(jsonArray);
+
+				// 判断XWPFDocument
+				if (StringUtils.isNotEmpty(document)) {
+					outputStream = new ByteArrayOutputStream();
+					document.write(outputStream);
+					byt = outputStream.toByteArray();
+
+					message = "Write DOC/DOCX file success";
+				}
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Write DOC/DOCX file error");

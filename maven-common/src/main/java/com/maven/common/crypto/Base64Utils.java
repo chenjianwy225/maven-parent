@@ -27,15 +27,17 @@ public class Base64Utils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				Base64 base64 = new Base64();
 				result = new String(base64.encode(source.getBytes()));
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -55,15 +57,17 @@ public class Base64Utils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				Base64 base64 = new Base64();
 				result = new String(base64.decode(source));
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Decoder error");

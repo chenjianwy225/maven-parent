@@ -204,6 +204,8 @@ public class RegexUtils {
 		boolean res = false;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				int lens = source.length();
@@ -277,10 +279,10 @@ public class RegexUtils {
 					}
 				}
 
-				logger.info("Judge success");
-			} else {
-				logger.info("Parameter error");
+				message = "Judge success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Judge error");
@@ -406,16 +408,18 @@ public class RegexUtils {
 		boolean result = false;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(regex)) {
 				Pattern pattern = Pattern.compile(regex);
 				Matcher matcher = pattern.matcher(source);
 				result = matcher.matches();
 
-				logger.error("Judge success");
-			} else {
-				logger.info("Parameter error");
+				message = "Judge success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Judge error");

@@ -44,32 +44,41 @@ public class XMLUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONObject对象
 	 */
 	public static JSONObject read(String filePath) {
 		JSONObject jsonObject = null;
 
 		try {
-			File file = new File(filePath);
+			String message = "Parameter error";
 
-			// 判断文件是否存在
-			if (file.exists()) {
-				String fileType = filePath.substring(
-						filePath.lastIndexOf(".") + 1).toLowerCase();
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(filePath)) {
+				message = "File not exist";
 
-				// 判断文件后缀名
-				if (fileType.equalsIgnoreCase(XML_NAME)) {
-					SAXReader reader = new SAXReader();
-					Document document = reader.read(new File(filePath));
+				File file = new File(filePath);
 
-					Element root = document.getRootElement();
-					jsonObject = structureData(root);
-				} else {
-					logger.info("File format error");
+				// 判断文件是否存在
+				if (file.exists()) {
+					String fileType = filePath.substring(
+							filePath.lastIndexOf(".") + 1).toLowerCase();
+
+					// 判断文件后缀名
+					if (fileType.equalsIgnoreCase(XML_NAME)) {
+						SAXReader reader = new SAXReader();
+						Document document = reader.read(new File(filePath));
+
+						Element root = document.getRootElement();
+						jsonObject = structureData(root);
+
+						message = "Read XML file success";
+					} else {
+						message = "File format error";
+					}
 				}
-			} else {
-				logger.info("File not exist");
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Read XML file error");
@@ -84,40 +93,52 @@ public class XMLUtils {
 	 * @param filePath
 	 *            文件路径
 	 * @param jsonObject
-	 *            JSON数据对象
+	 *            JSON数据对象(1、'attributes'-属性集合 2、'lists'-子元素集合 3、'values'-元素值集合)
 	 */
 	public static void write(String filePath, JSONObject jsonObject) {
 		Writer out = null;
 		XMLWriter writer = null;
 
 		try {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
+			String message = "Parameter error";
 
-			// 判断文件后缀名
-			if (fileType.equalsIgnoreCase(XML_NAME)) {
-				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(filePath)
+					&& StringUtils.isNotEmpty(jsonObject)) {
+				message = "File format error";
 
-				File file = new File(dir);
-				if (!file.exists()) {
-					file.mkdirs();
+				String fileType = filePath.substring(
+						filePath.lastIndexOf(".") + 1).toLowerCase();
+
+				// 判断文件后缀名
+				if (fileType.equalsIgnoreCase(XML_NAME)) {
+					String dir = filePath.substring(0,
+							filePath.lastIndexOf("\\"));
+
+					// 判断文件夹是否存在
+					File file = new File(dir);
+					if (!file.exists()) {
+						file.mkdirs();
+					}
+
+					Document document = DocumentHelper.createDocument();
+					structureXML(document, jsonObject);
+
+					// 创建输出流
+					out = new PrintWriter(filePath, XML_ENCODER);
+					// 格式化
+					OutputFormat format = new OutputFormat("\t", true);
+					// 去掉原来的空白(\t和换行和空格)
+					format.setTrimText(true);
+
+					writer = new XMLWriter(out, format);
+					writer.write(document);
+
+					message = "Write XML file success";
 				}
-
-				Document document = DocumentHelper.createDocument();
-				structureXML(document, jsonObject);
-
-				// 创建输出流
-				out = new PrintWriter(filePath, XML_ENCODER);
-				// 格式化
-				OutputFormat format = new OutputFormat("\t", true);
-				// 去掉原来的空白(\t和换行和空格)
-				format.setTrimText(true);
-
-				writer = new XMLWriter(out, format);
-				writer.write(document);
-			} else {
-				logger.info("File format error");
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Write XML file error");
@@ -140,7 +161,8 @@ public class XMLUtils {
 	 * 写文件(Byte)
 	 * 
 	 * @param jsonObject
-	 *            JSON数据对象
+	 *            JSON数据对象(1、'attributes'-属性集合 2、'lists'-子元素集合 3、'values'-元素值集合)
+	 * @return byte数组
 	 */
 	public static byte[] write(JSONObject jsonObject) {
 		ByteArrayOutputStream out = null;
@@ -148,20 +170,29 @@ public class XMLUtils {
 		byte[] byt = null;
 
 		try {
-			Document document = DocumentHelper.createDocument();
-			structureXML(document, jsonObject);
+			String message = "Parameter error";
 
-			// 创建输出流
-			out = new ByteArrayOutputStream();
-			// 格式化
-			OutputFormat format = new OutputFormat("\t", true);
-			// 去掉原来的空白(\t和换行和空格)
-			format.setTrimText(true);
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(jsonObject)) {
 
-			writer = new XMLWriter(out, format);
-			writer.write(document);
+				Document document = DocumentHelper.createDocument();
+				structureXML(document, jsonObject);
 
-			byt = out.toByteArray();
+				// 创建输出流
+				out = new ByteArrayOutputStream();
+				// 格式化
+				OutputFormat format = new OutputFormat("\t", true);
+				// 去掉原来的空白(\t和换行和空格)
+				format.setTrimText(true);
+
+				writer = new XMLWriter(out, format);
+				writer.write(document);
+				byt = out.toByteArray();
+
+				message = "Write XML file success";
+			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Write XML file error");
@@ -187,7 +218,7 @@ public class XMLUtils {
 	 * 
 	 * @param element
 	 *            元素对象
-	 * @return
+	 * @return JSONObject对象
 	 */
 	private static JSONObject structureData(Element element) {
 		JSONObject json = new JSONObject();
@@ -244,7 +275,7 @@ public class XMLUtils {
 	 * @param object
 	 *            XML对象
 	 * @param json
-	 *            JSON数据对象
+	 *            JSON数据对象(1、'attributes'-属性集合 2、'lists'-子元素集合 3、'values'-元素值集合)
 	 */
 	private static void structureXML(Object object, JSONObject json) {
 		// 判断元素是Document或Element

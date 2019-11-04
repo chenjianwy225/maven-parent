@@ -38,16 +38,18 @@ public class MD5Utils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				MessageDigest md5 = MessageDigest.getInstance(MD2);
 				byte[] digest = md5.digest(source.getBytes());
 				res = Hex.encodeHexString(digest);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -67,16 +69,18 @@ public class MD5Utils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				MessageDigest md5 = MessageDigest.getInstance(MD5);
 				byte[] digest = md5.digest(source.getBytes());
 				res = Hex.encodeHexString(digest);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -96,16 +100,18 @@ public class MD5Utils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				MessageDigest md5 = MessageDigest.getInstance(SHA);
 				byte[] digest = md5.digest(source.getBytes());
 				res = Hex.encodeHexString(digest);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");

@@ -49,6 +49,8 @@ public class HttpClientUtils {
 		GetMethod method = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				client = new HttpClient();
@@ -103,10 +105,10 @@ public class HttpClientUtils {
 					}
 				}
 
-				logger.info("Get request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("Get request error");
@@ -137,6 +139,8 @@ public class HttpClientUtils {
 		PostMethod method = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				client = new HttpClient();
@@ -190,10 +194,10 @@ public class HttpClientUtils {
 					}
 				}
 
-				logger.info("Post request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Post request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Post request error");

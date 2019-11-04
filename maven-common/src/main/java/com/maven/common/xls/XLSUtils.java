@@ -84,33 +84,45 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONArray对象
 	 */
 	public static JSONArray read(String filePath) {
 		JSONArray jsonArray = null;
+		String message = "Parameter error";
 
-		File file = new File(filePath);
+		// 判断传入参数
+		if (StringUtils.isNotEmpty(filePath)) {
+			message = "File not exist";
 
-		// 判断文件是否存在
-		if (file.exists()) {
-			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-					.toLowerCase();
+			File file = new File(filePath);
 
-			// 判断文件后缀名
-			switch (fileType) {
-			case XLS_NAME:
-				jsonArray = readXLS(filePath);
-				break;
-			case XLSX_NAME:
-				jsonArray = readXLSX(filePath);
-				break;
-			default:
-				logger.info("File format error");
-				break;
+			// 判断文件是否存在
+			if (file.exists()) {
+				String fileType = filePath.substring(
+						filePath.lastIndexOf(".") + 1).toLowerCase();
+
+				message = "Read XLS/XLSX file fail";
+				// 判断文件后缀名
+				switch (fileType) {
+				case XLS_NAME:
+					jsonArray = readXLS(filePath);
+					break;
+				case XLSX_NAME:
+					jsonArray = readXLSX(filePath);
+					break;
+				default:
+					message = "File format error";
+					break;
+				}
+
+				// 判断是否读取成功
+				if (StringUtils.isNotEmpty(jsonArray)) {
+					message = "Read XLS/XLSX file success";
+				}
 			}
-		} else {
-			logger.info("File not exist");
 		}
+
+		logger.info(message);
 
 		return jsonArray;
 	}
@@ -136,39 +148,52 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
-	 * @return
+	 * @return 是否写入成功
 	 */
 	public static boolean write(String filePath, JSONObject jsonObject) {
-		boolean success = false;
+		boolean result = false;
+		String message = "Parameter error";
 
-		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-				.toLowerCase();
+		// 判断传入参数
+		if (StringUtils.isNotEmpty(filePath)
+				&& StringUtils.isNotEmpty(jsonObject)) {
+			message = "File format error";
 
-		// 判断文件后缀名
-		if (fileType.equalsIgnoreCase(XLS_NAME)
-				|| fileType.equalsIgnoreCase(XLSX_NAME)) {
-			String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
 
-			File file = new File(dir);
-			if (!file.exists()) {
-				file.mkdirs();
+			// 判断文件后缀名
+			if (fileType.equalsIgnoreCase(XLS_NAME)
+					|| fileType.equalsIgnoreCase(XLSX_NAME)) {
+				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+				// 判断文件夹是否存在
+				File file = new File(dir);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+
+				message = "Write XLS/XLSX file fail";
+				// 判断文件后缀类型
+				switch (fileType) {
+				case XLS_NAME:
+					result = writeXLS(filePath, jsonObject);
+					break;
+				default:
+					result = writeXLSX(filePath, jsonObject);
+					break;
+				}
+
+				// 判断是否写入成功
+				if (result) {
+					message = "Write XLS/XLSX file success";
+				}
 			}
-
-			switch (fileType) {
-			case XLS_NAME:
-				writeXLS(filePath, jsonObject);
-				break;
-			default:
-				writeXLSX(filePath, jsonObject);
-				break;
-			}
-
-			success = true;
-		} else {
-			logger.info("File format error");
 		}
 
-		return success;
+		logger.info(message);
+
+		return result;
 	}
 
 	/**
@@ -192,23 +217,36 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
-	 * @return
+	 * @return byte数组
 	 */
 	public static byte[] write(int suffixIndex, JSONObject jsonObject) {
 		byte[] byt = null;
+		String message = "Parameter error";
 
-		// 判断文件后缀索引
-		switch (suffixIndex) {
-		case XLS_INDEX:
-			byt = writeXLS(jsonObject);
-			break;
-		case XLSX_INDEX:
-			byt = writeXLSX(jsonObject);
-			break;
-		default:
-			logger.info("File format error");
-			break;
+		// 判断传入参数
+		if (suffixIndex > 0 && StringUtils.isNotEmpty(jsonObject)) {
+			message = "Write XLS/XLSX file fail";
+
+			// 判断文件后缀索引
+			switch (suffixIndex) {
+			case XLS_INDEX:
+				byt = writeXLS(jsonObject);
+				break;
+			case XLSX_INDEX:
+				byt = writeXLSX(jsonObject);
+				break;
+			default:
+				message = "File format error";
+				break;
+			}
+
+			// 判断是否写入成功
+			if (StringUtils.isNotEmpty(byt)) {
+				message = "Write XLS/XLSX file success";
+			}
 		}
+
+		logger.info(message);
 
 		return byt;
 	}
@@ -220,39 +258,52 @@ public class XLSUtils {
 	 *            文件路径
 	 * @param xlsEntity
 	 *            XLS数据
-	 * @return
+	 * @return 是否写入成功
 	 */
 	public static boolean write(String filePath, XLSEntity xlsEntity) {
-		boolean success = false;
+		boolean result = false;
+		String message = "Parameter error";
 
-		String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
-				.toLowerCase();
+		// 判断传入参数
+		if (StringUtils.isNotEmpty(filePath)
+				&& StringUtils.isNotEmpty(xlsEntity)) {
+			message = "File format error";
 
-		// 判断文件后缀名
-		if (fileType.equalsIgnoreCase(XLS_NAME)
-				|| fileType.equalsIgnoreCase(XLSX_NAME)) {
-			String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+			String fileType = filePath.substring(filePath.lastIndexOf(".") + 1)
+					.toLowerCase();
 
-			File file = new File(dir);
-			if (!file.exists()) {
-				file.mkdirs();
+			// 判断文件后缀名
+			if (fileType.equalsIgnoreCase(XLS_NAME)
+					|| fileType.equalsIgnoreCase(XLSX_NAME)) {
+				String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+
+				// 判断文件夹是否存在
+				File file = new File(dir);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+
+				message = "Write XLS/XLSX file fail";
+				// 判断文件后缀类型
+				switch (fileType) {
+				case XLS_NAME:
+					result = writeXLS(filePath, xlsEntity);
+					break;
+				default:
+					result = writeXLSX(filePath, xlsEntity);
+					break;
+				}
+
+				// 判断是否写入成功
+				if (result) {
+					message = "Write XLS/XLSX file success";
+				}
 			}
-
-			switch (fileType) {
-			case XLS_NAME:
-				writeXLS(filePath, xlsEntity);
-				break;
-			default:
-				writeXLSX(filePath, xlsEntity);
-				break;
-			}
-
-			success = true;
-		} else {
-			logger.info("File format error");
 		}
 
-		return success;
+		logger.info(message);
+
+		return result;
 	}
 
 	/**
@@ -262,23 +313,36 @@ public class XLSUtils {
 	 *            文件后缀索引(1:xls文件,2:xlsx文件)
 	 * @param xlsEntity
 	 *            XLS数据
-	 * @return
+	 * @return byte数组
 	 */
 	public static byte[] write(int suffixIndex, XLSEntity xlsEntity) {
 		byte[] byt = null;
+		String message = "Parameter error";
 
-		// 判断文件后缀索引
-		switch (suffixIndex) {
-		case XLS_INDEX:
-			byt = writeXLS(xlsEntity);
-			break;
-		case XLSX_INDEX:
-			byt = writeXLSX(xlsEntity);
-			break;
-		default:
-			logger.info("File format error");
-			break;
+		// 判断传入参数
+		if (suffixIndex > 0 && StringUtils.isNotEmpty(xlsEntity)) {
+			message = "Write XLS/XLSX file fail";
+
+			// 判断文件后缀索引
+			switch (suffixIndex) {
+			case XLS_INDEX:
+				byt = writeXLS(xlsEntity);
+				break;
+			case XLSX_INDEX:
+				byt = writeXLSX(xlsEntity);
+				break;
+			default:
+				message = "File format error";
+				break;
+			}
+
+			// 判断是否写入成功
+			if (StringUtils.isNotEmpty(byt)) {
+				message = "Write XLS/XLSX file success";
+			}
 		}
+
+		logger.info(message);
 
 		return byt;
 	}
@@ -288,7 +352,7 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONArray对象
 	 */
 	private static JSONArray readXLS(String filePath) {
 		JSONArray jsonArray = null;
@@ -360,7 +424,7 @@ public class XLSUtils {
 	 * 
 	 * @param filePath
 	 *            文件路径
-	 * @return
+	 * @return JSONArray对象
 	 */
 	private static JSONArray readXLSX(String filePath) {
 		JSONArray jsonArray = null;
@@ -448,8 +512,10 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
+	 * @return 是否写入成功
 	 */
-	private static void writeXLS(String filePath, JSONObject jsonObject) {
+	private static boolean writeXLS(String filePath, JSONObject jsonObject) {
+		boolean result = false;
 		FileOutputStream outputStream = null;
 		HSSFWorkbook workbook = null;
 
@@ -460,6 +526,8 @@ public class XLSUtils {
 			if (StringUtils.isNotEmpty(workbook)) {
 				outputStream = new FileOutputStream(filePath);
 				workbook.write(outputStream);
+
+				result = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -473,6 +541,8 @@ public class XLSUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return result;
 	}
 
 	/**
@@ -496,8 +566,10 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
+	 * @return 是否写入成功
 	 */
-	private static void writeXLSX(String filePath, JSONObject jsonObject) {
+	private static boolean writeXLSX(String filePath, JSONObject jsonObject) {
+		boolean result = false;
 		FileOutputStream outputStream = null;
 		XSSFWorkbook workbook = null;
 
@@ -508,6 +580,8 @@ public class XLSUtils {
 			if (StringUtils.isNotEmpty(workbook)) {
 				outputStream = new FileOutputStream(filePath);
 				workbook.write(outputStream);
+
+				result = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -525,6 +599,8 @@ public class XLSUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return result;
 	}
 
 	/**
@@ -546,6 +622,7 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
+	 * @return byte数组
 	 */
 	private static byte[] writeXLS(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
@@ -596,6 +673,7 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
+	 * @return byte数组
 	 */
 	private static byte[] writeXLSX(JSONObject jsonObject) {
 		ByteArrayOutputStream outputStream = null;
@@ -638,8 +716,10 @@ public class XLSUtils {
 	 *            文件路径
 	 * @param xlsEntity
 	 *            XLS数据
+	 * @return 是否写入成功
 	 */
-	private static void writeXLS(String filePath, XLSEntity xlsEntity) {
+	private static boolean writeXLS(String filePath, XLSEntity xlsEntity) {
+		boolean result = false;
 		FileOutputStream outputStream = null;
 		HSSFWorkbook workbook = null;
 
@@ -650,6 +730,8 @@ public class XLSUtils {
 			if (StringUtils.isNotEmpty(workbook)) {
 				outputStream = new FileOutputStream(filePath);
 				workbook.write(outputStream);
+
+				result = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -663,6 +745,8 @@ public class XLSUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return result;
 	}
 
 	/**
@@ -672,8 +756,10 @@ public class XLSUtils {
 	 *            文件路径
 	 * @param xlsEntity
 	 *            XLS数据
+	 * @return 是否写入成功
 	 */
-	private static void writeXLSX(String filePath, XLSEntity xlsEntity) {
+	private static boolean writeXLSX(String filePath, XLSEntity xlsEntity) {
+		boolean result = false;
 		FileOutputStream outputStream = null;
 		XSSFWorkbook workbook = null;
 
@@ -684,6 +770,8 @@ public class XLSUtils {
 			if (StringUtils.isNotEmpty(workbook)) {
 				outputStream = new FileOutputStream(filePath);
 				workbook.write(outputStream);
+
+				result = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -697,6 +785,8 @@ public class XLSUtils {
 				e.printStackTrace();
 			}
 		}
+
+		return result;
 	}
 
 	/**
@@ -704,6 +794,7 @@ public class XLSUtils {
 	 * 
 	 * @param xlsEntity
 	 *            XLS数据
+	 * @return byte数组
 	 */
 	private static byte[] writeXLS(XLSEntity xlsEntity) {
 		ByteArrayOutputStream outputStream = null;
@@ -740,6 +831,7 @@ public class XLSUtils {
 	 * 
 	 * @param xlsEntity
 	 *            XLS数据
+	 * @return byte数组
 	 */
 	private static byte[] writeXLSX(XLSEntity xlsEntity) {
 		ByteArrayOutputStream outputStream = null;
@@ -790,7 +882,7 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
-	 * @return
+	 * @return HSSFWorkbook对象
 	 */
 	private static HSSFWorkbook getHSSFWorkbook(JSONObject jsonObject) {
 		HSSFWorkbook workbook = null;
@@ -1007,7 +1099,7 @@ public class XLSUtils {
 	 * 
 	 * @param xlsEntity
 	 *            XLS数据
-	 * @return
+	 * @return HSSFWorkbook对象
 	 */
 	private static HSSFWorkbook getHSSFWorkbook(XLSEntity xlsEntity) {
 		HSSFWorkbook workbook = null;
@@ -1334,7 +1426,7 @@ public class XLSUtils {
 	 *            'styleName'-样式名称(String)) E、行数据('height'-行高度(Short)
 	 *            'cells'-单元格集合(JSONArray)) F、单元格数据('width'-单元格宽度(Integer)
 	 *            'value'-单元格值(Object) 'styleName'-样式名称(String))
-	 * @return
+	 * @return XSSFWorkbook对象
 	 */
 	private static XSSFWorkbook getXSSFWorkbook(JSONObject jsonObject) {
 		XSSFWorkbook workbook = null;
@@ -1547,7 +1639,7 @@ public class XLSUtils {
 	 * 
 	 * @param xlsEntity
 	 *            xls数据
-	 * @return
+	 * @return XSSFWorkbook对象
 	 */
 	private static XSSFWorkbook getXSSFWorkbook(XLSEntity xlsEntity) {
 		XSSFWorkbook workbook = null;

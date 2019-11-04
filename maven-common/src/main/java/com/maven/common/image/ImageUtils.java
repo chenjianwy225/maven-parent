@@ -228,8 +228,11 @@ public class ImageUtils {
 	 *            宽度
 	 * @param h
 	 *            高度
+	 * @return 是否缩放成功
 	 */
-	private static void zoom(int w, int h) {
+	private static boolean zoom(int w, int h) {
+		boolean result = false;
+
 		try {
 			// 获取缩放后的Image对象
 			Image image = img.getScaledInstance(w, h, Image.SCALE_DEFAULT);
@@ -247,11 +250,14 @@ public class ImageUtils {
 			ImageIO.write(bufferedImage, targetSuffix, outputStream);
 			outputStream.close();
 
+			result = true;
 			logger.info("Zoom success");
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Zoom error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -265,8 +271,11 @@ public class ImageUtils {
 	 *            宽度
 	 * @param h
 	 *            高度
+	 * @return 是否截取成功
 	 */
-	private static void cut(int x, int y, int w, int h) {
+	private static boolean cut(int x, int y, int w, int h) {
+		boolean result = false;
+
 		try {
 			Iterator<ImageReader> iterator = ImageIO
 					.getImageReadersByFormatName(sourceSuffix);
@@ -284,11 +293,14 @@ public class ImageUtils {
 			ImageIO.write(bufferedImage, targetSuffix, outputStream);
 			outputStream.close();
 
+			result = true;
 			logger.info("Cut success");
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Cut error");
 		}
+
+		return result;
 	}
 
 	/**
@@ -300,9 +312,11 @@ public class ImageUtils {
 	 *            扩展名
 	 * @param scale
 	 *            缩放比例
+	 * @return 是否缩放成功
 	 */
 	public static boolean zoomImage(String picPath, String extName, double scale) {
-		boolean result = true;
+		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
@@ -316,13 +330,11 @@ public class ImageUtils {
 				// 获取缩放后的长和宽
 				int _width = (int) (scale * width);
 				int _height = (int) (scale * height);
-				zoom(_width, _height);
-
-				result = true;
+				result = zoom(_width, _height);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -338,11 +350,12 @@ public class ImageUtils {
 	 *            目标文件名
 	 * @param scale
 	 *            缩放比例
-	 * @return
+	 * @return 是否缩放成功
 	 */
 	public static boolean zoomImage(String picPath, String filePath,
 			String fileName, double scale) {
-		boolean result = true;
+		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
@@ -363,13 +376,11 @@ public class ImageUtils {
 				// 获取缩放后的长和宽
 				int _width = (int) (scale * width);
 				int _height = (int) (scale * height);
-				zoom(_width, _height);
-
-				result = true;
+				result = zoom(_width, _height);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -388,6 +399,7 @@ public class ImageUtils {
 	 */
 	public static boolean zoomImage(String picPath, String extName, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
@@ -397,13 +409,11 @@ public class ImageUtils {
 			// 判断原始文件是否存在
 			if (file.exists()) {
 				init(picPath, "", extName);
-				zoom(w, h);
-
-				result = true;
+				result = zoom(w, h);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -426,6 +436,7 @@ public class ImageUtils {
 	public static boolean zoomImage(String picPath, String filePath,
 			String fileName, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
@@ -442,13 +453,11 @@ public class ImageUtils {
 				}
 
 				init(picPath, filePath + File.separator + fileName, "");
-				zoom(w, h);
-
-				result = true;
+				result = zoom(w, h);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -471,6 +480,7 @@ public class ImageUtils {
 	public static boolean cutImage(String picPath, String extName,
 			int position, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
@@ -481,14 +491,12 @@ public class ImageUtils {
 			if (file.exists()) {
 				init(picPath, "", extName);
 				Map<String, Integer> map = cutImageInfo(position, w, h);
-				cut(map.get("x").intValue(), map.get("y").intValue(),
+				result = cut(map.get("x").intValue(), map.get("y").intValue(),
 						map.get("w").intValue(), map.get("h").intValue());
-
-				result = true;
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -513,6 +521,7 @@ public class ImageUtils {
 	public static boolean cutImage(String picPath, String filePath,
 			String fileName, int position, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
@@ -530,14 +539,12 @@ public class ImageUtils {
 
 				init(picPath, filePath + File.separator + fileName, "");
 				Map<String, Integer> map = cutImageInfo(position, w, h);
-				cut(map.get("x").intValue(), map.get("y").intValue(),
+				result = cut(map.get("x").intValue(), map.get("y").intValue(),
 						map.get("w").intValue(), map.get("h").intValue());
-
-				result = true;
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -562,6 +569,7 @@ public class ImageUtils {
 	public static boolean cutImage(String picPath, String extName, int x,
 			int y, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(extName)
@@ -571,13 +579,11 @@ public class ImageUtils {
 			// 判断原始文件是否存在
 			if (file.exists()) {
 				init(picPath, "", extName);
-				cut(x, y, w, h);
-
-				result = true;
+				result = cut(x, y, w, h);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}
@@ -604,6 +610,7 @@ public class ImageUtils {
 	public static boolean cutImage(String picPath, String filePath,
 			String fileName, int x, int y, int w, int h) {
 		boolean result = false;
+		String message = "Parameter error";
 
 		// 判断传入参数
 		if (StringUtils.isNotEmpty(picPath) && StringUtils.isNotEmpty(filePath)
@@ -621,13 +628,11 @@ public class ImageUtils {
 				}
 
 				init(picPath, filePath + File.separator + fileName, "");
-				cut(x, y, w, h);
-
-				result = true;
+				result = cut(x, y, w, h);
 			}
-		} else {
-			logger.info("Parameter error");
 		}
+
+		logger.info(message);
 
 		return result;
 	}

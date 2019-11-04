@@ -3,10 +3,10 @@ package com.maven.common.url;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.sf.json.JSONObject;
 
 import com.maven.common.StringUtils;
 import com.maven.common.http.HttpComponentsUtils;
@@ -41,6 +41,8 @@ public class ShortUrlUtils {
 		JSONObject jsonObject = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				Map<String, Object> params = new HashMap<String, Object>();
@@ -49,10 +51,10 @@ public class ShortUrlUtils {
 
 				jsonObject = HttpComponentsUtils.post(CTQ_url, params, "");
 
-				logger.info("Create short url success");
-			} else {
-				logger.info("Parameter error");
+				message = "Create short url success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Create short url error");

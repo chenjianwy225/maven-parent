@@ -142,6 +142,8 @@ public class FtpUtils {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(remotePath)
 					&& StringUtils.isNotEmpty(fileMap) && fileMap.size() > 0) {
@@ -177,10 +179,10 @@ public class FtpUtils {
 					}
 				}
 
-				logger.info("Upload file success");
-			} else {
-				logger.info("Parameter error");
+				message = "Upload file success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Upload file error");
@@ -205,6 +207,8 @@ public class FtpUtils {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(localPath)
 					&& StringUtils.isNotEmpty(fileList) && fileList.size() > 0) {
@@ -237,10 +241,10 @@ public class FtpUtils {
 					}
 				}
 
-				logger.info("Download file success");
-			} else {
-				logger.info("Parameter error");
+				message = "Download file success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Download file error");
@@ -256,9 +260,14 @@ public class FtpUtils {
 	 * 
 	 * @param fileList
 	 *            文件集合
+	 * @return 是否删除成功
 	 */
-	public void deleteFile(List<String> fileList) {
+	public boolean deleteFile(List<String> fileList) {
+		boolean result = false;
+
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(fileList) && fileList.size() > 0) {
 				connect();
@@ -273,16 +282,18 @@ public class FtpUtils {
 					ftpClient.dele(fileName);
 				}
 
-				logger.info("Delete file success");
-			} else {
-				logger.info("Parameter error");
+				message = "Delete file success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Delete file error");
 		} finally {
 			disconnect();
 		}
+
+		return result;
 	}
 
 	/**
@@ -307,6 +318,8 @@ public class FtpUtils {
 	 */
 	private void connect() {
 		try {
+			String message = "FTP connect fail";
+
 			ftpClient = new FTPClient();
 			ftpClient.setControlEncoding(this.encoding);
 
@@ -315,11 +328,12 @@ public class FtpUtils {
 			int replyCode = ftpClient.getReplyCode();
 
 			if (FTPReply.isPositiveCompletion(replyCode)) {
-				logger.info("FTP connect success");
+				message = "FTP connect success";
 			} else {
 				disconnect();
-				logger.info("FTP connect fail");
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("FTP connect error");

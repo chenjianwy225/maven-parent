@@ -60,6 +60,8 @@ public class RandomUtils {
 		Object[] result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (length > 0 && codeIndexs.length > 0) {
 				int width = EVERY_WIDTH * length;
@@ -94,10 +96,10 @@ public class RandomUtils {
 				g.dispose();
 				result = new Object[] { sRand.toUpperCase(), image };
 
-				logger.info("Get code success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get code success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get code error");
@@ -119,6 +121,8 @@ public class RandomUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (length > 0 && codeIndexs.length > 0) {
 				StringBuffer rand = new StringBuffer();
@@ -150,10 +154,10 @@ public class RandomUtils {
 
 				result = rand.toString();
 
-				logger.info("Get random code success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get random code success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get random code error");

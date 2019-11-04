@@ -89,6 +89,8 @@ public class DateUtils {
 		Date result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				format = StringUtils.isEmpty(format) ? YMDHMS : format;
@@ -96,13 +98,13 @@ public class DateUtils {
 				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 				result = dateFormat.parse(str);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change date success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Change error");
+			logger.error("Change date error");
 		}
 
 		return result;
@@ -132,6 +134,8 @@ public class DateUtils {
 		Long result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				format = StringUtils.isEmpty(format) ? YMDHMS : format;
@@ -139,13 +143,13 @@ public class DateUtils {
 				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 				result = dateFormat.parse(str).getTime();
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change date success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Change error");
+			logger.error("Change date error");
 		}
 
 		return result;
@@ -175,6 +179,8 @@ public class DateUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(date)) {
 				format = StringUtils.isEmpty(format) ? YMDHMS : format;
@@ -182,13 +188,13 @@ public class DateUtils {
 				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 				result = dateFormat.format(date);
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change date success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Change error");
+			logger.error("Change date error");
 		}
 
 		return result;
@@ -218,6 +224,8 @@ public class DateUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(lon)) {
 				format = StringUtils.isEmpty(format) ? YMDHMS : format;
@@ -225,13 +233,13 @@ public class DateUtils {
 				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 				result = dateFormat.format(new Date(lon));
 
-				logger.info("Change success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change date success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Change error");
+			logger.error("Change date error");
 		}
 
 		return result;
@@ -251,6 +259,8 @@ public class DateUtils {
 		Long date_one = null, date_two = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断第一个日期
 			if (StringUtils.isNotEmpty(dateOne)) {
 				if (dateOne instanceof Date) {
@@ -291,13 +301,13 @@ public class DateUtils {
 					result = 0;
 				}
 
-				logger.info("Compare success");
-			} else {
-				logger.info("Parameter error");
+				message = "Compare date success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Compare error");
+			logger.error("Compare date error");
 		}
 
 		return result;

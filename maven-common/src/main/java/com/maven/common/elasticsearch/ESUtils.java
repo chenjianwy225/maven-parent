@@ -161,6 +161,8 @@ public class ESUtils {
 		Map<String, Object> map = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(id)) {
 				connect();
@@ -170,13 +172,13 @@ public class ESUtils {
 						RequestOptions.DEFAULT);
 				map = getResponse.getSourceAsMap();
 
-				logger.info("Find single success");
-			} else {
-				logger.info("Parameter error");
+				message = "Find single data success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Find single error");
+			logger.error("Find single data error");
 		} finally {
 			disconnect();
 		}
@@ -244,10 +246,10 @@ public class ESUtils {
 				pager.setList(list);
 			}
 
-			logger.info("Find pager success");
+			logger.info("Find pager data success");
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Find pager error");
+			logger.error("Find pager data error");
 		} finally {
 			disconnect();
 		}
@@ -308,6 +310,8 @@ public class ESUtils {
 		boolean result = false;
 
 		try {
+			String message = "No data";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(list) && list.size() > 0) {
 				connect();
@@ -330,13 +334,13 @@ public class ESUtils {
 				createLogger(bulkResponse);
 				result = true;
 
-				logger.info("Add success");
-			} else {
-				logger.info("Not data");
+				message = "Add data success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Add error");
+			logger.error("Add data error");
 		} finally {
 			disconnect();
 		}
@@ -397,6 +401,8 @@ public class ESUtils {
 		boolean result = false;
 
 		try {
+			String message = "No data";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(list) && list.size() > 0) {
 				connect();
@@ -419,13 +425,13 @@ public class ESUtils {
 				createLogger(bulkResponse);
 				result = true;
 
-				logger.info("Update success");
-			} else {
-				logger.info("Not data");
+				message = "Update data success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Update error");
+			logger.error("Update data error");
 		} finally {
 			disconnect();
 		}
@@ -444,6 +450,8 @@ public class ESUtils {
 		boolean result = false;
 
 		try {
+			String message = "No data";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(ids) && ids.length > 0) {
 				connect();
@@ -464,13 +472,13 @@ public class ESUtils {
 				createLogger(bulkResponse);
 				result = true;
 
-				logger.info("Delete success");
-			} else {
-				logger.info("Not data");
+				message = "Delete data success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Delete error");
+			logger.error("Delete data error");
 		} finally {
 			disconnect();
 		}
@@ -489,6 +497,8 @@ public class ESUtils {
 		boolean result = false;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(queryBuilder)) {
 				connect();
@@ -505,13 +515,13 @@ public class ESUtils {
 				createLogger(bulkByScrollResponse);
 				result = true;
 
-				logger.info("Delete success");
-			} else {
-				logger.info("Parameter error");
+				message = "Delete data success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Delete error");
+			logger.error("Delete data error");
 		} finally {
 			disconnect();
 		}
@@ -543,10 +553,10 @@ public class ESUtils {
 					this.index);
 			client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
 
-			logger.info("Delete success");
+			logger.info("Delete index success");
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Delete error");
+			logger.error("Delete index error");
 		} finally {
 			disconnect();
 		}
@@ -680,6 +690,7 @@ public class ESUtils {
 	 */
 	private void createLogger(BulkResponse bulkResponse) {
 		int addNum = 0, updateNum = 0, deleteNum = 0;
+		String message = "No info";
 
 		// 遍历Response
 		for (BulkItemResponse bulkItemResponse : bulkResponse) {
@@ -700,26 +711,33 @@ public class ESUtils {
 
 		// 判断是否有日志数据
 		if (addNum > 0 || updateNum > 0 || deleteNum > 0) {
+			StringBuffer buffer = new StringBuffer();
+
 			// 判断是否有新增
 			if (addNum > 0) {
-				logger.info("Add data number："
-						+ Integer.valueOf(addNum).toString());
+				buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";"
+						: "" + "Add data number："
+								+ Integer.valueOf(addNum).toString());
 			}
 
 			// 判断是否有新增
 			if (updateNum > 0) {
-				logger.info("Update data number："
-						+ Integer.valueOf(updateNum).toString());
+				buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";"
+						: "" + "Update data number："
+								+ Integer.valueOf(updateNum).toString());
 			}
 
 			// 判断是否有新增
 			if (deleteNum > 0) {
-				logger.info("Delete data number："
-						+ Integer.valueOf(deleteNum).toString());
+				buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";"
+						: "" + "Delete data number："
+								+ Integer.valueOf(deleteNum).toString());
 			}
-		} else {
-			logger.info("No data");
+
+			message = buffer.toString();
 		}
+
+		logger.info(message);
 	}
 
 	/**
@@ -732,29 +750,36 @@ public class ESUtils {
 		long addNum = bulkByScrollResponse.getCreated();
 		long updateNum = bulkByScrollResponse.getUpdated();
 		long deleteNum = bulkByScrollResponse.getDeleted();
+		String message = "No info";
+		StringBuffer buffer = new StringBuffer();
 
 		// 判断处理总数
 		if (totalNum > 0) {
-			logger.info("Handle data number："
-					+ Long.valueOf(totalNum).toString());
+			buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";" : ""
+					+ "Handle data number：" + Long.valueOf(totalNum).toString());
 		}
 
 		// 判断添加总数
 		if (addNum > 0) {
-			logger.info("Add data number：" + Long.valueOf(addNum).toString());
+			buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";" : ""
+					+ "Add data number：" + Long.valueOf(addNum).toString());
 		}
 
 		// 判断修改总数
 		if (updateNum > 0) {
-			logger.info("Update data number："
+			buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";" : ""
+					+ "Update data number："
 					+ Long.valueOf(updateNum).toString());
 		}
 
 		// 判断删除总数
 		if (deleteNum > 0) {
-			logger.info("Delete data number："
+			buffer.append(StringUtils.isNotEmpty(buffer.toString()) ? ";" : ""
+					+ "Delete data number："
 					+ Long.valueOf(deleteNum).toString());
 		}
+
+		logger.info(message);
 	}
 
 	/**

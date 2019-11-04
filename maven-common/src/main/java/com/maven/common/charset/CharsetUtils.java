@@ -43,6 +43,8 @@ public class CharsetUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				if (str.equals(new String(str.getBytes(CHARSET_ISO),
@@ -62,10 +64,10 @@ public class CharsetUtils {
 					result = CHARSET_BIG5;
 				}
 
-				logger.info("Get charset success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get charset success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("Get charset error");
@@ -85,6 +87,8 @@ public class CharsetUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(str)) {
 				if (getCharset(str).equals(CHARSET_ISO)) {
@@ -93,10 +97,10 @@ public class CharsetUtils {
 					result = str;
 				}
 
-				logger.info("Change charset success");
-			} else {
-				logger.info("Parameter error");
+				message = "Change charset success";
 			}
+
+			logger.info(message);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			logger.info("Change charset error");

@@ -67,6 +67,8 @@ public class HttpComponentsUtils {
 		HttpGet httpGet = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				httpClient = HttpClientBuilder.create().build();
@@ -140,10 +142,10 @@ public class HttpComponentsUtils {
 					}
 				}
 
-				logger.info("Get request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request success");
@@ -190,6 +192,8 @@ public class HttpComponentsUtils {
 		URI uri = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(scheme) && StringUtils.isNotEmpty(host)
 					&& port > 0 && StringUtils.isNotEmpty(path)) {
@@ -267,10 +271,10 @@ public class HttpComponentsUtils {
 					}
 				}
 
-				logger.info("Get request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request error");
@@ -310,6 +314,8 @@ public class HttpComponentsUtils {
 		HttpPost httpPost = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				httpClient = HttpClientBuilder.create().build();
@@ -383,10 +389,10 @@ public class HttpComponentsUtils {
 					}
 				}
 
-				logger.info("Post request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Post request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Post request error");
@@ -433,6 +439,8 @@ public class HttpComponentsUtils {
 		URI uri = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(scheme) && StringUtils.isNotEmpty(host)
 					&& port > 0 && StringUtils.isNotEmpty(path)) {
@@ -510,10 +518,10 @@ public class HttpComponentsUtils {
 					}
 				}
 
-				logger.info("Post request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Post request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Post request error");
@@ -553,6 +561,8 @@ public class HttpComponentsUtils {
 		HttpPost httpPost = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(url)) {
 				httpClient = HttpClientBuilder.create().build();
@@ -633,10 +643,10 @@ public class HttpComponentsUtils {
 					}
 				}
 
-				logger.info("Upload request success");
-			} else {
-				logger.info("Parameter error");
+				message = "Upload request success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Upload request error");

@@ -49,6 +49,8 @@ public class RSAUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(
@@ -62,10 +64,10 @@ public class RSAUtils {
 				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -87,6 +89,8 @@ public class RSAUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
@@ -100,10 +104,10 @@ public class RSAUtils {
 				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
 				res = new String(bytes, ENCODING);
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Decoder error");
@@ -125,6 +129,8 @@ public class RSAUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
@@ -138,10 +144,10 @@ public class RSAUtils {
 				byte[] bytes = cipher.doFinal(source.getBytes(ENCODING));
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -163,6 +169,8 @@ public class RSAUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(
@@ -176,10 +184,10 @@ public class RSAUtils {
 				byte[] bytes = cipher.doFinal(Hex.decodeHex(source));
 				res = new String(bytes, ENCODING);
 
-				logger.info("Decoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Decoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("Decoder error");

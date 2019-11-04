@@ -51,6 +51,8 @@ public class LoadPropertiesUtils {
 		}
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(path)) {
 				properties = new Properties();
@@ -59,10 +61,10 @@ public class LoadPropertiesUtils {
 				InputStream is = classLoader.getResourceAsStream(path);
 				properties.load(is);
 
-				logger.info("Init success");
-			} else {
-				logger.info("Parameter error");
+				message = "Init success";
 			}
+
+			logger.info(message);
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Init error");
@@ -81,16 +83,18 @@ public class LoadPropertiesUtils {
 	public String getKey(String key) {
 		String value = null;
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(key)) {
 				value = properties.getProperty(key);
 				value = new String(properties.getProperty(key).getBytes(
 						"ISO-8859-1"), "UTF-8");
 
-				logger.info("Get key success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get key success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get key error");

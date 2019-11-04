@@ -38,6 +38,8 @@ public class HMACUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				KeyGenerator keyGenerator = KeyGenerator.getInstance(HMACMD5);
@@ -47,10 +49,10 @@ public class HMACUtils {
 				byte[] bytes = mac.doFinal(source.getBytes());
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -72,6 +74,8 @@ public class HMACUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source) && StringUtils.isNotEmpty(key)) {
 				SecretKey secretKey = new SecretKeySpec(key.getBytes(),
@@ -81,10 +85,10 @@ public class HMACUtils {
 				byte[] bytes = mac.doFinal(source.getBytes());
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -104,6 +108,8 @@ public class HMACUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				KeyGenerator keyGenerator = KeyGenerator.getInstance(HMACSHA1);
@@ -113,10 +119,10 @@ public class HMACUtils {
 				byte[] bytes = mac.doFinal(source.getBytes());
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");
@@ -138,6 +144,8 @@ public class HMACUtils {
 		String res = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(source)) {
 				SecretKey secretKey = new SecretKeySpec(key.getBytes(),
@@ -147,10 +155,10 @@ public class HMACUtils {
 				byte[] bytes = mac.doFinal(source.getBytes());
 				res = Hex.encodeHexString(bytes);
 
-				logger.info("Encoder success");
-			} else {
-				logger.info("Parameter error");
+				message = "Encoder success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Encoder error");

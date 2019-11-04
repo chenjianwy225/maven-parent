@@ -47,16 +47,18 @@ public class ParamUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? CharsetUtils
 						.charsetConverter(object) : defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -94,16 +96,18 @@ public class ParamUtils {
 		Integer result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? Integer
 						.valueOf(object) : defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -141,16 +145,18 @@ public class ParamUtils {
 		Long result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? Long.valueOf(object)
 						: defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -188,16 +194,18 @@ public class ParamUtils {
 		Float result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? Float.valueOf(object)
 						: defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -235,16 +243,18 @@ public class ParamUtils {
 		Double result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? Double
 						.valueOf(object) : defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -282,16 +292,18 @@ public class ParamUtils {
 		Boolean result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String object = request.getParameter(key);
 				result = StringUtils.isNotEmpty(object) ? Boolean
 						.valueOf(object) : defaultValue;
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
@@ -330,6 +342,8 @@ public class ParamUtils {
 		String[] result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(request) && StringUtils.isNotEmpty(key)) {
 				String[] objects = request.getParameterValues(key);
@@ -342,10 +356,10 @@ public class ParamUtils {
 					result = defaultValue;
 				}
 
-				logger.info("Get request parameter success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get request parameter success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get request parameter error");
