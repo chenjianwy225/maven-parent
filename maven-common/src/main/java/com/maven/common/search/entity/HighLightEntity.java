@@ -1,4 +1,4 @@
-package com.maven.common.elasticsearch.entity;
+package com.maven.common.search.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;

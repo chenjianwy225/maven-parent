@@ -98,7 +98,7 @@ public class DOCUtils {
 				String fileType = filePath.substring(
 						filePath.lastIndexOf(".") + 1).toLowerCase();
 
-				message = "Read DOC/DOCX file fail";
+				message = "Read DOC/DOCX file failure";
 				// 判断文件后缀名
 				switch (fileType) {
 				case DOC_NAME:
@@ -153,7 +153,7 @@ public class DOCUtils {
 				// 判断文件后缀名
 				if (fileType.equalsIgnoreCase(DOC_NAME)
 						|| fileType.equalsIgnoreCase(DOCX_NAME)) {
-					message = "Write DOC/DOCX file fail";
+					message = "Write DOC/DOCX file failure";
 
 					String dir = filePath.substring(0,
 							filePath.lastIndexOf("\\"));
@@ -217,7 +217,7 @@ public class DOCUtils {
 
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(jsonArray)) {
-				message = "Write DOC/DOCX file fail";
+				message = "Write DOC/DOCX file failure";
 
 				document = getXWPFDocument(jsonArray);
 

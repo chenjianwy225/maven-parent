@@ -1,6 +1,9 @@
 package com.maven.common.request;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -47,15 +50,17 @@ public class MapUtils {
 		Object result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
 				result = map.get(key);
 
-				logger.info("Get object success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get object error");
@@ -93,6 +98,8 @@ public class MapUtils {
 		String result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -101,10 +108,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? object.toString()
 						: defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -142,6 +149,8 @@ public class MapUtils {
 		Integer result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -150,10 +159,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? Integer
 						.valueOf(object.toString()) : defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -191,6 +200,8 @@ public class MapUtils {
 		Long result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -199,10 +210,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? Long.valueOf(object
 						.toString()) : defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -240,6 +251,8 @@ public class MapUtils {
 		Float result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -248,10 +261,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? Float.valueOf(object
 						.toString()) : defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -289,6 +302,8 @@ public class MapUtils {
 		Double result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -297,10 +312,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? Double.valueOf(object
 						.toString()) : defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -338,6 +353,8 @@ public class MapUtils {
 		Boolean result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -346,10 +363,10 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? Boolean
 						.valueOf(object.toString()) : defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
@@ -387,6 +404,8 @@ public class MapUtils {
 		Date result = null;
 
 		try {
+			String message = "Parameter error";
+
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(map) && map.size() > 0
 					&& StringUtils.isNotEmpty(key)) {
@@ -395,15 +414,101 @@ public class MapUtils {
 				result = StringUtils.isNotEmpty(object) ? (Date) object
 						: defaultValue;
 
-				logger.info("Get string success");
-			} else {
-				logger.info("Parameter error");
+				message = "Get string success";
 			}
+
+			logger.info(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Get string error");
 		}
 
+		return result;
+	}
+
+	/**
+	 * Class转Map
+	 * 
+	 * @param obj
+	 *            Class对象
+	 * @return Map对象
+	 */
+	public static Map<String, Object> classToMap(Object object) {
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			String message = "Parameter error";
+
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(object)) {
+				Class<?> clazz = object.getClass();
+				Field[] fields = clazz.getDeclaredFields();
+
+				// 遍历Class数据
+				for (Field field : fields) {
+					field.setAccessible(true);
+					String fieldName = field.getName();
+					Object value = field.get(object);
+
+					result.put(fieldName, StringUtils.isNotEmpty(value) ? value
+							: "");
+				}
+
+				message = "Change class to map success";
+			}
+
+			logger.info(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Change class to map error");
+		}
+
+		return result;
+	}
+
+	/**
+	 * Map转Class
+	 * 
+	 * @param map
+	 *            Map对象
+	 * @param clazz
+	 *            Class对象
+	 * @return Class对象
+	 */
+	public static <T> T mapToClass(Map<String, Object> map, Class<T> clazz) {
+		T result = null;
+
+		try {
+			String message = "Parameter error";
+
+			// 判断传入参数
+			if (StringUtils.isNotEmpty(map) && StringUtils.isNotEmpty(clazz)) {
+				result = clazz.newInstance();
+				Field[] fields = result.getClass().getDeclaredFields();
+
+				// 遍历Class数据
+				for (Field field : fields) {
+					field.setAccessible(true);
+					int mod = field.getModifiers();
+					String fieldName = field.getName();
+
+					if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+						continue;
+					}
+
+					if (map.containsKey(fieldName)) {
+						field.set(result, map.get(fieldName));
+					}
+				}
+
+				message = "Change map to class success";
+			}
+
+			logger.info(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Change map to class error");
+		}
 		return result;
 	}
 }

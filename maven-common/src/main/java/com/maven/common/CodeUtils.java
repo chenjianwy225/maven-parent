@@ -7,7 +7,9 @@ package com.maven.common;
  * @createDate 2019-01-09
  */
 public enum CodeUtils {
-	SUCCESS(0, "请求成功"), ERROR(-1, "请求失败");
+
+	ERROR(-1, "服务器异常"), FAILURE(0, "请求失败"), SUCCESS(1, "请求成功"), NO_TOKEN(2,
+			"Token无效或失效"), NO_PARAMETER(3, "参数错误");
 
 	// 返回编码
 	private final int code;

@@ -101,7 +101,7 @@ public class XLSUtils {
 				String fileType = filePath.substring(
 						filePath.lastIndexOf(".") + 1).toLowerCase();
 
-				message = "Read XLS/XLSX file fail";
+				message = "Read XLS/XLSX file failure";
 				// 判断文件后缀名
 				switch (fileType) {
 				case XLS_NAME:
@@ -173,7 +173,7 @@ public class XLSUtils {
 					file.mkdirs();
 				}
 
-				message = "Write XLS/XLSX file fail";
+				message = "Write XLS/XLSX file failure";
 				// 判断文件后缀类型
 				switch (fileType) {
 				case XLS_NAME:
@@ -225,7 +225,7 @@ public class XLSUtils {
 
 		// 判断传入参数
 		if (suffixIndex > 0 && StringUtils.isNotEmpty(jsonObject)) {
-			message = "Write XLS/XLSX file fail";
+			message = "Write XLS/XLSX file failure";
 
 			// 判断文件后缀索引
 			switch (suffixIndex) {
@@ -283,7 +283,7 @@ public class XLSUtils {
 					file.mkdirs();
 				}
 
-				message = "Write XLS/XLSX file fail";
+				message = "Write XLS/XLSX file failure";
 				// 判断文件后缀类型
 				switch (fileType) {
 				case XLS_NAME:
@@ -321,7 +321,7 @@ public class XLSUtils {
 
 		// 判断传入参数
 		if (suffixIndex > 0 && StringUtils.isNotEmpty(xlsEntity)) {
-			message = "Write XLS/XLSX file fail";
+			message = "Write XLS/XLSX file failure";
 
 			// 判断文件后缀索引
 			switch (suffixIndex) {

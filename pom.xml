@@ -21,7 +21,8 @@
 		<spring.data.jpa.version>2.1.2.RELEASE</spring.data.jpa.version>
 		<spring.data.redis>2.1.4.RELEASE</spring.data.redis>
 		<mysql.version>5.1.47</mysql.version>
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.29</slf4j.version>
+		<log4j.version>2.12.1</log4j.version>
 		<dom4j.version>2.1.1</dom4j.version>
 		<json.version>2.4</json.version>
 		<junit.version>4.12</junit.version>
@@ -37,11 +38,13 @@
 		<redis.version>2.9.3</redis.version>
 		<jackson.version>2.9.9</jackson.version>
 		<httpclient.version>3.1</httpclient.version>
-		<httpcomponents.version>4.5.10</httpcomponents.version>
+		<httpcomponents.client.version>4.5.10</httpcomponents.client.version>
+		<httpcomponents.core.version>4.4.12</httpcomponents.core.version>
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
 		<quartz.version>2.3.1</quartz.version>
 		<elasticsearch.version>7.4.1</elasticsearch.version>
+		<solr.version>8.3.0</solr.version>
 	</properties>
 
 	<dependencyManagement>
@@ -205,10 +208,10 @@
 			</dependency>
 			<!-- MySql End -->
 
-			<!-- Log4j Start -->
+			<!-- Slf4j Start -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId>
+				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
 
@@ -216,7 +219,20 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>${slf4j.version}</version>
-				<scope>test</scope>
+			</dependency>
+			<!-- Slf4j End -->
+
+			<!-- Log4j Start -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 			<!-- Log4j End -->
 
@@ -393,13 +409,19 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>${httpcomponents.version}</version>
+				<version>${httpcomponents.client.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpmime</artifactId>
-				<version>${httpcomponents.version}</version>
+				<version>${httpcomponents.client.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>${httpcomponents.core.version}</version>
 			</dependency>
 			<!-- HttpComponents End -->
 
@@ -444,14 +466,52 @@
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>transport</artifactId>
 				<version>${elasticsearch.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpcore</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>${elasticsearch.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpcore</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<!-- Elasticsearch End -->
+
+			<!-- Solr Start -->
+			<dependency>
+				<groupId>org.apache.solr</groupId>
+				<artifactId>solr-solrj</artifactId>
+				<version>${solr.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpcore</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- Solr End -->
 		</dependencies>
 	</dependencyManagement>
 </project>

@@ -1,16 +1,16 @@
-package com.maven.common.elasticsearch.entity;
+package com.maven.common.search.entity;
 
 import java.io.Serializable;
 
 import org.elasticsearch.search.sort.SortOrder;
 
 /**
- * 排序实体类
+ * Elastic排序实体类
  * 
  * @author chenjian
  * @createDate 2019-10-29
  */
-public class SortEntity implements Serializable {
+public class ElasticSortEntity implements Serializable {
 
 	private static final long serialVersionUID = -3070804445703149154L;
 
@@ -26,7 +26,7 @@ public class SortEntity implements Serializable {
 	 * @param fieldName
 	 *            字段名
 	 */
-	public SortEntity(String fieldName) {
+	public ElasticSortEntity(String fieldName) {
 		this.fieldName = fieldName;
 	}
 

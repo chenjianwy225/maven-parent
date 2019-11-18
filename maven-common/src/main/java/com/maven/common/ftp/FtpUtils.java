@@ -318,7 +318,7 @@ public class FtpUtils {
 	 */
 	private void connect() {
 		try {
-			String message = "FTP connect fail";
+			String message = "FTP connect failure";
 
 			ftpClient = new FTPClient();
 			ftpClient.setControlEncoding(this.encoding);

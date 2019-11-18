@@ -1,4 +1,4 @@
-package com.maven.common.elasticsearch;
+package com.maven.common.search.elastic;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -43,49 +43,49 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.maven.common.StringUtils;
-import com.maven.common.elasticsearch.entity.HighLightEntity;
-import com.maven.common.elasticsearch.entity.QueryEntity;
-import com.maven.common.elasticsearch.entity.SearchEntity;
-import com.maven.common.elasticsearch.entity.SortEntity;
 import com.maven.common.page.Pager;
 import com.maven.common.properties.LoadPropertiesUtils;
 import com.maven.common.request.MapUtils;
+import com.maven.common.search.entity.HighLightEntity;
+import com.maven.common.search.entity.QueryEntity;
+import com.maven.common.search.entity.SearchEntity;
+import com.maven.common.search.entity.ElasticSortEntity;
 
 /**
- * ES搜索引擎类
+ * Elastic搜索引擎类
  * 
  * @author chenjian
  * @createDate 2019-10-25
  */
-public class ESUtils {
+public class ElasticUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(ESUtils.class);
+	private static Logger logger = LoggerFactory.getLogger(ElasticUtils.class);
 
-	// ES服务器地址
+	// Elastic服务器地址
 	private String host;
 
-	// ES服务器端口
+	// Elastic服务器端口
 	private int port = 0;
 
-	// ES的Index名称
+	// Elastic的索引名称
 	private String index;
 
-	// ES默认服务器地址
+	// Elastic默认服务器地址
 	private final String DEFAULT_HOST = "127.0.0.1";
 
-	// ES默认服务器端口
+	// Elastic默认服务器端口
 	private final int DEFAULT_PORT = 9200;
 
-	// ES默认Index名称
+	// Elastic默认索引名称
 	private final String DEFAULT_INDEX = "studentindex";
 
-	// RestHighLevelClient实例类
+	// RestHighLevelClient实例对象
 	private RestHighLevelClient client = null;
 
 	/**
 	 * 构造函数
 	 */
-	public ESUtils() {
+	public ElasticUtils() {
 		init();
 	}
 
@@ -93,11 +93,11 @@ public class ESUtils {
 	 * 构造函数
 	 * 
 	 * @param host
-	 *            ES服务器地址
+	 *            Elastic服务器地址
 	 * @param port
-	 *            ES服务器端口
+	 *            Elastic服务器端口
 	 */
-	public ESUtils(String host, int port) {
+	public ElasticUtils(String host, int port) {
 		this.host = host;
 		this.port = port;
 		init();
@@ -107,9 +107,9 @@ public class ESUtils {
 	 * 构造函数
 	 * 
 	 * @param index
-	 *            ES的Index名称
+	 *            Elastic的Index名称
 	 */
-	public ESUtils(String index) {
+	public ElasticUtils(String index) {
 		this.index = index;
 		init();
 	}
@@ -118,13 +118,13 @@ public class ESUtils {
 	 * 构造函数
 	 * 
 	 * @param host
-	 *            ES服务器地址
+	 *            Elastic服务器地址
 	 * @param port
-	 *            ES服务器端口
+	 *            Elastic服务器端口
 	 * @param index
-	 *            ES的Index名称
+	 *            Elastic的Index名称
 	 */
-	public ESUtils(String host, int port, String index) {
+	public ElasticUtils(String host, int port, String index) {
 		this.host = host;
 		this.port = port;
 		this.index = index;
@@ -136,7 +136,7 @@ public class ESUtils {
 	 */
 	private void init() {
 		LoadPropertiesUtils loadPropertiesUtils = LoadPropertiesUtils
-				.getInstance("es.properties");
+				.getInstance("elastic.properties");
 
 		this.host = StringUtils.isNotEmpty(this.host) ? this.host
 				: StringUtils.isNotEmpty(loadPropertiesUtils.getKey("host")) ? loadPropertiesUtils
@@ -318,12 +318,12 @@ public class ESUtils {
 
 				BulkRequest bulkRequest = new BulkRequest();
 
-				for (Map<String, Object> source : list) {
-					String id = MapUtils.getString(source, "id");
+				for (Map<String, Object> map : list) {
+					String id = MapUtils.getString(map, "id");
 
 					if (StringUtils.isNotEmpty(id)) {
 						IndexRequest indexRequest = new IndexRequest(this.index)
-								.id(id).source(source);
+								.id(id).source(map);
 						bulkRequest.add(indexRequest);
 					}
 				}
@@ -586,7 +586,7 @@ public class ESUtils {
 		if (StringUtils.isNotEmpty(searchEntity)) {
 			QueryEntity query = searchEntity.getQuery();
 			HighLightEntity highLight = searchEntity.getHighLight();
-			List<SortEntity> sorts = searchEntity.getSorts();
+			List<ElasticSortEntity> sorts = searchEntity.getElasticSorts();
 
 			// 判断是否有搜索条件
 			if (StringUtils.isNotEmpty(query)) {
@@ -658,9 +658,9 @@ public class ESUtils {
 
 			// 判断是否设置排序
 			if (StringUtils.isNotEmpty(sorts) && sorts.size() > 0) {
-				for (SortEntity sortEntity : sorts) {
-					searchSourceBuilder.sort(sortEntity.getFieldName(),
-							sortEntity.getSort());
+				for (ElasticSortEntity elasticSortEntity : sorts) {
+					searchSourceBuilder.sort(elasticSortEntity.getFieldName(),
+							elasticSortEntity.getSort());
 				}
 			}
 		}
@@ -783,38 +783,38 @@ public class ESUtils {
 	}
 
 	/**
-	 * 连接ES
+	 * 连接Elastic
 	 */
-	public void connect() {
+	private void connect() {
 		try {
 			// 判断是否创建RestHighLevelClient对象
 			if (StringUtils.isEmpty(client)) {
-				// 设置ES实例的名称
+				// 设置RestHighLevelClient实例对象
 				client = new RestHighLevelClient(
 						RestClient.builder(new HttpHost(InetAddress
 								.getByName(this.host), this.port)));
 
-				logger.info("Elasticsearch connect success");
+				logger.info("Elastic connect success");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Elasticsearch connect error");
+			logger.error("Elastic connect error");
 		}
 	}
 
 	/**
-	 * 关闭ES
+	 * 关闭Elastic
 	 */
-	public void disconnect() {
+	private void disconnect() {
 		try {
 			// 判断是否关闭RestHighLevelClient对象
 			if (StringUtils.isNotEmpty(client)) {
 				client.close();
-				logger.info("Elasticsearch disconnect success");
+				logger.info("Elastic disconnect success");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Elasticsearch disconnect error");
+			logger.error("Elastic disconnect error");
 		}
 	}
 }

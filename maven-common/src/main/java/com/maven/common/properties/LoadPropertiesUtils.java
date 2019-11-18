@@ -59,7 +59,11 @@ public class LoadPropertiesUtils {
 				ClassLoader classLoader = LoadPropertiesUtils.class
 						.getClassLoader();
 				InputStream is = classLoader.getResourceAsStream(path);
-				properties.load(is);
+
+				// 判断文件是否存在
+				if (StringUtils.isNotEmpty(is)) {
+					properties.load(is);
+				}
 
 				message = "Init success";
 			}
@@ -88,8 +92,12 @@ public class LoadPropertiesUtils {
 			// 判断传入参数
 			if (StringUtils.isNotEmpty(key)) {
 				value = properties.getProperty(key);
-				value = new String(properties.getProperty(key).getBytes(
-						"ISO-8859-1"), "UTF-8");
+
+				// 判断是否存在
+				if (StringUtils.isNotEmpty(value)) {
+					value = new String(properties.getProperty(key).getBytes(
+							"ISO-8859-1"), "UTF-8");
+				}
 
 				message = "Get key success";
 			}
