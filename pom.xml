@@ -42,7 +42,7 @@
 		<httpcomponents.core.version>4.4.12</httpcomponents.core.version>
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
-		<quartz.version>2.3.1</quartz.version>
+		<quartz.version>2.3.2</quartz.version>
 		<elasticsearch.version>7.4.1</elasticsearch.version>
 		<solr.version>8.3.0</solr.version>
 	</properties>
