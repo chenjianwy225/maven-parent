@@ -38,7 +38,7 @@
 		<redis.version>2.9.3</redis.version>
 		<jackson.version>2.9.9</jackson.version>
 		<httpclient.version>3.1</httpclient.version>
-		<httpcomponents.client.version>4.5.10</httpcomponents.client.version>
+		<httpcomponents.client.version>4.5.13</httpcomponents.client.version>
 		<httpcomponents.core.version>4.4.12</httpcomponents.core.version>
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
