@@ -43,7 +43,7 @@
 		<xmlbeans.version>3.1.0</xmlbeans.version>
 		<freemarker.version>2.3.29</freemarker.version>
 		<quartz.version>2.3.1</quartz.version>
-		<elasticsearch.version>7.4.1</elasticsearch.version>
+		<elasticsearch.version>7.11.2</elasticsearch.version>
 		<solr.version>8.3.0</solr.version>
 	</properties>
 
