@@ -26,7 +26,7 @@
 		<dom4j.version>2.1.1</dom4j.version>
 		<json.version>2.4</json.version>
 		<junit.version>4.12</junit.version>
-		<hibernate.version>5.3.7.Final</hibernate.version>
+		<hibernate.version>5.4.24.Final</hibernate.version>
 		<datasource.version>0.9.5.2</datasource.version>
 		<ehcache.version>2.10.6</ehcache.version>
 		<commons.codec.version>1.11</commons.codec.version>
